@@ -1,0 +1,369 @@
+All strings are encoded in UTF-8.
+
+Strings are internally stored as dynamic objects. Some functions can operate
+directly on the string objects. Others (external libraries, for example) cannot.
+In Nuclear Basic there is the concept of "Strict Strings" which distinguishes
+between functions that cannot accept the dynamic objects and those that can. A
+similar system should be provided where applicable.
+
+String objects are passed around like array objects are -- by the data pointer,
+not by the starting pointer of the object. (The starting pointer can be deduced,
+but the data pointer is what really matters to the majority of systems operating
+on the objects.)
+
+Extra care should be taken when considering memory allocation. Immutable strings
+can be packed together reasonably well, but dynamically adjusted strings are
+different. The dotNET framework solves this by forcing programmers to use a
+separate "System.Text.StringBuilder" class that will manipulate the same object
+rather than create a separate "System.String" object on each manipulation.
+
+The compiler should take account of "constant expressions" and optimization
+opportunities. For example LEN( "Hello" ) would be replaced with the constant 5.
+
+Optimization-wise, there are a set of commands which return a new string which
+might immediately thereafter be used to append to an existing string object.
+There are (internal) commands which will do an in-place append with the
+conversion. Calls to the lower performing system should be omitted.
+
+Additionally, there are optimizations that can be made when assigning a string
+to the result of a modification of itself. There are in-place variants of many
+of the functions, internally. For example, x$ = REMOVE$(x$,a,b) could operate on
+the string represented by x$ directly.
+
+Performing comparisons with a string should consider how the string is being
+accessed. Examples:
+- IF LEFT$( First$, 10 ) = LEFT$( Second$, 10 ) THEN...
+--- if( strncmp( pszFirst, pszSecond, 10 ) == 0 )
+- IF LEFT$( First$, 10 ) = Second$ THEN...
+--- if( strncmp( pszFirst, pszSecond, 10 ) == 0 && strlen( pszSecond ) == 10 )
+- IF LOWER$( First$ ) = LOWER$( Second$ ) THEN...
+--- if( strcasecmp( pszFirst, pszSecond ) == 0 )
+- IF UPPER$( First$ ) = "STRING WITH UPPERS ONLY" THEN...
+--- if( strcasecmp( pszFirst, pszSecond ) == 0 )
+- IF LOWER$( LEFT$( First$, 10 ) ) = LOWER$( LEFT$( Second$, 10 ) ) THEN...
+--- if( strncasecmp( pszFirst, pszSecond, 10 ) == 0 )
+
+Repeated calls to SKIP$() and similar functions (such as MID$()) should be
+replaced with basic pointer arithmetic in the calling code until it becomes
+necessary to create an object (e.g., the string is being assigned to, or is
+being returned by the function). This sort of optimization needs to be extremely
+certain of how the string will be accessed though, so it will only work for more
+trivial cases. However, those trivial cases would benefit greatly from the
+suspected performance improvements.
+
+The compiler should also warn about potentially unwanted comparisons, e.g.,
+- IF LOWER$( First$ ) = UPPER$( Second$ ) THEN...
+--- If this is true then the string has no alphabetical letters in it. This
+.   might not be the intention though. (User might have been aiming for
+.   LOWER$( First$ ) = LOWER$( Second$ ) instead, but used UPPER$ by accident.)
+
+================================================================================
+
+String pools should be considered. Loading up a bunch of strings that are
+related into a specific section of memory would be good for cache / prediction.
+
+- MAKE STRING POOL( MaximumSizeInBytes ) : Return uint<StringPoolHandle>
+- DELETE STRING POOL StringPoolHandle
+- SET CURRENT STRING POOL StringPoolHandle
+- CURRENT STRING POOL() : Return uint<StringPoolHandle>
+
+- STRING POOL CAPACITY() : Return uintptr //maximum size in bytes
+- STRING POOL SIZE() : Return uintptr //allocated size in bytes
+
+The current string pool affects where new strings will be allocated from.
+
+- GET STRING POOL( String$ ) : Return uint<StringPoolHandle> //returns the string pool used by the given string
+
+Additionally, the concept of a "string builder" (as in dotNET) that efficiently
+constructs a string could be useful. (Especially for software that translates a
+given format (e.g., markdown) to another format (e.g., HTML), which could be
+dealing with large strings.)
+
+In order for such a "string builder" to be useful it would need to be able to
+fragment allocations into separate (large) chunks but could treat it as though
+it were one string. Likewise, it should be able to write directly to a file in
+whatever encoding is requested.
+
+================================================================================
+
+struct TenshiPoolString_s;
+
+typedef struct TenshiStringPool_s
+{
+	TenshiUIntPtr_t					Capacity;
+	TenshiUIntPtr_t					Alloced;
+	char *							pData;
+
+	struct TenshiPoolString_s *		pLiveHead;
+	struct TenshiPoolString_s *		pLiveTail;
+
+	struct TenshiPoolString_s *		pDeadHead;
+	struct TenshiPoolString_s *		pDeadTail;
+} TenshiStringPool_t;
+
+typedef struct TenshiPoolString_s
+{
+	struct TenshiPoolString_s *		pPrev;
+	struct TenshiPoolString_s *		pNext;
+	TenshiString_t					String;
+} TenshiPoolString_t;
+
+typedef struct TenshiString_s
+{
+	// Maximum size of string ;; if high-bit is set then string is static
+	TenshiUIntPtr_t					Capacity;
+	// Current size of string (except terminating NUL) ;; if high-bit is set then string is in pool
+	TenshiUIntPtr_t					Length;
+	// String pointer
+	char *							pData;
+} TenshiString_t;
+
+enum
+{
+	kHighBit = ( ( ( TenshiUIntPtr_t )1 )<<( sizeof( TenshiUIntPtr_t )*8 - 1 ) ),
+	kLowMask = kHighBit - 1
+};
+
+TenshiBoolean_t teIsStringStatic( const TenshiString_t *pStr )
+{
+	return ( pStr->Capacity & kHighBit ) == kHighBit ? TENSHI_TRUE : TENSHI_FALSE;
+}
+TenshiUIntPtr_t teStringCapacity( const TenshiString_t *pStr )
+{
+	return pStr->Capacity & kLowMask;
+}
+
+TenshiBoolean_t teIsStringPooled( const TenshiString_t *pStr )
+{
+	return ( pStr->Length & kHighBit ) == kHighBit ? TENSHI_TRUE : TENSHI_FALSE;
+}
+TenshiUIntPtr_t teStringLength( const TenshiString_t *pStr )
+{
+	return pStr->Length & kLowMask;
+}
+
+char *teStringPointer( const TenshiString_t *pStr )
+{
+	if( teIsStringPooled( pStr ) ) {
+		return ( char * )( pStr + 1 );
+	}
+
+	return pStr->pData;
+}
+TenshiStringPool_t *teStringPool( const TenshiString_t *pStr )
+{
+	if( teIsStrignPooled( pStr ) ) {
+		return ( TenshiStringPool_t * )( pStr->pData );
+	}
+
+	return NULL;
+}
+
+================================================================================
+
+The original string system has these functions:
+
+- ASC, BIN$, CHR$, HEX$, LEFT$, LEN, LOWER$, MID$, RIGHT$, STR$, UPPER$, VAL,
+  SPACE$, COMPARE CASE$, FIND FIRST CHAR$, FIND LAST CHAR$, FIND SUB STRING$,
+  FIRST TOKEN$, NEXT TOKEN$, REVERSE$, FREE STRING$
+
+The following are additional functions to be added:
+
+- SKIP$( Original$, NumberOfCharacters )
+--- Equivalent to REMOVE$( Original$, 0, NumberOfCharacters )
+--- Used to replace RIGHT$( Original$, LEN( Original$ ) - NumberOfCharacters )
+- INSERT$( Original$, Insertion$, BeforeIndex [, InsertionLen=LEN(Insertion$)] )
+--- Returns a new string which is effectively:
+		LEFT$(Original$,BeforeIndex) + LEFT$(Insertion$,InsertionLen) + RIGHT$(Original$,LEN(Original$)-BeforeIndex)
+- REMOVE$( Original$, FirstIndex, NumberOfCharacters )
+--- Returns a new string with the range starting at FirstIndex and extending to
+.   FirstIndex+NumberOfCharacters of Original$ removed from the string. If
+.   NumberOfCharacters is zero then the return value is the same as Original$.
+- REMOVE LAST$( Original$, NumberOfCharacters )
+--- Basically equivalent to REMOVE$( Original$, LEN( Original$ ) - NumberOfCharacters, NumberOfCharacters )
+- REPLACE$( Original$, Search$, Substitution$ )
+--- Returns a new string with all instances of Search$ replaced with
+.   Substitution$
+- REPLACE FIRST$( Original$, Search$, Substitution$ )
+--- As with REPLACE$() but stops after the first instance is found.
+
+- STARTS WITH$( First$, Second$ )
+--- Returns TRUE if First$ starts with Second$; FALSE otherwise
+- ENDS WITH$( First$, Second$ )
+--- Returns TRUE if First$ ends with Second$; FALSE otherwise
+- CONTAINS$( First$, Second$ )
+--- Returns TRUE if First$ contains Second$; FALSE otherwise
+
+- STARTS WITH ANY OF$( First$, Characters$ )
+--- Returns TRUE if First$ starts with any of the characters in Characters$
+- ENDS WITH ANY OF$( First$, Characters$ )
+--- Returns TRUE if First$ ends with any of the characters in Characters$
+- CONTAINS ANY OF$( First$, Characters$ )
+--- Returns TRUE if First$ contains any of the characters in Characters$
+- ONLY CONTAINS$( First$, Characters$ )
+--- Returns TRUE if First$ only contains characters from Characters$
+
+- FIND FIRST OF$( Source$, Characters$ )
+--- Returns the index of the first occurrence of any character in Characters$ in Source$, or -1 if none found
+- FIND NEXT OF$( Source$, Characters$, LastOccurrenceIndex )
+--- Returns the index of the first occurrence after LastOccurrenceIndex of any character in Characters$ in Source$, or -1 if none found
+- FIND PREVIOUS OF$( Source$, Characters$, LastOccurrenceIndex )
+--- Returns the index of the first occurrence before LastOccurrenceIndex of any character in Characters$ in Source$, or -1 if none found
+- FIND LAST OF$( Source$, Characters$ )
+--- Returns the index of the last occurrence of any character in Characters$ in Source$, or -1 if none found
+
+- PLURAL$( Base$, Count [, PluralEnding$="" [, PluralRemoveLast=0 ] )
+	FUNCTION PLURAL$( Base$, Count, PluralEnding$="", PluralRemoveLast=0 )
+		IF Count = 0 THEN EXITFUNCTION Base$
+
+		IF PluralEnding$ = ""
+			IF ENDS WITH$( Base$, "ex" ) THEN EXITFUNCTION REMOVE LAST$( Base$, 2 ) + "ices"
+			IF ENDS WITH$( Base$, "s" ) THEN EXITFUNCTION Base$ + "es"
+			EXITFUNCTION Base$ + "s"
+		ENDIF
+	ENDFUNCTION REMOVE LAST$( Base$, PluralRemoveLast ) + PluralEnding$
+
+- ESCAPE$( Original$ )
+--- Returns Original$ with C-style escape sequences added
+- UNESCAPE$( Original$ )
+--- Returns Original$ with C-style escape sequences processed
+- ESCAPE HTML$( Original$ )
+--- Adds HTML escapes to Original$
+- UNESCAPE HTML$( Original$ )
+--- Process HTML escapes in Original$
+- ESCAPE SQL$( Original$ )
+--- Adds MySQL escapes to Original$
+- UNESCAPE SQL$( Original$ )
+--- Processes MySQL escapes in Original$
+
+- QUOTE$( Original$ )
+--- Returns Original$ surrounded with quotes if the quotes weren't already there
+- UNQUOTE$( Original$ )
+--- Returns Original$ with surrounding quotes removed (if they were present)
+
+- TRIM$( Original$ )
+--- Returns the equivalent of TRIM RIGHT$( TRIM LEFT$( Original$ ) )
+- TRIM LEFT$( Original$ )
+--- Returns Original$ with all leading whitespace removed
+- TRIM RIGHT$( Original$ )
+--- Returns Original$ with all trailing whitespace removed
+
+- SPLIT$ DestinationArray$(), Original$, Separator$
+--- Fills DestinationArray$() (MUST be of type string or uninitialized) with the
+.   parts of Original$ that were delimited between Separator$
+- SPLIT UNQUOTED$ DestinationArray$(), Original$, Separator$ [, EscapeChar$ = "\" ]
+--- As SPLIT$() but paying attention to escape sequences and quoted text
+--- e.g., <"hello world" test test2> would become ["hello world",test,test2]
+- MERGE$( SourceArray$() [, Glue$="" ] )
+--- Creates a new string from SourceArray$() with each element separated by
+.   Glue$ (if given)
+
+- HANTOZEN$( Original$ )
+--- Converts half-width alphabetical and katakana characters to their full-width
+.   equivalents.
+- ZENTOHAN$( Original$ )
+--- Converts full-width alphabetical and katakana characters to their half-width
+.   equivalents.
+
+- UTF32$( UTF32CodePoint )
+--- Returns a string made of the given UTF32CodePoint
+- UTF16$( UTF16CodePoint[, UTF16CodePoint2 ] )
+--- Returns a string made of the given UTF16 code points
+- UTF8$( UTF8CodePoint [, UTF8CodePoint2 [, UTF8CodePoint3 [, UTF8CodePoint4 ]]] )
+--- Returns a string made of the given UTF-8 code points
+
+- CODEPOINT LEN( Source$ )
+--- Returns the number of Unicode code points in the string
+- CODEPOINT INDEX( Source$, Index )
+--- Returns the byte offset into the string for the given code point index
+- CODEPOINT VALUE( Source$, Index )
+--- Returns the code point from the string for the given code point index
+--- WRONG: CODEPOINT VALUE( Source$, CODEPOINT INDEX( Source$, SomeIndex ) )
+- CODEPOINTS TO ARRAY DestinationArray(), Source$
+--- Adds all code points found in Source$ to the given array
+- CODEPOINTS ARRAY$( SourceArray() )
+--- Constructs a string from the UTF-32 code points found in the given array
+
+- STRING TO UTF16 ARRAY DestinationArray(), Source$
+--- Converts a given string to a set of UTF-16 code points (useful for calling
+.   into Windows functions)
+- UTF16 ARRAY$( SourceArray() )
+--- Creates a string from the given array of UTF-16 code points.
+
+- CHARACTER LEN( Source$ )
+--- Returns the number of graphemes (characters) in the string
+- CHARACTER INDEX( Source$, CharacterIndex )
+--- Returns the byte offset into the string
+- CHARACTER VALUE( Source$, Index )
+--- Returns the character from the string for the given character index
+--- WRONG: CHARACTER VALUE( Source$, CHARACTER INDEX( Source$, SomeIndex ) )
+- CHARACTERS TO ARRAY DestinationArray(), Source$
+--- Adds all graphemes (characters) from the string to the given array
+- CHARACTERS ARRAY$( SourceArray() )
+--- Same as CODEPOINTS ARRAY$().
+
+- HASH$( Source$ ) AS UINT32 (DWORD)
+--- Computes a feasible hash value for use in identifying the string in a btree.
+- CRC32$( Source$ [, Polynomial ] ) AS UINT32 (DWORD)
+--- Computes a CRC32 value using either the default polynomial (to be decided at
+.   a later time) or the polynomial given. The hash-table is cached, but if the
+.   polynomial is changed then it is recalculated.
+
+- SKIP WHITESPACE$( Original$ [, SingleLineComment$="//" [, NestCommentOpen$="/*", NestCommentClose$="*/" ] ] )
+--- Parses the string, skipping past all comments and white-space
+- SKIP LINE$( Original$ )
+--- Parses the string, skipping past the end-of-line sequence (\r\n, \n, or \r)
+- SKIP QUOTE$( Original$ [, ParseEscapes = 1 ] )
+--- Parses the string, while parsing escapes
+- SKIP WORD$( Original$ [, SupportUnicode = 1 ] )
+--- Parses the string, skipping past any valid c-style identifier
+--- If SupportUnicode is enabled then any valid Swift identifier is skipped
+- SKIP NUMBER$( Original$ )
+--- Parses the string, skipping past any valid number
+- SKIP BRACED SECTION$( Original$ [, BracketOpen$="{", BracketClose$="}" ] )
+--- Parses the string, skipping past the braced section (including nested braces)
+- SKIP TEXT$( Original$, Text$ )
+--- Parses the string, skipping past LEN( Text$ ) if STARTS WITH$( Original$, Text$ )
+- SKIP ANY OF$( Original$, Characters$ )
+--- Parses the string, skipping past all starting characters in Characters$
+
+- SKIPPED()
+--- Returns TRUE if the last SKIP <x>$() call processed anything
+- SKIPPED LEN()
+--- Returns the length (in bytes) of whatever was skipped
+
+- SKIPPED ASC()
+--- Returns the ASCII value (byte value) of the first character skipped
+- SKIPPED INDEX()
+--- Returns the index of the Character$ skipped
+
+- SKIPPED COMMENT$()
+--- Returns the comment that was skipped
+
+- IS SKIPPED NUMBER INTEGER()
+--- Returns TRUE if the last SKIP NUMBER$() call processed an integer
+- IS SKIPPED NUMBER FLOAT()
+--- Returns TRUE if the last SKIP NUMBER$() call processed a float
+- IS SKIPPED NUMBER DECIMAL()
+--- Returns TRUE if the last SKIP NUMBER$() call processed a decimal number
+- IS SKIPPED NUMBER BINARY()
+--- Returns TRUE if the last SKIP NUMBER$() call processed a binary number
+- IS SKIPPED NUMBER OCTAL()
+--- Returns TRUE if the last SKIP NUMBER$() call processed an octal number
+- IS SKIPPED NUMBER HEXADECIMAL()
+--- Returns TRUE if the last SKIP NUMBER$() call processed a hexadecimal number
+- IS SKIPPED NUMBER SCINOT()
+--- Returns TRUE if the last SKIP NUMBER$() call processed a scientific-notation number
+- SKIPPED INTEGER()
+--- Returns the last number processed by SKIP NUMBER$() as an integer
+- SKIPPED FLOAT()
+--- Returns the last number processed by SKIP NUMBER$() as a float
+
+- SKIPPED QUOTE$()
+--- Returns the last string processed by SKIP QUOTE$()
+- SKIPPED QUOTE LEN()
+--- Returns the length of the string processed by SKIP QUOTE$() in bytes minus
+.   the last null terminator
+- SKIPPED WORD$()
+--- Returns the last string processed by SKIP WORD$()
+

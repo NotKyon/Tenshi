@@ -1,0 +1,115 @@
+The collection systems are the unified array system, linked list system, and
+dictionary (map / binary tree) system.
+
+The unified array system is described in the "Unified Array System.txt" document
+in this directory.
+
+All systems support literals. The list system accepts array literals rather than
+having a specific system.
+
+Array Literals:
+
+	( 1, 2, 3, x, y, z, a + b, 7 )
+
+BTree Literals:
+
+	( "Bob" = 75, "Jack" = 37, "Joe" = 42 )
+
+
+If strings are passed as the key then a hash operation is performed on the text
+to create the appropriate integer key value.
+
+Lists and dictionaries are their own types. The item type is specified before
+the "LIST" or "BTREE" types are specified.
+
+For example, you could create a list of strings like so:
+
+	// Declare the list
+	MyList AS STRING LIST
+
+	// Add some strings to the list
+	LIST PUSH BACK MyList, "Hello world!"
+	LIST PUSH BACK MyList, "Good bye!"
+
+	// Enumerate the list
+	LIST TO FRONT MyList
+	WHILE LIST IS VALID( MyList )
+		// Display the current string
+		PRINT LIST ITEM( MyList )
+
+		// Skip to the next item
+		LIST TO NEXT MyList
+	ENDWHILE
+
+	// Get rid of the list
+	DELETE LIST MyList
+
+
+[LIST API]
+Return list = COPY LIST( Destination List, Source List )
+Return list = DUPLICATE LIST( Source List )
+Return zero = DELETE LIST( List )
+
+LIST PUSH LIST FRONT Destination List, Source List
+LIST PUSH LIST BACK Destination List, Source List
+LIST INSERT LIST BEFORE Destination List, Source List
+LIST INSERT LIST AFTER Destination List, Source List
+
+LIST PUSH FRONT List, Item
+LIST PUSH BACK List, Item
+Return value = LIST POP FRONT( List )
+Return value = LIST POP BACK( List )
+LIST INSERT BEFORE List, Item
+LIST INSERT AFTER List, Item
+
+LIST TO FRONT List
+LIST TO BACK List
+LIST TO PREVIOUS List
+LIST TO NEXT List
+
+Return value = LIST CURRENT( List )
+Return value = LIST TAKE( List )
+
+LIST REMOVE CURRENT List
+LIST RESET CURRENT List
+
+Return boolean = LIST IS EMPTY( List )
+LIST CLEAR List
+
+LIST MOVE TO FRONT List
+LIST MOVE TO BACK List
+LIST MOVE TO PREVIOUS List
+LIST MOVE TO NEXT List
+
+Return boolean = LIST IS VALID( List )
+
+Return uintptr = LIST COUNT( List )
+Return value = LIST ITEM( List, Index )
+
+LIST SET COMPARE FUNCTION List, CmpFunc
+Return function = LIST GET COMPARE FUNCTION( List )
+
+LIST SORT List [, CmpFunc ]
+LIST FIND FIRST List, Item [, CmpFunc ]
+LIST FIND NEXT List, Item [, CmpFunc ]
+LIST FIND LAST List, Item [, CmpFunc ]
+LIST FIND PREVIOUS List, Item [, CmpFunc ]
+
+
+[BTREE API]
+Return btree = COPY BTREE( Destination BTree, Source BTree )
+Return btree = DUPLICATE BTREE( Source BTree )
+Return zero = DELETE BTREE( BTree )
+
+Return boolean = BTREE IS EMPTY( BTree )
+BTREE CLEAR BTree
+
+Return btreeNode = BTREE LOOKUP( BTree, Key )
+Return btreeNode = BTREE ADD( BTree, Key )
+Return btreeNode = BTREE FIND( BTree, Key )
+
+Return zero = BTREE NODE REMOVE( BTreeNode )
+
+BTREE NODE SET BTreeNode, Item
+Return value = BTREE NODE GET( BTreeNode )
+

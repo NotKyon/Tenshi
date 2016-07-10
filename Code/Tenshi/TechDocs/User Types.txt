@@ -1,0 +1,180 @@
+﻿User Defined Types (UDT) are structures containing a list of fields.
+
+They do not have the notion of "private" or "protected" fields, as in C++. All
+fields are considered, in typical object oriented terms, public.
+
+UDT instances are allocated on the stack by default. Instances are passed by
+read-only reference to parameters (default), and by value on return.
+
+
+TRIVIAL TYPES
+-------------
+
+UDTs are considered "trivial" if they can be copied with a memcpy and destroyed
+without requiring a function call.
+
+If the type has a string field (either directly or through an embedded type)
+then it is non-trivial as destroying a type instance requires freeing string
+memory.
+
+
+TYPE CONSTRUCTORS AND DESTRUCTORS
+---------------------------------
+
+The syntax is best explained by example:
+
+	REM Construction is supported through assignment expressions
+	TYPE SomeType
+		x = 7
+		y = 8
+	ENDTYPE
+
+	REM More sophisticated types require more sophisticated methods...
+	TYPE FileType
+		name$ as string
+		handle as integer
+	ENDTYPE
+
+	REM Should a more sophisticated method be required, defining the constructor
+	REM function separately, taking the type as a parameter, can be done.
+	FUNCTION __constructor__( file as FileType )
+		REM Constructor code here
+		file.name$ = GET TEMPORARY FILENAME$()
+		file.handle = OPEN TO WRITE( file.name$ )
+	ENDFUNCTION
+
+	REM Likewise, defining a destructor is similar
+	FUNCTION __destructor__( file as FileType )
+		REM Destructor code here
+		CLOSE FILE file.handle
+	ENDFUNCTION
+
+Constructor code is called upon type instantiation.
+
+Destructor code is invoked when the type's instance is no longer in scope. When
+a type instance is being returned from a function it is still considered to be
+in scope.
+
+This code:
+
+	TYPE TestType
+		myValue
+	ENDTYPE
+
+	GLOBAL theLastValue = 0
+
+	FUNCTION __constructor__( self as TestType )
+		self.myValue = theLastValue++
+		"Constructed: " + self.myValue
+	ENDFUNCTION
+	FUNCTION __destructor__( self as TestType )
+		"Destructed: " + self.myValue
+	ENDFUNCTION
+
+	FUNCTION GetTest() as TestType
+	ENDFUNCTION
+
+	FUNCTION TryTest( inTest as TestType )
+		"Got: " + inTest.myValue
+	ENDFUNCTION
+
+	FUNCTION Run()
+		LOCAL tempTest as TestType
+
+		tempTest = GetTest()
+		TryTest( tempTest )
+	ENDFUNCTION
+
+	Run()
+
+Should produce this output (without the comments):
+
+	// Run()'s "tempTest" local is constructed
+	Constructed: 0
+	// Run() calls GetTest(), so its tempTest local is discarded
+	Destructed: 0
+	// GetTest() constructs a new TestType
+	Constructed: 1
+	// The test type is copied by value and not destructed
+
+	// TryTest() is now invoked -- UDT instances are passed by reference so
+	// there's no need to make a copy or invoke any destructors upon return
+	Got: 1
+
+	// The Run() function reaches its end, cleaning up its tempTest
+	Destructed: 1
+
+
+DYNAMICALLY ALLOCATED TYPE INSTANCES
+------------------------------------
+
+The runtime commands "ALLOC" and "DEALLOC" can be used to allocate and
+deallocate a type instance. ALLOC allocates the backing memory, invokes the
+type's constructor, then returns a handle to the instance of the type. DEALLOC
+takes the type handle, invokes the type's destructor, then deallocates the
+backing memory.
+
+Function call syntax on the type's name, with the handle as a parameter, returns
+a reference to the type (as opposed to returning the value of the type).
+
+Example:
+
+	TYPE WeaponType
+		name$
+		attack#
+		weight#
+		isProjectile? ` does this _shoot_ something?
+		maxAmmo
+		image_id
+		hudModel_id
+	ENDTYPE
+
+	GLOBAL thePistol = ALLOC WeaponType
+
+	// thePistol.name$ = "Pistol" // ← Error: "thePistol" is an integral type, not a UDT
+
+	LOCAL REF pistol = WeaponType(thePistol)
+	pistol.name$ = "Pistol"
+	pistol.attack# = 10.0
+	pistol.weight# = 2.0
+	pistol.isProjectile? = false
+	pistol.maxAmmo = 6
+	pistol.image_id = 0
+	pistol.hudModel_id = 0
+
+	// DEALLOC pistol		// ← Error: "pistol" is not a handle, it's a reference
+	// DEALLOC thePistol	// ← Correct! "thePistol" is a handle
+
+It is not expected that this system would be used heavily, except for
+optimizations. Using the existing array and similar systems should be sufficient
+for memory management.
+
+Handles can also be queried for additional information through the following
+core functions:
+
+	<handle> IS A <typename>
+	Checks whether a given handle represents (or is trivially convertable to) a
+	given type.
+
+		IF thePistol IS A WeaponType
+			"The pistol is a weapon."
+		ENDIF
+
+
+REFLECTION
+----------
+
+Type information is generated automatically. This information can be used for
+reflection (and is needed by some runtime functions).
+
+The format of this information is not yet finalized. Runtime functions for
+querying types will follow. (In the above section, regarding handles, the
+ability to retrieve the type information from a handle will be added.)
+
+The following information is expected to be exported:
+
+* Type's name and size
+* Field names, and in memory offsets, with their associated type
+* Type patterns (for some minor DBP compatibility)
+* Various compiler attributes (such as whether the type is trivial)
+

@@ -1,0 +1,175 @@
+A different code generation method should benefit initial development and
+maintenance. At the time of writing LLVM is being used both directly and
+indirectly (inconsistently) in the code generation process from the AST. This is
+inconvenient and confusing at a glance.
+
+The desired process of compilation:
+
+	[ Lexer ] -> [ Parser ] -> [ AST / Semant ] -> [ IR CodeGen ] -> [ LLVM ]
+
+Parts of the AST should be cleaned up a bit, but should be unnecessary for this.
+
+
+
+
+INTERMEDIATE REPRESENTATION CONCEPTS
+====================================
+
+IR Action classes used to encapsulate various bits of functionality.
+
+* Casting from one type to another, without specifically stating the low-level
+  operations to do the cast. (e.g., zero-extend, truncate, etc)
+* Object construction / allocation (esp. for temporary objects)
+* Object destruction / deallocation (esp. for temporary objects)
+* Scopes (which can manage automatic object cleanup)
+* Return from function -- exits the scope, so object cleanup handled internally
+* Placement of labels -- these translate to BasicBlocks in LLVM which must be
+  terminated. Termination can be a branch out of the label into another one.
+
+Function calls with temporary objects in the parameters need to:
+
+* Allocate the return value first (if applicable and not already allocated)
+* Push a new (temporary) scope
+* Allocate/construct each object in order
+* Call the function
+* Assign the return value
+* Destruct/deallocate each object (in reverse order)
+* Pop the scope
+
+"Allocating the return value" does not apply if directly returning from a
+function. The value returned would be assigned to a register; all other points
+still apply.
+
+
+
+
+INTERMEDIATE REPRESENTATION IMPLEMENTATION CONSIDERATIONS
+=========================================================
+
+Presently there is no strict reason this has to actually exist as a separate set
+of action classes. Simple functions and data management inside of MCodeGen and
+more consistent calls to it (no LLVM code anywhere else) should do.
+
+This does become a bit problematic when considering functions and user defined
+types, as these both have important data information about them. For example,
+the llvm::Function * that needs to be called when invoking a function.
+
+Encapsulating that sort of information as some sort of IR class may be more
+useful in this regard. This also ensures the exact details of LLVM (which
+evolves at a greater pace than this software) can be kept out of the primary
+code generation system, which should help reduce repetitive sections of code, as
+well as organize more relevant code closer together in a more easy-to-reason-
+about state.
+
+
+
+
+CODE GENERATION FOR COMMON CONSTRUCTS
+=====================================
+
+[DO/LOOP]
+
+Input:
+
+	DO
+		loop_stmts
+	LOOP
+
+Output:
+
+	L0 $Continue:
+		loop_stmts
+		<safetyloop>
+		BR L0
+	L1 $Break:
+
+
+[WHILE/ENDWHILE]
+
+Input:
+
+	WHILE cond_expr
+		loop_stmts
+	ENDWHILE
+
+Output:
+
+	L0 $Continue:
+		CONDBR <cond_expr>, L1, L2
+	L1:
+		loop_stmts
+		<optional safetyloop>
+	L2 $Break:
+
+
+[REPEAT/UNTIL]
+
+Input:
+
+	REPEAT
+		loop_stmts
+	UNTIL cond_expr
+
+Output:
+
+	L0 $Continue:
+		loop_stmts
+		<optional safetyloop>
+		CONDBR <cond_expr>, L1, L0
+	L1 $Break:
+
+
+[FOR/NEXT]
+
+Input 1:
+
+	FOR var = first TO lastinclusive
+		loop_stmts
+	NEXT
+
+Output 1:
+
+	STORE <first>, var
+	L0:
+		loop_stmts
+	L1 $Continue:
+		CONDBR (CMPEQ (LOAD var), <lastinclusive>), L3, L2
+	L2:
+		STORE (ADD (LOAD var), 1), var
+		BR L0
+	L3 $Break:
+
+
+Input 2:
+
+	FOR var = first UNTIL lastexclusive
+		loop_stmts
+	NEXT
+
+Output 2:
+
+	STORE first, var
+	L0:
+		CONDBR (CMPEQ (LOAD var), <lastexclusive>), L3, L1
+	L1:
+		loop_stmts
+	L2 $Continue:
+		STORE (ADD (LOAD var), 1), var
+		BR L0
+	L3 $Break:
+
+
+[]
+
+
+
+
+MODULE SYSTEM
+=============
+
+TODO: Write this section -- module declarations and dependency tracking
+..... keep track of which functions are actually called from a module and
+..... generate LLVM declarations for only those functions (more readable output)
+
+..... Keep track of module dependencies!
+

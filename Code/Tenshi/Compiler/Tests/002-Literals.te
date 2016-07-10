@@ -1,0 +1,82 @@
+﻿#__TEST:LEXER
+#__TEST:expect-token string "Test1" line:25
+#__TEST:expect-token string "C:\\Windows\\System32\\user32.dll" line:28
+#__TEST:expect-token string "This string has a \"string\" inside of it.\nNewline!" line:31
+#__TEST:expect-token number 123 +integer line:34
+#__TEST:expect-token number 0xFACEBEEF +integer line:37
+#__TEST:expect-token number 0xFACEBEEF +integer
+#__TEST:expect-token number 0b1011001 +integer
+#__TEST:expect-token number 0b1011001 +integer
+#__TEST:expect-token number 0c777 +integer
+#__TEST:expect-token number 16xCAFEBABE +integer
+#__TEST:expect-token number 36xSAUCE +integer
+#__TEST:expect-token number 1000000 +integer
+#__TEST:expect-token number 0xFACEBEEF +integer
+#__TEST:expect-token number 0.5 +float
+#__TEST:expect-token number 1.3e+6 +float
+#__TEST:expect-token number 1.3e-6 +float
+#__TEST:expect-token number 0xA.B +float
+#__TEST:expect-token number 0xA.B +float
+#__TEST:expect-token number 0xA.BpC +float
+#__TEST:expect-token number 0xA.BpC +float
+#__TEST:expect-token none
+
+REM The following is just a basic string literal
+"Test1"
+
+REM This one is a string with escapes in it (but the escapes aren't processed)
+"C:\Windows\System32\user32.dll"
+
+REM This one is a string with escapes in it that ARE processed
+~"This string has a \"string\" inside of it.\nNewline!"
+
+REM A simple decimal number
+123
+
+REM A hexadecimal number
+0xFACEBEEF
+
+REM Another hexadecimal number
+$FACEBEEF
+
+REM A binary number
+0b1011001
+
+REM Another binary number
+%1011001
+
+REM An octal number
+0c777
+
+REM A number with an arbitrary base (hexadecimal)
+16xCAFEBABE
+
+REM Another number with an arbitrary base
+36xSAUCE
+
+REM Number separators
+1_000_000
+
+REM Number separators (hexadecimal)
+0xFACE_BEEF
+
+REM Floating point number
+0.5
+
+REM Floating point number (2)
+1.3e6
+
+REM Floating point number (3)
+1.3e-6
+
+REM Floating point number (4)
+$A.B
+
+REM Floating point number (5)
+0xA.B
+
+REM Floating point number (6)
+$A.BpC
+
+REM Floating point number (7)
+0xA.BpC

@@ -1,0 +1,277 @@
+The project file lists various options and settings for building a given target.
+
+It is not meant as a general purpose build system, but rather a simple method
+for grouping related inputs and their compilation settings.
+
+The compiler will compare file modification times between the input and the
+corresponding output to determine whether rebuilding is necessary. (The compiler
+can optionally be passed a "force rebuild" flag to skip this and rebuild all
+files in the project.)
+
+
+BASIC SYNTAX
+------------
+
+Project files are specially formatted text documents. The document consist of
+blank lines, comments, and commands, each separated by new lines. Leading and
+trailing white-space on lines are ignored.
+
+A blank line has no meaning. A line that consists only of whitespace (such as
+the TAB character) is treated as a blank line.
+
+A comment is a line that starts with a "#" symbol. All content of the line is
+ignored and has no meaning, as though it were a blank line.
+
+A command is a sequence of tokens within a line. Tokens are either normal text
+delimited by whitespace (e.g., SPACE, TAB, etc) or a quoted section of text.
+Quoted text is additionally processed for escape sequences. (See the section on
+escape sequences below, for specifics.)
+
+If the first *tokens* in a command begins with a "?" symbol then the command is
+conditional. If each of the condition tokens in a command evaluate to true then
+the command is processed. Otherwise the command is completely ignored.
+
+The first non-condition token of a command's line denotes the command's
+function. The remaining tokens are the arguments to the function.
+
+
+ESCAPE SEQUENCES
+----------------
+
+Quoted text can also use escape sequences. An escape sequence begins with a '\'
+(backslash) and is followed by the escape character, then by any additional
+parameter to the escape sequence. The sequences are listed below:
+
+	\n              Newline (same as "\n" in C)
+	\r              Carriage return (same as "\r" in C)
+	\t              Tab (same as "\t" in C)
+	\u<HHHH>        Replaces with Unicode code-point U+<HHHH>
+	\U<HHHHHHHH>    Replaces with Unicode code-point U+<HHHHHHHH>
+	\x<HH>          Replaces with byte <HH>
+	\?              Same as one "?"
+	\'              Same as single-quote "'"
+	\"              Inserts a double-quote '"'
+	\\              Inserts a backslash "\"
+
+Hexadecimal sequences can use lowercase or uppercase letters.
+
+
+OUTPUT FILES AND INPUT FILES
+----------------------------
+
+If a file is marked as a source code file in the project (first parameter to
+Compile) then it will be marked, internally, as "do not write." Any command that
+attempts to output to that file will fail with the error that it is a source
+file.
+
+This matches command-line behavior. (e.g., "-o main.te main.te" will fail.) This
+sort of error is easy to make. It is expected that when it occurs, more often
+than not, it is unintentional.
+
+
+CONDITIONALS
+------------
+
+The following conditionals are supported:
+
+	?0              Always false.
+	?1              Always true.
+
+	?Debug          True if building in a debug mode.
+	?Release        True if building in a release mode.
+	?Test           True if building in a unit-testing mode.
+	?Profile        True if building in a profiling mode.
+
+	?Win32          True if targeting Windows, but not the Windows Store.
+	?Linux          True if targeting desktop GNU/Linux distribution.
+	?MacOSX         True if targeting Mac OS X.
+	?Android        True if targeting Android. (?Linux is not true for this.)
+	?iOS            True if targeting iOS. (?MacOSX is not true for this.)
+
+	?Microsoft      True if targeting any Microsoft OS.
+	?UNIX           True if targeting any UNIX-like OS.
+
+	?HadDependency  True if the last OptionalDependency found the project.
+
+Unrecognized conditionals will not emit any errors or warnings. They will
+silently evaluate to false. Rationale: Support future conditionals.
+
+
+COMMANDS
+--------
+
+	$ Name <Project Name>
+	Set the name of the project. Subsequent calls override.
+
+	$ Type <Project Type>
+	Set the type of the project. The type denotes how the project is to be
+	built. (e.g., "Executable," "Dynamic Library," etc.) The following types are
+	supported:
+
+		* Executable -- A general purpose executable. On Windows, assumes
+		  console subsystem.
+		* Application -- A general purpose executable. On Windows, assumes Win32
+		  (GUI) subsystem.
+		* StaticLibrary -- Archive of object files, not linked. Built with AR.
+		* DynamicLibrary -- Dynamic library that can be called from other
+		  applications.
+		* Pipeline -- A console-based tool executable. Meant to be used for
+		  processing files (offline). Pipeline executables are not treated
+		  differently by the compiler (from Executable) but an IDE may do
+		  additional processing.
+		* Editor -- A GUI-based tool executable. Meant to be used for
+		  manipulating files (online). Editor executables are not treated
+		  differently by the compiler (from Application) but an IDE may do
+		  additional processing.
+		* Game -- An executable meant to be a video game. Game executables are
+		  not treated differently by the compiler (from Application) but an IDE
+		  may do additional processing.
+
+	$ Target <Output Filename>
+	Select the name of the output file (for the link pass). If the target is a
+	library (whether static or dynamic) then the output name is prefixed with
+	"lib." The suffix (extension) depends on the target OS and project type. For
+	example, if the project is not a library and it is being built for Windows
+	then the suffix will be ".exe."
+
+	$ -TargetPrefix
+	Instruct Target not to use a prefix. (Must be specified before the call to
+	Target.)
+
+	$ +TargetPrefix
+	Instruct Target to use a prefix if applicable. (Must be specified before the
+	call to Target.)
+
+	$ -TargetSuffix
+	Instruct Target not to use a suffix (such as ".dll"). (Must be specified
+	before the call to Target.)
+
+	$ +TargetSuffix
+	Instruct Target to use a suffix (such as ".dll"). (Must be specified before
+	the call to Target.)
+
+	$ EmitLLVMText <Output Filename>
+	Causes the final build to also emit a LLVM IR text listing to the given
+	file.
+
+	$ EmitModules <Output Filename>
+	Writes the set of modules being used by the project into the given text
+	file.
+
+	$ +ASMList
+	Enables assembly file listing when compiling a source file. The name of the
+	assembly file listing will be the same as the object's filename, but with .s
+	as the extension instead of .o.
+	$ -ASMList
+	Disables assembly file listing.
+
+	$ +IRList
+	Enables LLVM IR file listing when compiling a source file. The name of the
+	IR file listing will be the same as the object's filename, but with .ll
+	(.LL) instead of .o.
+	$ -IRList
+	Disables LLVM IR file listing.
+
+	$ Compile <Source Filename> [ <Object Filename> ]
+	Adds a source file, optionally mapping its output object filename. If the
+	object filename is omitted then it is assumed to be the source file's name
+	minus the source file's extension, plus the default object file extension.
+
+	The first source file found is treated as the main file. All subsequent
+	files are treated as "include only" files.
+
+	The source file is expected to be specified relative to the compile command.
+	Absolute path names will be rejected. (Create your project files
+	responsibly.)
+
+	$ Dependency <Project Name>
+	Adds a dependency on another project. The project is required to exist. The
+	compiler will search for it first from the local directories of the project,
+	then from each of the current "project dependency search directories," which
+	can be supplied on the command-line or put in the "TENSHI_PROJDEPDIRS"
+	environment variable (with paths being separated with the ';' character). No
+	searching will occur if the project itself was already supplied (either by a
+	past dependency command, or through the command-line).
+
+	$ OptionalDependency <Project Name>
+	Same as Dependency, but does nothing if the project doesn't exist.
+
+	Essentially this states that if the project does exist it should be built
+	before this project. Otherwise, no harm done.
+
+	If the project is found then this alters "?HasDependency" such that it
+	evaluates to true. Otherwise, it alters "?HasDependency" such that it
+	evaluates to false.
+
+	$ +Module <Module Name>
+	Specifies a given module as being required, and imports it for the project.
+	This is useful to avoid searching through all modules for a command.
+
+	$ -Module <Module Name>
+	Specifies a given module as being excluded, and will ignore it if found.
+
+	$ -Modules
+	Specifies that all modules not explicitly added (via +Module) should be
+	ignored. (This can be a performance win if you know all the modules you're
+	using.)
+
+	$ Shell.PreDependencies <ShellCommand...>
+	Runs the given shell command before doing any dependency checks.
+
+	$ Shell.PostDependencies <ShellCommand...>
+	Runs the given shell command after doing all dependency checks, if
+	succeeded.
+
+	$ Shell.PreCompile [ "<" <InputFile> | ">" <OutputFile> ] <ShellCommand...>
+	Runs the given shell command prior to doing any compilation. If the string
+	"$1" is found, it will be replaced with the name of the source file
+	(relative to the current working directory of the compiler). Likewise, "$2"
+	will do the same, but with the output file.
+
+	The optional leading "<" or ">" indicate a requirement on the source or
+	output file respectively. (The files indicated are relative to the project
+	file, as with the Compile command.)
+
+	$ Shell.PostCompile [ "<" <InputFile> | ">" <OutputFile> ] <ShellCommand...>
+	Runs the given shell command after successfully completing the compilation
+	for the source and output files. As with Shell.PreCompile, $1 and $2 refer
+	to the source and output files.
+
+	The "<" and ">" are the same as with Shell.PreCompile.
+
+	$ Shell.PreBuild <ShellCommand...>
+	Runs the given shell command prior to doing the final build command.
+
+	$ Shell.PostBuild <ShellCommand...>
+	Runs the given shell command after successfully completing the final build
+	command.
+
+	$ Shell.FailedDependencies <ShellCommand...>
+	Runs the given shell command upon failure to find any of the dependencies.
+
+	$ Shell.FailedCompile [ "<" <InputFile> | ">" <OutputFile> ] <ShellCommand...>
+	Runs the given shell command upon a failed compilation of the given file.
+
+	The "<" and ">" are the same as with Shell.PreCompile.
+
+	$ Shell.FailedBuild <ShellCommand...>
+	Runs the given shell command upon failure to complete the final build.
+
+
+EXAMPLE FILE
+------------
+
+	Name "Example Project"
+	Type Executable
+
+	Target "Example"
+
+	EmitLLVMText "LLVM IR Dump.txt"
+
+	Compile "Main.te" "Main.o"
+	Compile "Secondary.te" "Secondary.o"
+
+	?Debug Compile "DebugOnly.te" "DebugOnly.o"
+	?Release Compile "ReleaseOnly.te" "ReleaseOnly.o"
+
+	?Debug ?Win32 Compile "DebugWindowsOnly.te" "DebugWindowsOnly.o"

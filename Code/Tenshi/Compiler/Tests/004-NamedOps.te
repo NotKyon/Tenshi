@@ -1,0 +1,57 @@
+#__TEST:PREPROCESSOR
+#__TEST:expect-token punctuation !
+#__TEST:expect-token punctuation &&
+#__TEST:expect-token punctuation ||
+#__TEST:expect-token punctuation ~~
+#__TEST:expect-token punctuation <<
+#__TEST:expect-token punctuation >>
+#__TEST:expect-token punctuation ~<<
+#__TEST:expect-token punctuation ~>>
+#__TEST:expect-token punctuation &
+#__TEST:expect-token punctuation |
+#__TEST:expect-token punctuation ~
+#__TEST:expect-token punctuation ~
+#__TEST:add-keyword "make cube"
+#__TEST:expect-token name x +startline
+#__TEST:expect-token punctuation =
+#__TEST:expect-token name "MAKE CUBE" +keyword
+#__TEST:expect-token punctuation (
+#__TEST:expect-token punctuation )
+#__TEST:add-keyword "turn left"
+#__TEST:expect-token name "TURN LEFT" +keyword +startline
+#__TEST:expect-token name x
+#__TEST:expect-token punctuation ,
+#__TEST:expect-token number 45
+#__TEST:expect-token name L_MyLabel
+#__TEST:expect-token punctuation :
+#__TEST:expect-token name PRINT
+#__TEST:expect-token string "Hello, world!"
+#__TEST:expect-token name type +keyword
+#__TEST:expect-token name TVec3
+#__TEST:expect-token name float +keyword +startline
+#__TEST:expect-token name x
+#__TEST:expect-token punctuation ,
+#__TEST:expect-token name y
+#__TEST:expect-token name z +startline
+#__TEST:expect-token name as +keyword
+#__TEST:expect-token name float +keyword
+#__TEST:expect-token name endtype +keyword +startline
+#__TEST:expect-token none
+
+NOT AND OR XOR BITWISE LSHIFT BITWISE RSHIFT BITWISE LROTATE BITWISE RROTATE
+BITWISE AND BITWISE OR BITWISE XOR BITWISE NOT
+x = MAKE CUBE() : TURN LEFT x, 45
+L_MyLabel:
+	PRINT "Hello, world!"
+	
+
+REMSTART
+
+	== A simple vector type ==
+
+REMEND
+
+type TVec3
+	float x, y
+	z as float
+endtype

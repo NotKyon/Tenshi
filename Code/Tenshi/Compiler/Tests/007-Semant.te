@@ -1,0 +1,91 @@
+#__TEST:PARSER
+#__TEST:parse-program
+#__TEST:print-ast
+#__TEST:semant
+#__TEST:print-types
+#__TEST:expect-type-size TransformComponent 28
+#__TEST:expect-type-size EntityType 32
+#__TEST:print-syms
+
+global xyz63532 = 1 + 2 + 3 + 4 + 5
+
+REMSTART
+
+	== Types ==
+
+REMEND
+
+rem The transformation of the entity (in local space)
+type TransformComponent
+	position		as vector3
+	rotation		as vector3
+	scaling#		as float
+endtype
+
+rem The entity type
+type EntityType
+	transform		as TransformComponent  // move this line down for "GetPosition" to fail
+	name$			as string
+endtype
+
+
+REMSTART
+
+	== Globals ==
+
+REMEND
+
+global g_myEntity as EntityType
+global EntityType g_otherEnt
+
+//g_myEntity.notAField = 7 //properly errors
+
+g_myEntity.name$ = "Steve"
+g_otherEnt.name$ = "Fred"
+
+` should result in 19
+g_myEntity.transform.position.x = 3 + 7 + 9
+` should result in 180
+g_otherEnt.transform.rotation.y = 0 + 10*3 - 60 + 15*2 - 1 + 181
+
+g_myEntity.transform.position.z = -10 // test unary operator
+//g_myEntity.transform.scaling# = "7" //properly errors
+g_myEntity.transform.scaling# = 7 // test casting from integer to float
+
+local sum = GetSum( 2, 3 )
+sum -= 1
+sum += GetSum( 1, sum )
+
+local pos = GetPosition( g_myEntity )
+pos.x = ( pos.x*pos.x ) / ( pos.y*pos.y )
+
+function GetSum( x, y ) as integer
+endfunction x + y
+
+function GetPosition( xform as TransformComponent ) as vector3
+endfunction xform.position
+
+/*
+// Multiple function overloads in user code is not yet enabled
+function GetSum( x, y, z ) as integer
+endfunction x + y + z
+*/
+
+GetPosition g_otherEnt
+
+function TotallyIncompatible() as EntityType
+endfunction
+
+local x = 0
+mylabel:
+	"Hello, world!"
+	x = x + 1
+	if x mod 5 = 0
+		gosub sublabel
+	endif
+	// and repeat
+	goto mylabel
+
+sublabel:
+	"Five! It's 2 + 3 = " + GetSum( 2, 3 )
+	return

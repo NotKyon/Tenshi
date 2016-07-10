@@ -1,0 +1,191 @@
+﻿CODING CONVENTIONS
+==================
+
+C AND C++ STANDARD
+------------------
+For C++, use C++14 (VS2015 version). For C, use C99.
+
+Exception: The axlibs use C89 and offer C++03 support, using C++11 features if
+           they are found to be available.
+
+
+TABS AND SPACING
+----------------
+Tab characters should only be used to indent a line, not for alignment. If this
+is followed then it doesn't matter what your tab width is. For such indentations
+only real tab characters shall be used. (No spaces.) For the purpose of
+alignment, only spaces shall be used (potentially after a series of tabs to get
+only the indentation-level correct).
+
+Indentation example:
+
+	Bool Node::isDescendantOf( const Node &test ) const
+	{
+		const Node *pCheck = m_pParent;
+		while( pCheck != nullptr ) {
+			if( pCheck == &test ) {
+				return true;
+			}
+
+			pCheck = pCheck->m_pParent;
+		}
+
+		return false;
+	}
+
+Indentation and alignment example:
+
+	Bool statHandle( SFileStat &dst, OSFile f )
+	{
+		BY_HANDLE_FILE_INFORMATION info;
+
+		if( !GetFileInformationByHandle( win32h( f ), &info ) ) {
+			return false;
+		}
+
+		dst.uAttributes   = attribs_fromwin32( info.dwFileAttributes );
+		dst.uDeviceId     = info.dwVolumeSerialNumber;
+		dst.uRecordId     = U64(info.nFileIndexHigh)<<32 | U64(info.nFileIndexLow);
+		dst.uTimeCreated  = filetime_fromwin32( info.ftCreationTime );
+		dst.uTimeModified = filetime_fromwin32( info.ftLastWriteTime );
+		dst.uTimeAccessed = filetime_fromwin32( info.ftLastWriteTime );
+		dst.cBytes        = U64(info.nFileSizeHigh)<<32 | U64(info.nFileSizeLow);
+
+		return true;
+	}
+
+(Note the spacing prior to the `=` where members of `dst` are assigned in the
+above.)
+
+
+NAMESPACES
+----------
+Each library in Code/Libs is given its own sub-namespace within the Ax
+namespace. e.g., the Async library uses the namespace Ax::Async for the majority
+of its functionality.
+
+
+FORMAT / CASING
+---------------
+Symbols are formatted/cased as follows.
+
+    Namespaces      GroupingName
+    Variables       <prefix>someNoun
+    Classes         <Prefix>SomeNoun
+    Typenames       SomeNoun
+    Functions       verbOrActionDescription<Suffix>
+    Enumerations    ESomeNoun
+
+
+VARIABLE PREFIXES
+-----------------
+Variables are first prefixed based on their scope.
+
+    Class member    m_
+    Globals         g_
+
+Static variables within functions are not prefixed.
+Static variables within classes are globals.
+
+Variables might be further prefixed based on their type.
+
+    bool            b
+    unsigned        u
+    <counter>       c
+    <pointer>       p
+    float/double    f
+    char[]          sz   (if NUL-terminated)
+    wchar_t[]       wsz  (if NUL-terminated)
+    <template>      t
+    <typename>      T
+
+A "<counter>" is any variable used to indicate a quantity.
+
+"char[]" refers to any character array. If the character array is statically
+sized then it just uses 'sz', but if it's a pointer to an array of characters
+then it's 'psz'. Likewise with wchar_t[]/wsz.
+
+A "<template>" variable is any template parameter that is not a type.
+A "<typename>" variable is a template parameter that is a type.
+
+e.g., U32 m_uFrameId, CubeInfo g_cubeOfDoom, const char *g_pszAppName, etc.
+
+
+CLASS PREFIXES
+--------------
+Classes get prefixed in a way to describe what they are.
+
+    General             C       General classes.
+    Framework component F       Framework classes that aren't game or editor/pipeline-specific.
+    Game component      G       Game-specific class
+    Interface           I       Abstract (pure virtual) interface
+    Per-thread manager  L       Thread-local singleton manager class (one per thread)
+    Manager             M       Singleton manager class
+    Editor component    P       Editor (pipeline)-specific class
+    Resource            R       Resource: instances are managed by a Manager class
+    Structure           S       Structure or class with (mostly) public access
+    Template            T       Template classes (e.g., TLinkedList<>)
+    Widget              W       Any UI element
+
+Core classes (e.g., Str) are not prefixed, unless they are template classes (e.g., TArr<>).
+
+
+FUNCTION SUFFIXES
+-----------------
+Recursive functions should be suffixed with "_r"
+Callback functions should be suffixed with "_f"
+
+If a function is an asynchronous job it should end with "Job_f"
+
+
+FILES
+-----
+Files should be named after the functionality that they contain. Typically a
+file will be named after the (primary) class it implements or declares, without
+the prefix. (e.g., Application.cpp instead of CApplication.cpp)
+
+C++ source files should end with .cpp
+C++ header files should end with .hpp
+
+Header files should not use "header guards" (e.g., #ifndef/#define ... #endif),
+rather they should use #pragma once. This is supported by all major compilers
+and can result in a marginal speed-up over header guards, while also reducing
+the number of macros/defines that might appear in code completion results.
+
+
+TODO/FIXME COMMETS
+------------------
+The use of "FIXME:" should be preferred over "TODO:" comments.
+
+
+BRACES
+------
+Functions, classes/structs, etc., have braces separated onto separate lines
+aligned with the first token of the declaration. e.g.,
+
+    S32 getSum( S32 x, S32 y )
+    {
+        return x + y;
+    }
+
+Braces within functions should be placed on the same line, immediately following
+a single space after the last token. e.g.,
+
+    Bool takeFlag( U32 &uFlags, U32 uCheckFlag )
+    {
+        if( ( uFlags & uCheckFlag ) == uCheckFlag ) {
+            uFlags &= ~uCheckFlag;
+            return true;
+        }
+
+        return false;
+    }
+
+
+PREFIX/POSTFIX INCREMENT/DECREMENT
+----------------------------------
+Prefix increment/decrement should be preferred over postfix increment/decrement.
+i.e., `++i` is good, whereas `i++` is bad. While compilers can do a good job of
+optimizing the latter into the former, we favor explicitness in this case.
+
+

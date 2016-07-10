@@ -1,0 +1,619 @@
+The "unified array system" existed in the original language (DBP) so support
+must be provided.
+
+Arrays can serve as a list, stack, queue, or just a general array. This appears
+to be nothing particularly special. An internal index is stored with the array
+and manipulated with these commands. Inserting elements within lists, stacks, or
+queues will cause the entire array to be resized.
+
+Arrays and lists can be multidimensional. Stacks and queues cannot. (They
+require the array to be single-dimensional.)
+
+NOTE: The "bottom" of the array is defined as the last item in the array. The
+-     "top" of the array is defined as the first item (0) in the array.
+
+NOTE: "ARRAY COUNT" returns the LAST AVAILABLE INDEX for use in that array. For
+-     example if an array has space for exactly two items then ARRAY COUNT()
+-     returns 1. If it were exactly one item, then ARRAY COUNT() returns 0. It
+-     returns -1 if the array is completely empty (indicating the lack of an
+-     available subscript).
+
+NOTE: "ARRAY DELETE ELEMENT" only works on single dimensional arrays. It also
+-     has two forms. One takes a specific index to delete, while the other uses
+-     the "current index" of the array.
+
+[GENERAL COMMANDS]
+DIM
+REDIM
+UNDIM
+
+[LIST COMMANDS (FROM ORIGINAL)]
+EMPTY ARRAY
+ARRAY INDEX TO BOTTOM
+ARRAY INDEX TO TOP
+ARRAY INSERT AT BOTTOM
+ARRAY INSERT AT TOP
+ARRAY INSERT AT ELEMENT
+ARRAY DELETE ELEMENT
+NEXT ARRAY INDEX
+PREVIOUS ARRAY INDEX
+ARRAY COUNT()
+ARRAY INDEX VALID()
+
+[STACK COMMANDS (FROM ORIGINAL)]
+ARRAY INDEX TO STACK
+ADD TO STACK
+REMOVE FROM STACK
+
+[QUEUE COMMANDS (FROM ORIGINAL)]
+ARRAY INDEX TO QUEUE
+ADD TO QUEUE
+REMOVE FROM QUEUE
+
+[ADDITIONAL COMMANDS]
+// Retrieve the actual number of items in the array
+ARRAY LEN( Array() )
+// Sort the items in the array using a less-than comparison (or CmpFunc if it's
+// provided)
+ARRAY SORT Array() [, CmpFunc ]
+
+
+[[----------------------------------------------------------------------------]]
+
+The following is a pseudo implementation of the above functions.
+
+// -- WORK IN PROGRESS -- //
+
+// TODO: Keep "uDimensions" up to date on the *CAPACITY* of the array. This will
+//       allow more efficient operations on the array.
+
+extern void *Alloc( uintptr cBytes );
+extern void Dealloc( void *pData );
+
+struct SType;
+extern uintptr GetTypeItemSizeInBytes( const SType * );
+extern bool IsTypeTrivial( const SType * );
+extern void ConstructInstance( SType *, void *pData );
+extern void CopyConstructInstance( SType *, void *pOutData, const void *pInData );
+extern void MoveConstructInstance( SType *, void *pDstData, void *pSrcData );
+extern void DestructInstance( SType *, void *pData );
+
+struct SArray
+{
+    enum : uintptr
+    {
+        kMaxDimensions              = 9,
+        kInvalidIndex               = ~uintptr( 0 )
+    };
+
+    uintptr     uDimensions[ kMaxDimensions ];          //elements per dimension -- maximum of 10 dimensions in original
+    uintptr     cDimensions;                            //total number of dimensions
+    uintptr     cItems;                                 //total number of elements
+    uintptr     cItemBytes;                             //size of one element within the array
+    SType *     pItemType;                              //item type (used for managing individual items in the array)
+    uintptr     uIndex;                                 //current index
+
+    inline static const SArray *FromDataPointer( const void *pDataPointer )
+    {
+        return ( const SArray * )( uintptr( pDataPointer ) - sizeof( SArray ) );
+    }
+    inline static SArray *FromDataPointer( void *pDataPointer )
+    {
+        return const_cast< SArray * >( FromDataPointer( ( const void * )pDataPointer ) );
+    }
+
+    inline const void *GetDataPointer_Const() const
+    {
+        return ( void * )( uintptr( this ) + sizeof( *this ) );
+    }
+    inline const void *GetDataPointer() const
+    {
+        return GetDataPointer_Const();
+    }
+    inline void *GetDataPointer()
+    {
+        return const_cast< void * >( GetDataPointer_Const() );
+    }
+
+    inline const void *GetItemPointer_Const( uintptr uItemIndex ) const
+    {
+        return ( const void * )( uintptr( GetDataPointer_Const() ) + uItemIndex );
+    }
+    inline const void *GetItemPointer( uintptr uItemIndex ) const
+    {
+        return GetItemPointer_Const( uItemIndex );
+    }
+    inline void *GetItemPointer( uintptr uItemIndex )
+    {
+        return const_cast< void * >( GetItemPointer_Const( uItemIndex ) );
+    }
+
+    inline uintptr CalculateMultidimensionalIndex( const uintptr *pDimIndexes, uintptr cDims ) const
+    {
+        if( cDims > cDimensions ) {
+            return kInvalidIndex;
+        }
+    
+        // H*W*z + W*y + x
+
+        uintptr uCalcIndex = 0;
+        uintptr uDimMult = 1;
+        for( uintptr i = 0; i < cDims; ++i ) {
+            uCalcIndex += uDimIndex[ i ]*uDimMult;
+            uDimMult *= uDimensions[ i ];
+        }
+
+        return uCalcIndex;
+    }
+    template< typename tNumDims >
+    inline uintptr CalculateMultidimensionalIndex( const uintptr( &uDimIndexes )[ tNumDims ] ) const
+    {
+        static_assert( tNumDims <= kMaxDimensions, "Too many dimensions" );
+        return CalculateMultidimensionalIndex( uDimIndexes, tNumDims );
+    }
+    inline uintptr CalculateMultidimensionalIndex( uintptr uIndex1 ) const
+    {
+        return uIndex1;
+    }
+    inline uintptr CalculateMultidimensionalIndex( uintptr uIndex1, uintptr uIndex2 ) const
+    {
+        return cDimensions[ 0 ]*uIndex2 + uIndex1;
+    }
+    inline uintptr CalculateMultidimensionalIndex( uintptr uIndex1, uintptr uIndex2, uintptr uIndex3 ) const
+    {
+        return cDimensions[ 1 ]*cDimensions[ 0 ]*uIndex3 + cDimensions[ 0 ]*uIndex2 + uIndex1;
+    }
+
+    inline bool IsSingleDimensional() const
+    {
+        return cDimensions <= 1;
+    }
+
+    inline void IndexToBottom()
+    {
+        uIndex = cItems > 0 ? cItems - 1 : 0;
+    }
+    inline void IndexToTop()
+    {
+        uIndex = 0;
+    }
+    inline void NextIndex()
+    {
+        if( uIndex + 1 < cItems ) {
+            ++uIndex;
+        }
+    }
+    inline void PreviousIndex()
+    {
+        if( uIndex > 0 ) {
+            --uIndex;
+        }
+    }
+
+    inline bool IsIndexValid() const
+    {
+        return uIndex < cItems;
+    }
+};
+
+static uintptr ArrayInternal_CalculateItemCount( const uintptr *pDimensions, uintptr cDimensions )
+{
+    uintptr cItems = cDimensions > 0 ? 1 : 0;
+    for( uintptr i = 0; i < cDimensions; ++i ) {
+        cItems *= pDimensions[ i ];
+    }
+    return cItems;
+}
+
+void *ArrayUndim( void *pArrayData )
+{
+    if( !pArrayData ) {
+        return nullptr;
+    }
+
+    SArray *const pArr = SArray::FromDataPointer( pArrayData );
+
+    if( !IsTypeTrivial( pArr->pItemType ) ) {
+        uintptr uDataAddr = uintptr( pArrayData );
+        for( uintptr i = 0; i < pArr->cItems; ++i ) {
+            DestructInstance( pArr->pItemType, ( void * )uDataAddr );
+            uDataAddr += pArr->cItemBytes;
+        }
+    }
+
+    Dealloc( ( void * )pArr );
+    return nullptr;
+}
+void *ArrayDim( const uintptr *pDimensions, uintptr cDimensions, SType *pItemType )
+{
+    const uintptr cItemBytes = GetTypeItemSizeInBytes( pItemType );
+    if( !cItemBytes ) {
+        return nullptr;
+    }
+
+    const uintptr cItems = ArrayInternal_CalculateItemCount( pDimensions, cDimensions );
+    const uintptr cDataBytes = cItemBytes*cItems;
+    const uintptr cBytes = sizeof( SArray ) + cDataBytes;
+
+    SArray *const pArr = ( SArray * )Alloc( cBytes );
+    if( !pArr ) {
+        return nullptr;
+    }
+
+    for( uintptr i = 0; i < cDimensions; ++i ) {
+        pArr->uDimensions[ i ] = pDimensions[ i ];
+    }
+    for( uintptr i = cDimensions; i < SArray::kMaxDimensions; ++i ) {
+        pArr->uDimensions[ i ] = 0;
+    }
+    pArr->cDimensions = cDimensions;
+
+    pArr->cItems = cItems;
+    pArr->cItemBytes = cItemBytes;
+    pArr->pItemType = pItemType;
+    pArr->uIndex = 0;
+
+    void *const pBaseDataAddr = pArr->GetDataPointer();
+    if( IsTypeTrivial( pItemType ) ) {
+        memset( pBaseDataAddr, 0, cDataBytes );
+    } else {
+        uintptr uDataAddr = uintptr( pBaseDataAddr );
+        for( uintptr i = 0; i < cItems; ++i ) {
+            ConstructInstance( pItemType, ( void * )uDataAddr );
+            uDataAddr += cItemBytes;
+        }
+    }
+
+    return pBaseDataAddr;
+}
+void *ArrayRedim( void *pOldArrayData, const uintptr *pDimensions, uintptr cDimensions, SType *pItemType )
+{
+    if( !pOldArrayData ) {
+        return ArrayDim( pDimensions, cDimensions, pItemType );
+    }
+
+    SArray *const pOldArray = SArray::FromDataPointer( pOldArrayData );
+    if( pOldArray->pItemType != pItemType ) {
+        return nullptr;
+    }
+
+    const uintptr cItems = ArrayInternal_CalculateItemCount( pDimensions, cDimensions );
+    const uintptr cDataBytes = pOldArray->cItemBytes*cItems;
+    const uintptr cBytes = sizeof( SArray ) + cDataBytes;
+
+    SArray *const pArr = ( SArray * )Alloc( cBytes );
+    if( !pArr ) {
+        return nullptr;
+    }
+
+    for( uintptr i = 0; i < cDimensions; ++i ) {
+        pArr->uDimensions[ i ] = pDimensions[ i ];
+    }
+    for( uintptr i = cDimensions; i < SArray::kMaxDimensions; ++i ) {
+        pArr->uDimensions[ i ] = 0;
+    }
+    pArr->cDimensions = cDimensions;
+
+    uintptr uOldBases[ SArray::kMaxDimensions ];
+    uOldBases[ 0 ] = 0;
+    for( uintptr i = 1; i < pOldArray->cDimensions; ++i ) {
+        uOldBases[ i ] = uOldBases[ i - 1 ] + pOldArray->cDimensions[ i ];
+    }
+
+    uintptr uNewBases[ SArray::kMaxDimensions ];
+    uNewBases[ 0 ] = 0;
+    for( uintptr i = 1; i < cDimensions; ++i ) {
+        uNewBases[ i ] = uNewBases[ i - 1 ] + pDimensions[ i ];
+    }
+
+    pArr->cItems = cItems;
+    pArr->cItemBytes = pOldArray->cItemBytes;
+    pArr->pItemType = pOldArray->pItemType;
+    pArr->uIndex = 0;
+
+    void *const pOldBaseAddr = pOldArray->GetDataPointer();
+    void *const pNewBaseAddr = pArr->GetDataPointer();
+
+    const uintptr uOldBaseAddr = uintptr( uOldBaseAddr );
+    const uintptr uNewBaseAddr = uintptr( uNewBaseAddr );
+
+    const uintptr cMoveDims = pOldArray->cDimensions < cDimensions ? pOldArray->cDimensions : cDimensions;
+    const uintptr cMakeDims = pOldArray->cDimensions < cDimensions ? cDimensions - pOldArray->cDimensions : 0;
+
+    for( uintptr uDim = 0; uDim < cMoveDims; ++uDim ) {
+        const uintptr uDstDimAddr = uNewBaseAddr + uNewBases[ uDim ];
+        const uintptr uSrcDimAddr = uOldBaseAddr + uOldBases[ uDim ];
+
+        const uintptr cOldItems = pOldArray->uDimensions[ uDim ];
+        const uintptr cNewItems = pArr->uDimensions[ uDim ];
+
+        const uintptr cMoveItems = cOldItems < cNewItems ? cOldItems : cNewItems;
+        const uintptr cMakeItems = cOldItems < cNewItems ? cNewItems - cOldItems : 0;
+
+        if( IsTypeTrivial( pItemType ) ) {
+            memcpy( ( void * )uDstAddr, ( const void * )uSrcAddr, cMoveItems*pArr->cItemBytes );
+            memset( ( void * )( uDstAddr + cMoveItems*pArr->cItemBytes ), 0, cMakeItems*pArr->cItemBytes );
+        } else {
+            for( uintptr uItem = 0; uItem < cMoveItems; ++uItem ) {
+                const uintptr uDstAddr = uDstDimAddr + uItem*pArr->cItemBytes;
+                const uintptr uSrcAddr = uSrcDimAddr + uItem*pArr->cItemBytes;
+
+                MoveConstructInstance( pItemType, ( void * )uDstAddr, ( void * )uSrcAddr );
+            }
+            for( uintptr uItem = 0; uItem < cMakeItems; ++uItem ) {
+                const uintptr uDstAddr = uDstDimAddr + ( cMoveItems + uItem )*pArr->cItemBytes;
+                ConstructInstance( pItemType, ( void * )uDstAddr );
+            }
+        }
+    }
+
+    ArrayUndim( pOldArrayData );
+
+    return pBaseDataAddr;
+}
+
+void *ArrayInsertElements( void *pArrayData, uintptr uBefore, const void *pItems, uintptr cItems )
+{
+    if( !pArrayData || !cItems ) {
+        return pArrayData;
+    }
+
+    SArray *const pArr = SArray::FromDataPointer( pArrayData );
+    if( !pArr->IsSingleDimensional() ) {
+        return nullptr;
+    }
+
+    const uintptr cNewItems = pArr->cItems + cItems;
+    const uintptr cNewBytes = cNewItems*pArr->cItemBytes;
+
+    SArray *const pNewArr = ( SArray * )Alloc( cNewBytes );
+    if( !pNewArr ) {
+        return nullptr;
+    }
+
+    for( uintptr uDim = 0; uDim < SArray::kMaxDimensions; ++uDim ) {
+        pNewArr->uDimensions[ uDim ] = pArr->uDimensions[ uDim ];
+    }
+    pNewArr->cDimensions = pArr->cDimensions;
+
+    pNewArr->cItems = cNewItems;
+    pNewArr->cItemBytes = pArr->cItemBytes;
+    pNewArr->pItemType = pArr->pItemType;
+
+    void *const pNewArrData = pNewArr->GetDataPointer();
+    uintptr uDstData = uintptr( uNewArrData );
+    uintptr uSrcData = uintptr( pArrayData );
+
+    const uintptr uTop = uBefore <= pArr->cItems ? uBefore : pArr->cItems;
+    pNewArr->uIndex = uTop;
+
+    for( uintptr i = 0; i < uTop; ++i ) {
+        MoveConstructInstance( pArr->pItemType, ( void * )uDstData, ( void * )uSrcData );
+        DestructInstance( pArr->pItemType, ( void * )uSrcData );
+
+        uDstData += pArr->cItemBytes;
+        uSrcData += pArr->cItemBytes;
+    }
+
+    if( !pItems ) {
+        for( uintptr i = 0; i < cItems; ++i ) {
+            ConstructInstance( pArr->pItemType, ( void * )uDstData );
+            uDstData += pArr->cItemBytes;
+        }
+    } else {
+        uSrcData = uintptr( pItems );
+        for( uintptr i = 0; i < cItems; ++i ) {
+            CopyConstructInstance( pArr->pItemType, ( void * )uDstData, ( const void * )uSrcData );
+            uDstData += pArr->cItemBytes;
+            uSrcData += pArr->cItemBytes;
+        }
+    }
+
+    uSrcData = uintptr( pArrayData ) + uTop*pArr->cItemBytes;
+    for( uintptr i = uTop; i < pArr->cItems; ++i ) {
+        MoveConstructInstance( pArr->pItemType, ( void * )uDstData, ( void * )uSrcData );
+        DestructInstance( pArr->pItemType, ( void * )uSrcData );
+
+        uDstData += pArr->cItemBytes;
+        uSrcData += pArr->cItemBytes;
+    }
+
+    Dealloc( ( void * )pArr );
+    return pNewArrData;
+}
+void *ArrayInsertAtTop( void *pArrayData )
+{
+    return ArrayInsertElements( pArrayData, 0, nullptr, 1 );
+}
+void *ArrayInsertAtBottom( void *pArrayData )
+{
+    if( !pArrayData ) {
+        return nullptr;
+    }
+
+    SArray *const pArr = SArray::FromDataPointer( pArrayData );
+    return ArrayInsertElements( pArrayData, pArr->cItems, nullptr, 1 );
+}
+void *ArrayInsertAtElement( void *pArrayData, uintptr uElement )
+{
+    return ArrayInsertElements( pArrayData, uElement, nullptr, 1 );
+}
+void *ArrayInsertQuantityAtTop( void *pArrayData, uintptr cItems )
+{
+    return ArrayInsertElements( pArrayData, 0, nullptr, cItems );
+}
+void *ArrayInsertQuantityAtBottom( void *pArrayData, uintptr cItems )
+{
+    if( !pArrayData ) {
+        return nullptr;
+    }
+
+    SArray *const pArr = SArray::FromDataPointer( pArrayData );
+    return ArrayInsertElements( pArrayData, pArr->cItems, nullptr, cItems );
+}
+void *ArrayInsertQuantityAtElement( void *pArrayData, uintptr uElement, uintptr cItems )
+{
+    return ArrayInsertElements( pArrayData, uElement, nullptr, cItems );
+}
+
+void ArrayDeleteElements( void *pArrayData, uintptr uFirst, uintptr cDeletes )
+{
+    if( !pArrayData ) {
+        return;
+    }
+
+    SArray *const pArr = SArray::FromDataPointer( pArrayData );
+    if( uFirst >= pArr->cItems || !cDeletes ) {
+        return;
+    }
+
+    const uintptr uBaseAddr = uintptr( pArrayData );
+
+    const uintptr uTop = uFirst + cDeletes > pArr->cItems ? pArr->cItems : uFirst + cDeletes;
+    if( !IsTypeTrivial( pArr->pItemType ) ) {
+        for( uintptr i = uTop; i > uFirst; --i ) {
+            const uintptr uItemAddr = uBaseAddr + ( i - 1 )*pArr->cItemBytes;
+            DestructInstance( pArr->pItemType, ( void * )uItemAddr );
+        }
+    }
+
+    const uintptr uRemainder = pArr->cItems - uTop;
+    for( uintptr i = 0; i < uRemainder; ++i ) {
+        const uintptr uDstAddr = uBaseAddr + ( uFirst + i )*pArr->cItemBytes;
+        const uintptr uSrcAddr = uBaseAddr + ( uTop + i )*pArr->cItemBytes;
+
+        MoveConstructInstance( pArr->pItemType, ( void * )uDstAddr, ( void * )uSrcAddr );
+        DestructInstance( pArr->pItemType, ( void * )uSrcAddr );
+    }
+
+    const uintptr cRemoved = uTop - uFirst;
+    pArr->cItems -= cRemoved;
+}
+void ArrayDeleteElementAt( void *pArrayData, uintptr uIndex )
+{
+    ArrayDeleteElements( pArrayData, uIndex, 1 );
+}
+void ArrayDeleteElement( void *pArrayData )
+{
+    if( !pArrayData ) {
+        return;
+    }
+
+    ArrayDeleteElements( pArrayData, SArray::FromDataPointer( pArrayData )->uIndex, 1 );
+}
+
+void EmptyArray( void *pArrayData )
+{
+    if( !pArrayData ) {
+        return;
+    }
+
+    ArrayDeleteElements( pArrayData, 0, SArray::FromDataPointer( pArrayData )->cItems );
+}
+
+void ArrayIndexToBottom( void *pArrayData )
+{
+    if( !pArrayData ) {
+        return;
+    }
+
+    SArray::FromDataPointer( pArrayData )->IndexToBottom();
+}
+void ArrayIndexToTop( void *pArrayData )
+{
+    if( !pArrayData ) {
+        return;
+    }
+
+    SArray::FromDataPointer( pArrayData )->IndexToTop();
+}
+void NextArrayIndex( void *pArrayData )
+{
+    if( !pArrayData ) {
+        return;
+    }
+
+    SArray::FromDataPointer( pArrayData )->NextIndex();
+}
+void PreviousArrayIndex( void *pArrayData )
+{
+    if( !pArrayData ) {
+        return;
+    }
+
+    SArray::FromDataPointer( pArrayData )->PreviousIndex();
+}
+
+intptr ArrayCount( const void *pArrayData )
+{
+    if( !pArrayData ) {
+        return -1;
+    }
+
+    const SArray *const pArray = SArray::FromDataPointer( pArrayData );
+
+    if( pArray->cItems == 0 ) {
+        return -1;
+    }
+
+    return intptr( pArray->cItems - 1 );
+}
+
+bool ArrayIndexValid( const void *pArrayData )
+{
+    if( !pArrayData ) {
+        return false;
+    }
+
+    return SArray::FromDataPointer( pArrayData )->IsIndexValid();
+}
+
+void ArrayIndexToStack( void *pArrayData )
+{
+    ArrayIndexToBottom( pArrayData );
+}
+void *AddToStack( void *pArrayData )
+{
+    void *const pNewArrayData = ArrayInsertAtBottom( pArrayData );
+    if( !pNewArrayData ) {
+        return nullptr;
+    }
+
+    ArrayIndexToBottom( pNewArrayData );
+    return pNewArrayData;
+}
+void RemoveFromStack( void *pArrayData )
+{
+    if( !pArrayData ) {
+        return;
+    }
+
+    SArray *const pArray = SArray::FromDataPointer( pArrayData );
+
+    if( pArray->cItems == 0 ) {
+        return;
+    }
+
+    ArrayDeleteElements( pArrayData, pArray->cItems - 1, 1 );
+    ArrayIndexToBottom( pArrayData );
+}
+
+void ArrayIndexToQueue( void *pArrayData )
+{
+    ArrayIndexToTop( pArrayData );
+}
+void *AddToQueue( void *pArrayData )
+{
+    void *const pNewArrayData = ArrayInsertAtTop( pArrayData );
+    if( !pNewArrayData ) {
+        return nullptr;
+    }
+
+    ArrayIndexToBottom( pNewArrayData );
+    return pNewArrayData;
+}
+void RemoveFromQueue( void *pArrayData )
+{
+    ArrayDeleteElements( pArrayData, 0, 1 );
+    ArrayIndexToTop( pArrayData );
+}

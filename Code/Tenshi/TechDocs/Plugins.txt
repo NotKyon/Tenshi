@@ -1,0 +1,427 @@
+TODO: Define how options in the commands file are specified. (e.g., ".OPTION")
+
+Plugins are separated into three separate directories.
+
+- plugins-core/
+- plugins-licensed/
+- plugins-user/
+
+(The exact path depends on the installation directory and target platform. For
+example, some plug-ins will be available for Windows, or just WinRT, while other
+plug-ins might target only GNU/Linux and Mac OS X.)
+
+The "core plugins" can implement both language level functionality and engine
+level functionality.
+
+The "licensed plugins" are simply a set of protected middle-ware systems.
+
+The "user plugins" are unprotected third party plug-ins.
+
+Plug-ins can either be placed directly into the appropriate directory, or they
+can be placed in a sub-directory.
+
+The commands exported by a plug-in are made visible by a corresponding
+".commands" file with the same name as the plug-in. The ".commands" file can
+also given configuration options for which library to use for which purpose. For
+example, a library can be given with debug symbols and code enabled for use with
+the debug mode of the compiler, while a separate release mode library might be
+available when debug mode is disabled.
+
+The commands file can also export constants and user-defined types.
+
+TODO: It would be cool if specific "properties" could be specified as well. The
+-     properties defined would be passed to some initialization setting and
+-     could be made visible for editing in the IDE. Additionally, specifying
+-     which functions, libraries, constants, or properties are exported based on
+-     the profile (e.g., "tool" versus "game") could prove useful as well. One
+-     use case would be a plug-in that has a "tool" mode which has extra
+-     dependencies causing the total distribution size to go up, but a really
+-     small "game" mode that doesn't have as many dependencies. Choosing between
+-     these could help make the user's final distribution size as small and
+-     efficient as possible.
+-
+-     NOTE: This is actually directly useful to the core plug-in's due to
+-           renderer settings. (e.g., Windowed, 640 x 480, etc)
+
+
+[FRAMEWORKS]
+Users can specify their own libraries ("frameworks") that are treated similarly
+to plug-ins. (They have initialization, finishing, step, fixed-step, etc,
+functions and their own list of exported symbols, etc.) They are compiled into
+the user's executable directly and they are distributed in source form.
+
+
+[COMMANDS FILE FUNCTION DECLARATION SYNTAX]
+Functions can be declared in a few separate ways.
+
+The first is to use the old-style syntax. e.g., "GET SUM[%LLL%_GetSum" which is
+just "VISIBLE NAME%TYPE PATTERN%FunctionSymbolName" For more information about
+type patterns, see the "TYPE PATTERNS" section below.
+
+The second method is to declare the function in this syntax:
+
+    VISIBLE NAME( Parameters ) AS ReturnType = "ExportedSymbolName"
+
+For example, the above "GET SUM" example would be:
+
+    GET SUM( X, Y ) AS INTEGER = "_GetSum"
+
+This syntax uses all the same features that the compiler supports, except in a
+reduced environment.
+
+
+[TYPE PATTERNS]
+Single-Character Sequences:
+    0 = Void
+    X = Any
+    B = Boolean (B = Boolean)
+    C = Int8 (C = Character)
+    N = Int16 (N = Number)
+    L = Int32 (L = Long number)
+    R = Int64 (R = Really long number)
+    Y = Uint8 (Y = bYte)
+    W = Uint16 (W = Word)
+    D = Uint32 (D = Double word)
+    Q = Uint64 (Q = Quadruple word)
+	A = Float16 (A = hAlf float)
+    F = Float32 (F = single Float)
+    O = Float64 (O = dOuble float)
+    S = String (const char *; S = String)
+	T = String (const wchar_t * (UTF-16); T = sTring)
+    G = String object (G = strinG)
+    H = Array (H = array Handle)
+    M = Dictionary (M = Map)
+    K = Linked List (K = linKed list)
+    @ = Attribute
+
+Double-Character Sequences:
+    I1 = Int8
+    I2 = Int16
+    I4 = Int32
+    I8 = Int64
+    IP = IntPtr
+    U1 = Uint8
+    U2 = Uint16
+    U4 = Uint32
+    U8 = Uint64
+    UP = UintPtr
+	#2 = Float16
+	#4 = Float32
+	#8 = Float64
+
+Triple-Character Sequences:
+	V4X = SIMDVector128 (any type)
+	V8X = SIMDVector256 (any type)
+    V4F = SIMDVector128_4Float32
+    V2O = SIMDVector128_2Float64
+    V4L = SIMDVector128_4Int32
+    V2R = SIMDVector128_2Int64
+    V8F = SIMDVector256_8Float32
+    V4O = SIMDVector256_4Float64
+    V8L = SIMDVector256_8Int32
+    V8R = SIMDVector256_4Int64
+    ... = Any number of parameters (c-style)
+
+Quadruple-Character Sequences:
+	EF21 = Vector2f
+	EF22 = Matrix2f
+	EF23 = Matrix23f
+	EF24 = Matrix24f
+	EF31 = Vector3f
+	EF32 = Matrix32f
+	EF33 = Matrix3f
+	EF34 = Matrix34f
+	EF41 = Vector4f
+	EF42 = Matrix42f
+	EF43 = Matrix43f
+	EF44 = Matrix4f
+	EF4Q = Quaternionf
+	EI16 = 128-bit signed integer
+	EU16 = 128-bit unsigned integer
+	EUN1 = 8-bits representing unsigned-normalized float (0.0 to 1.0; UNorm8)
+	EUN2 = 16-bits representing unsigned-normalized float (0.0 to 1.0; UNorm16)
+	EUN4 = 32-bits representing unsigned-normalized float (0.0 to 1.0; UNorm32)
+	EUN8 = 64-bits representing unsigned-normalized float (0.0 to 1.0; UNorm64)
+	ESN1 = 8-bits representing signed-normalized float (-1.0 to 1.0; SNorm8)
+	ESN2 = 16-bits representing signed-normalized float (-1.0 to 1.0; SNorm16)
+	ESN4 = 32-bits representing signed-normalized float (-1.0 to 1.0; SNorm32)
+	ESN8 = 64-bits representing signed-normalized float (-1.0 to 1.0; SNorm64)
+
+Sequence Modifiers:
+    < = Type is to be passed by reference for input (will not modify the data)
+    > = Type is to be passed by reference for output (will not read the data)
+    * = Type is to be passed by reference for input/output
+    ~ = Zero or more parameters passed as an array internally (not in user code)
+    + = One or more parameters passed as an array internally (not in user code)
+    ? = Zero or one parameter passed as an array internally (not in user code)
+	= = Select a default value if one is not provided
+	: = Labelled parameter
+
+All Type Sequences In Alphabetical Order:
+	A = Float16 (A = hAlf float)
+    B = Boolean (B = Boolean)
+    C = Int8 (C = Character)
+    D = Uint32 (D = Double word)
+	EF21 = Vector2f
+	EF22 = Matrix2f
+	EF23 = Matrix23f
+	EF24 = Matrix24f
+	EF31 = Vector3f
+	EF32 = Matrix32f
+	EF33 = Matrix3f
+	EF34 = Matrix34f
+	EF41 = Vector4f
+	EF42 = Matrix42f
+	EF43 = Matrix43f
+	EF44 = Matrix4f
+	EF4Q = Quaternionf
+	EI16 = 128-bit signed integer
+	ESN1 = 8-bits representing signed-normalized float (-1.0 to 1.0; SNorm8)
+	ESN2 = 16-bits representing signed-normalized float (-1.0 to 1.0; SNorm16)
+	ESN4 = 32-bits representing signed-normalized float (-1.0 to 1.0; SNorm32)
+	ESN8 = 64-bits representing signed-normalized float (-1.0 to 1.0; SNorm64)
+	EU16 = 128-bit unsigned integer
+	EUN1 = 8-bits representing unsigned-normalized float (0.0 to 1.0; UNorm8)
+	EUN2 = 16-bits representing unsigned-normalized float (0.0 to 1.0; UNorm16)
+	EUN4 = 32-bits representing unsigned-normalized float (0.0 to 1.0; UNorm32)
+	EUN8 = 64-bits representing unsigned-normalized float (0.0 to 1.0; UNorm64)
+    F = Float32 (F = single Float)
+    G = String object (G = strinG)
+    H = Array (H = array Handle)
+    I1 = Int8
+    I2 = Int16
+    I4 = Int32
+    I8 = Int64
+    IP = IntPtr
+    K = Linked List (K = linKed list)
+    L = Int32 (L = Long number)
+    M = Dictionary (M = Map)
+    N = Int16 (N = Number)
+    O = Float64 (O = dOuble float)
+    Q = Uint64 (Q = Quadruple word)
+    R = Int64 (R = Really long number)
+    S = String (const char *; S = String)
+	T = String (const wchar_t * (UTF-16); T = sTring)
+    U1 = Uint8
+    U2 = Uint16
+    U4 = Uint32
+    U8 = Uint64
+    UP = UintPtr
+	V4X = SIMDVector128 (any type)
+	V8X = SIMDVector256 (any type)
+    V4F = SIMDVector128_4Float32
+    V2O = SIMDVector128_2Float64
+    V4L = SIMDVector128_4Int32
+    V2R = SIMDVector128_2Int64
+    V8F = SIMDVector256_8Float32
+    V4O = SIMDVector256_4Float64
+    V8L = SIMDVector256_8Int32
+    V4R = SIMDVector256_4Int64
+    W = Uint16 (W = Word)
+    X = Any
+    Y = Uint8 (Y = bYte)
+    @ = Attribute
+	#2 = Float16
+	#4 = Float32
+	#8 = Float64
+    ... = Any number of parameters (c-style)
+    < = Type is to be passed by reference for input (will not modify the data)
+    > = Type is to be passed by reference for output (will not read the data)
+    * = Type is to be passed by reference for input/output
+    ~ = Zero or more parameters passed as an array internally (not in user code)
+    + = One or more parameters passed as an array internally (not in user code)
+    ? = Zero or one parameter passed as an array internally (not in user code)
+	= = Select a default value if one is not provided
+	: = Labelled parameter
+
+Any type sequence can be suffixed with a "*" character to indicate that the type
+is an input/output reference. Likewise "<" represents an input-only reference,
+and ">" represents an output-only reference.
+
+EXCEPTION: When an array (H) has a "*" suffix the function is expected to return
+-          that array.
+-        : String objects (G) and arrays (H) are always passed by reference. The
+-          use of "<" in this case only indicates that the value referenced will
+-          not be modified.
+
+When a collection (H,M,K) or any-type (X) are passed an optional "structure" can
+be given. The structure always starts with "(" and ends with ")". Inside of the
+structure all type sequences are accepted. (Including nested structures.) This
+can be used to enforce the type used by the array. In the case of "any-type" it
+enforces a specific structure layout.
+
+Labelled parameters are specified with a ":" followed by the label enclosed in a
+pair of parentheses. For example, PRINT "Hello, world!" AT 10, 10 could be
+declared as:
+
+	"PRINT%S:(AT)LL%print_at_impl"
+
+Likewise the function called by "TURN OBJECT 1 LEFT 45.0 DEGREES" could be
+declared like so:
+
+	"TURN OBJECT%L:(LEFT)@[degrees,radians]F%turn_object_left_impl"
+
+Attributes are passed as an integer. An integer value of 0 is given if no
+attribute is passed.
+
+When specifying attributes in the type patterns list, you can also specify which
+attributes are acceptable (rather than "any valid string"). For example, taken
+from "select_w" (from RlDev) the following attributes might exist for a menu
+selection system:
+
+    hide        Option is not displayed at all
+    blank       No option is given here, instead just a blank line
+    colour(idx) Set the color of the option to the palette color `idx`
+    title(idx)  Disable the option, but keep it displayed; also allows a color
+    cursor(idx) Display an icon next to the option (`idx` being the icon index)
+
+As can be inferred from the above, there are times when some attributes may have
+parameters, while others might not. Parameters to attributes can be provided
+when valid attributes are listed.
+
+An example of the "select_w" command's declaration:
+
+    select_w[%L@[hide,blank,colour(L),title(L=0),cursor(L)]S+%select_w_impl"
+
+The declaration for select_w in C would then look something like this:
+
+	/* these are the possible attributes */
+	enum select_parm_attrib
+	{
+		/* this attribute is passed if no attribute is specified */
+		kSelectAttrib_None = 0,
+		/* 'hide' */
+		kSelectAttrib_Hide,
+		/* 'blank' */
+		kSelectAttrib_Blank,
+		/* colour(colour_index) */
+		kSelectAttrib_Colour,
+		/* title(colour_index=0) */
+		kSelectAttrib_Title,
+		/* cursor(icon_index) */
+		kSelectAttrib_Cursor
+	};
+    /* structured because of the "+" */
+    struct select_parm
+    {
+        /* "attrib" because of the "@" */
+		enum select_parm_attrib		attrib;
+        /* "attrib_index" because some attribs take an "L" parameter */
+        int                         attrib_index;
+        /* "value" because of the "S" */
+        const char *                value;
+    };
+    
+    /* returns "int" because of "[%L" (the '[' right before '%' means "returns,"
+     * and the next type sequence after that indicates the return type */
+    int select_w_impl( size_t num_parms, const select_parm *parms );
+
+Any code from the language itself is guaranteed to be valid as it is a compiler
+semantic error to attempt to pass an invalid attribute, and the compiler is to
+not call the function if it could not allocate the parameters needed (e.g., on
+the stack or on the heap).
+
+Suppose there's also a "fade" attribute which takes a float value. The command
+declaration would then look like this:
+
+    select_w[%L@[hide,blank,colour(L),title(L=0),cursor(L),fade(F)]S+select_w_impl"
+
+And the structure used should then be modified to something like this:
+
+    struct select_parm
+    {
+		enum select_parm_attrib		attrib;
+        union {
+            int                     index;
+            float                   fade_time;
+        }                           attrib_parm;
+        const char *                value;
+    };
+
+Note how additional storage space is NOT required. (Look at the union.)
+
+
+[LABELLED PARAMETERS IN OTHER SYNTAX]
+Labelled parameters (referred to as "Sectioned Functions" in Notes.txt) were
+shown in "TYPE PATTERNS." The syntax for declaring them in the other syntax is:
+
+    VISIBLE NAME( Parms, [LABEL NAME] Parms ) AS ReturnType = "Symbol"
+
+For example, "PRINT AT" would be:
+
+	PRINT( Text$, [AT] X, Y ) = "print_at_impl"
+
+And the new "TURN OBJECT LEFT" would be:
+
+	TURN OBJECT( ObjectNumber, [LEFT] Angle# @[degrees,radians] ) = \
+	"turn_object_left_impl"
+
+
+[ATTRIBUTES IN OTHER SYNTAX]
+As shown in "TYPE PATTERNS" attributes can be handy for implementing something
+like select_w. Here's how select_w would be declared using the other syntax:
+
+	SELECT_W( Parms+ AS STRING @[hide,blank,colour(index AS INTEGER),\
+	title(index AS INTEGER = 0),cursor(index AS INTEGER),\
+	fade(value AS FLOAT)]) AS INTEGER = "select_w_impl"
+
+The "+" after the name of the parameter has the same meaning as the "+" type
+sequence modifier. The "@" after "STRING" means "attributes on strings." The
+possible attributes are then shown in the bracketed notation as shown in type
+patterns, but with the ability to name their parameters.
+
+
+[SPECIAL MODULE FUNCTIONS]
+Plug-ins can specify special functions that the engine calls at various points.
+These are the functions:
+
+	- Init (bool Init( TenshiRuntimeGlob_t *pGlob ))
+		* This is called upon module start-up. It can return "false" to signify
+		  that it failed to initialize properly. It retrieves a pointer to the
+		  shared global structure.
+	- Fini (void Fini())
+		* Called upon module shut-down. This is to properly clean up memory,
+		  temporary files, kernel resources, registered services, etc.
+	- SafeLoop (bool SafeLoop())
+		* Called by "safety code" generated in loops (such as DO/LOOP) rather
+		  than a full heavy SYNC call.
+		* If this returns false then the program should be exited.
+		* The internal version provided by the core runtime just calls "SYNC"
+		  if "SYNC ON" was not specified (or "SYNC OFF" was specified last)
+	- Step (bool Step())
+		* Called in all SYNC operations.
+		* If this returns false then the program should be exited.
+	- Hide (void Hide())
+		* Called when the user switches away from the app
+			* On desktop: App is minimized or put in the background
+			* On mobile: User switches to another app or home screen
+	- Show (void Show())
+		* Called when the user switches back to the app
+			* On desktop: App comes back from its minimized or background state
+			* On mobile: User switches back to the app
+	- SaveState (void SaveState())
+		* Called when the app is about to be terminated and needs to save its
+		  state
+		* NOTE: This has nothing to do with game save files
+	- LoadState (void LoadState())
+		* Called when the app is being resumed and needs to load its (formerly
+		  saved) state
+		* NOTE: This has nothing to do with game save files
+
+NOTE: Show() will only be called if Hide() was called first.
+
+
+The module commands file can specify which functions are which with the
+following directives:
+
+	.fn-init <function name>
+	.fn-fini <function name>
+	.fn-loop <function name>
+	.fn-step <function name>
+	.fn-hide <function name>
+	.fn-show <function name>
+	.fn-save <function name>
+	.fn-load <function name>
+
+### TODO: Need to verify these show/hide and save/load functions with Android
+.         and iOS APIs.

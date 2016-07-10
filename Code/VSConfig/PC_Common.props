@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <_Temp_DebugSuffix>$([System.Text.RegularExpressions.Regex]::Match($(Configuration),`Debug`))</_Temp_DebugSuffix>
+    <DebugSuffix>$(_Temp_DebugSuffix.Replace(Debug,Dbg))</DebugSuffix>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetName>$(ProjectName)$(DebugSuffix)</TargetName>
+    <IntDir>$(SolutionDir)Build\Obj$(PlatformArchitecture)\$(ProjectName)\$(Configuration)\</IntDir>
+    <IncludePath>$(SolutionDir)Code\Libs\;$(SolutionDir)Code\ThirdParty\bzip2\;$(SolutionDir)Code\ThirdParty\glew\include\;$(SolutionDir)Code\ThirdParty\libjpeg\;$(SolutionDir)Code\ThirdParty\libpng\;$(SolutionDir)Code\ThirdParty\lzma\;$(SolutionDir)Code\ThirdParty\zlib\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Build\Lib$(PlatformArchitecture)\;$(LibraryPath)</LibraryPath>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>PC_BUILD;BUILD_DATE=$(Date:yyyyMMdd);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnablePREfast>true</EnablePREfast>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="_Temp_DebugSuffix">
+      <Value>$(_Temp_DebugSuffix)</Value>
+    </BuildMacro>
+    <BuildMacro Include="DebugSuffix">
+      <Value>$(DebugSuffix)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

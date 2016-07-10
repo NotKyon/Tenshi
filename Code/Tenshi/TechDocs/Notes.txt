@@ -1,0 +1,631 @@
+Things to be implemented or documented still:
+
+- "RESERVE OBJECTS DstArr(), NumObjects"
+--- Prepare object IDs in advance
+--- IDs can be "available," "reserved," -or- "in use."
+--- Reserved IDs will not be allocated from automatically.
+
+- Support handles AND IDs.
+--- Handles are easily distinguishable in that they have 0xFFF00000 (bit mask)
+.   as nonzero always
+--- Handles can be reference counted; using IDs directly is riskier
+--- Return Dword = RETAIN( Handle ) -- increment reference count (returns same handle)
+--- Return Dword = RELEASE( Handle ) -- decrement reference count (returns zero)
+
+- Threads are controlled/declared with special keywords
+--- THREAD FUNCTION FunctionName(Parameters...)
+--- ENDFUNCTION / EXITFUNCTION still apply
+--- Calling the function returns a _future_
+--- Dereferencing future synchronizes
+--- WAIT Future will also synchronize
+--- Return Boolean = IS READY( Future ) checks
+
+- Jobs can also be declared like threads (JOB FUNCTION) but cannot be launched
+. the same way
+--- Need to add to job list
+--- Jobs can be implicit (PARALLEL FOR/PARALLEL FOR EACH)
+--- Job functions cannot be called directly
+
+- Errors should be multilingual (e.g., RuntimeError( 100 ))
+--- Display box allows language to be selected
+--- Errors/text can be provided through external files
+
+[Implemented]
+- SELECT/ENDSELECT/CASE/ENDCASE - FALLTHROUGH support
+	{
+		SELECT EVENT TYPE()
+			CASE EVENT_MOUSE_PRESS
+				` Go to next case
+				FALLTHROUGH
+			ENDCASE
+			CASE EVENT_MOUSE_RELEASE
+				DoSomething()
+			ENDCASE
+		ENDSELECT
+	}
+--- ENDCASE should be optional/implied by a following "CASE" statement or an
+.   "ENDSELECT" statement.
+	{
+		SELECT EVENT TYPE()
+			CASE EVENT_MOUSE_PRESS
+				` Go to next case
+				FALLTHROUGH
+			CASE EVENT_MOUSE_RELEASE
+				DoSomething()
+		ENDSELECT
+	}
+
+[Implemented]
+- FOR/UNTIL support
+--- `FOR i=0 UNTIL 10` is the same as `for(int i=0;i<10;++i)`
+
+- FOR EACH support (in language)
+--- `FOR EACH x IN SomeCollection`
+
+<X:Decided against this>
+The following adds too much work to the compiler for too little game. Having the
+plug-in just export a collection is easiest.
+
+	- FOR EACH support (plug-ins)
+	--- `FOR EACH <name>`
+	------ e.g., FOR EACH OBJECT : PRINT OBJECT NAME$() : NEXT
+	--- `FOR EACH <name> IN <name>( <value> )`
+	------ e.g., FOR EACH LIGHT IN OBJECT( 1 ) : PRINT LIGHT NAME$() : NEXT
+	--- Nested...
+		{
+			FOR EACH OBJECT
+				PRINT OBJECT NAME$()
+				FOR EACH LIGHT IN OBJECT()
+					PRINT "  Light: "; LIGHT NAME$()
+				NEXT LIGHT
+			NEXT OBJECT
+		}
+	--- Systems supporting this provide an "EACH" function and a list of functions
+	.   that take the value as a parameter. (e.g., OBJECT POSITION X())
+	--- The name of the variable used will be the name of the system. e.g.,
+		{
+			LOCAL MeshNamedBob = 0
+			FOR EACH OBJECT
+				LOCAL MyObj = OBJECT
+				LOCAL NumMeshes = OBJECT MESH COUNT( MyObj ) `MyObj isn't necessary
+				PRINT "Object "+Chr(34)+OBJECT NAME$()+Chr(34)+" has "+NumMeshes+PLURAL$(" Mesh",NumMeshes)
+				FOR EACH MESH IN OBJECT( MyObj )
+					LOCAL MyMesh = MESH
+					PRINT "  Mesh: "; MESH NAME$()
+					IF CASE COMPARE$( MESH NAME$(), "bob" ) THEN MeshNamedBob = MyMesh : EXIT 2
+				NEXT MESH
+			NEXT OBJECT
+		}
+</X>
+
+[Implemented]
+- Variables can be declared starting with a type in addition to the "AS" syntax
+--- e.g., FLOAT x, y, z
+--- e.g., GLOBAL FLOAT g_fCamPosX, g_fCamPosY, g_fCamPosZ
+--- These are statements, not expressions (obviously).
+
+- Casting to a type should be doable through a function-call syntax of the
+  type's name
+--- e.g., FLOAT( SomeString$ )
+--- e.g., DOUBLE INTEGER( SomeString$ )
+--- e.g., STRING( 23.7 )
+--- The existing commands that are expected will be exported still. They might
+.   take extra parameters. (Such as STR$( 23.7555, 1 ))
+
+<X:Decided against this>
+	This is neat, but probably error prone.
+	- Alternate type casting?
+	--- x TO type
+	------ Converts "x" to "type," performing any necessary data conversions
+	--- y AS type
+	------ Interprets "x" as "type" even if the data conversion doesn't match
+</X>
+
+- Packages and explicit imports / excludes
+--- Package defines a grouping of code into a module
+--- Code does not have to be in one file
+--- IMPORT PackageName will import a package or error if the package is not
+.   available
+--- EXCLUDE IMPORT PackageName will prevent a particular package from being
+.   automatically imported
+--- PACKAGE PackageName will declare which package the file is a part of
+
+- CVars and Commands supported in the language
+--- CVars are declared by suffixing the type of the variable with "CVAR" e.g.,
+.   r_distance AS FLOAT CVAR
+--- CVAR keyword can take optional parameters. (To be decided later.) Useful for
+.   flags, variable ranges, whether the CVar is considered a cheat or not, etc.
+.       r_distance AS FLOAT CVAR( firstParm=1, secondParm=2 )
+--- Command functions can be declared in much the same way:
+.       COMMAND FUNCTION r_updateMegatextures()
+--- Likewise, additional parameters can be applied:
+.       COMMAND FUNCTION r_updateMegatextures(), firstParm=1, secondParm=2
+--- Shorthand CVar declaration
+------ "#<VarName>"
+--------- e.g., #r_distance AS FLOAT
+------ "<Type> #<VarName>"
+--------- e.g., FLOAT #r_distance
+
+- Compiler directive to mark a file as "include only."
+--- Prime_8 originally requested this for Nuclear Basic.
+
+- "Safety code" (automatic sync calls) exists in the original language and
+  should be preserved.
+--- A "sync" call is always automatically generated at the bottom of a DO/LOOP.
+--- If safety code is enabled (default) then it also exists at the bottom of a
+.   WHILE/ENDWHILE and REPEAT/UNTIL.
+--- The "sync" call is never present on FOR/NEXT loops.
+--- The internal safety code routine could, in debug mode, check for
+.   unintentional infinite loops and pull up the debugger.
+
+- Different project types / profiles
+--- Game
+------ Subsystem: Windows; has default window
+------ Optional settings selection window
+--- App
+------ Subsystem: Windows; no default window
+--- Headless
+------ Subsystem: Console
+--- Library
+------ Can be dynamic (DLL) or static (LIB)
+------ Effectively just a module
+
+- Text and number objects
+--- Specially setup sprite-like objects that display messages with special
+.   formatting. These are inspired by RealLive's equivalent systems.
+--- Special formatting can be used for text.
+--- An image can be passed to number objects to control how they look.
+--- Additional images can be added to text objects for emojis (or other special
+.   characters) which will be drawn with the correct formatting systems.
+--- A color palette can be specified for text objects to control blending.
+--- The "insert cursor" can be modified from within the text object.
+
+- Fibers should be supported directly
+--- Functions like YIELD could be used to support coroutines. Likewise, waiting
+.   for a timer or mouse click could do the same thing.
+
+- Memory tagging
+--- Modules are automatically assigned their own tags
+--- Each internal system has its own set of memory tags
+--- Memory can be budgeted.
+------ Configured through cvars in the project.
+
+- Special attributes on function parameters
+--- See following example of RealLive code:
+.       repeat
+.           case
+.               select_w (
+.                   'New game',
+.                   title if LatestSave < 0: 'Load game',
+.                   hide if !game_finished: 'Omake',
+.                   'Exit'
+.               )
+.           of 0 // 'New game' selected
+.               jump(game_start_scenario)
+.           of 1 // 'Load game' selected
+.               menu_load
+.               break
+.           of 2 // 'Omake' selected
+.               farcall(omake_scenario)
+.               break
+.           other // 'Exit' selected (or an error occurred)
+.               end
+.           ecase
+.       till 0
+--- In the above note "title if Latest Save < 0: 'Load game'" and the line
+.   following it.
+------ This applies a particular attribute for that parameter if the condition
+.      given is met.
+------ The "title" attribute means "disabled but visible"
+------ The "hide" attribute means "disabled and invisible"
+------ The attributes are only applied if the condition following them is met
+------ The "select_w" function here means to display the options passed to it in
+.      a separate selection window. This is not relevant to the attributes idea,
+.      but is preserved and described for reference.
+--- Certain functions could expose that they accept "attributes" with their
+.   normal parameters, and which attributes they support.
+--- As shown above, this is useful for setting up menus and choices in games. We
+.   desire to be similar to scripting languages and other systems meant
+.   specifically for games, in the interest of making things easier.
+--- The syntax for the above RealLive example in this language would be:
+.       DO
+.           SELECT
+.               select_w(
+.                   "New game",
+.                   "Load game" IF LatestSave < 0 THEN title,
+.                   "Omake" IF NOT game_finished THEN hide,
+.                   "Exit"
+.               )
+.               CASE 0 // "New game" selected
+.                   GOTO game_start_scenario
+.               ENDCASE
+.               CASE 1 // "Load game" selected
+.                   menu_load
+.               ENDCASE
+.               CASE 2 // "Omake" selected
+.                   omake_scenario
+.               ENDCASE
+.               CASE DEFAULT // "Exit" selected (or an error occurred)
+.                   END
+.               ENDCASE
+.           ENDSELECT
+.       LOOP
+
+- Menu system
+--- A menu system should be present and configurable
+------ Configuration could be programmed or automatically loaded (project
+.      properties/configuration)
+--- See the "special attributes on function parameters" (above) for a look at
+.   how it should be.
+
+- KEY MOUSE ON / KEY MOUSE OFF
+--- Enable or disable moving the mouse with the arrow keys
+
+- Sectioned function names
+--- e.g., PRINT "Hello, world!" AT 10, 10
+------ "AT" is part of the function name, but the text parameter comes first
+--- e.g., TURN OBJECT 1 LEFT 45.0 DEGREES
+------ "DEGREES" is an attribute in this case
+------ Does not conflict with "TURN OBJECT LEFT"
+--- This is similar in nature to how Objective-C and Swift have labelled
+.   parameters.
+
+- IS ANY OF / HAS ANY OF / HAS ALL OF / HAS ONLY
+--- IF x IS ANY OF( 5, 10, 15, y ) ...
+------ Checks if the value contained by <x> is any of the values listed in the
+.      parentheses.
+--- IF SomeArr() HAS ANY OF( 5, 10, 15, y ) ...
+------ Checks if SomeArr() has any of the values listed in the parentheses as
+.      items in that array (order doesn't matter)
+--- IF SomeArr() HAS ALL OF( 5, 10, 15, y ) ...
+------ Checks if SomeArr() has all of the values listed in the parentheses as
+.      items in that array (order doesn't matter)
+--- IF SomeArr() HAS ONLY( 5, 10, 15, y ) ...
+------ Checks if SomeArr() consists only of the values listed in the parentheses
+.      as items in that array (order doesn't matter)
+--- These are operators to make testing the same value easier
+
+- Implied variable comparison
+--- e.g., IF x >= 0 AND < 10 THEN...
+------ Same as IF x >= 0 AND x < 10
+--- e.g., IF x < 0 OR >= 10 THEN...
+------ Same as IF x < 0 OR x <= 10
+--- e.g., IF x >= 1 OR = -1 THEN...
+------ Same as IF x >= 1 OR x = -1
+--- In all cases the variable has to be used first
+--- This only applies to AND/OR relational operators
+--- If <x> is an expression then the expression is evaluated only once
+
+- Compiler variables
+--- $Store
+------ The value of the last function call with an unassigned return value
+------ e.g., IF LEN( MyStr$ ) > 0 THEN PRINT "Length of string is: "; $Store
+------ This variable only has an effect when it's used and is aware of the type
+.      returned by the last call with an unassigned return value
+------ e.g., IF LEN( MyStr$ ) > 0 THEN Obj = GET CURRENT OBJECT() : PRINT "Length of string is: "; $Store
+--------- In the above "$Store" refers to the return value of the LEN() call
+--- $File, $Line, $Function (and __FILE__, __LINE__, __FUNCTION__)
+------ As in C
+--- $CompileDate, $CompileTime, $CompileYear, $CompileMonth, $CompileDay,
+.   $CompileHour, $CompileMinute, $CompileSecond (and __DATE__, __TIME__)
+------ $CompileDate and $CompileTime are string representations of the date and
+.      time of the compilation. All others are integer representations.
+--- $CompileUser, $CompileHost, $CompileCorp
+------ $CompileUser: Name of the user (default to OS account user name)
+------ $CompileHost: Name of the machine/node that did the compilation
+------ $CompileCorp: Name of the "organization"/"corporation" (default to OS
+.      setting)
+--- $BuildNumber
+------ ID of the latest build of the project
+--------- A separate "build number" file is created with the project supporting
+.         it. (This is disabled by default. It is automatically enabled as soon
+.         as the compiler encounters a $BuildNumber token, however.)
+--------- Build numbers start at 1.
+--- $LocalData
+------ Address of the start of this file's data segment
+--- $LocalDataSize
+------ Size (in bytes) of this file's data segment
+
+- Compiler should be project-aware.
+--- If a project passed to the compiler says it depends on a project with the
+.   given name then the compiler should be able to find and use that project.
+--- Projects can have identification names (as opposed to just "normal names")
+------ e.g., "JohnnyBHacker.Libs.StringParser"
+------ e.g., "Utilities.EntityFileReader"
+------ e.g., "SoftwareCorporation.Tools.3DWorldEditor"
+------ These names can be used when searching for projects that the passed
+.      project depends on.
+--- Compiler should not depend on the project file. Command-line options should
+.   cover the entire range of (reasonable) settings.
+------ This is more for integration with MAKE and "that crowd"
+------ Requiring certain things to be in their own file is still fine, however
+--------- e.g., which files to build into the executable
+--------- e.g., which configuration settings are the default
+--- The project file passed to the compiler tells the compiler how to build that
+.   specific project. This includes things like default settings, or files with
+.   default settings, whether the project is a windows application, a game, a
+.   pipeline tool, editor plug-in, etc.
+
+- There should be a simple plug-in pack file format that the IDE can install.
+--- Command-line tools to create and install such a format should be included.
+--- This makes it very easy to install plug-ins. The user doesn't need to know
+.   where they're installed to in order to use them. Instead, just
+.   double-clicking the plug-in pack will install it.
+--- A serial key / registration system can be built-in to the pack.
+------ Serial key is in a self-validating form.
+------ However, the serial key is also used to encrypt the contents of the pack.
+------ Both a Windows and a Linux (32-bit and 64-bit, each) version should be
+.      included. (So the pack can be generated automatically on a server.)
+--------- Example: A user purchases plug-in <x>. They are given a serial key
+.         (generated automatically) and the pack generator can create that pack
+.         with that serial key as the encryption.
+
+- Support for plug-in and project repositories.
+--- An official repository is the default.
+--- Additional repositories can be added by the user. (Configurable.)
+--- If a project is depended upon (in another project file) or a plug-in is
+.   explicitly required (in the project file or through an IMPORT statement) and
+.   the user doesn't have it installed, it can be acquired automatically
+.   (depending on the user's settings).
+------ If the plug-in is a "paid-for" plug-in then the user can choose to buy
+.      the plug-in if they haven't done so already, or the repository system can
+.      look-up their serial key and apply it automatically to the downloaded
+.      pack (if they already bought the plug-in).
+------ If the plug-in is a "paid-for" plug-in but also has a free version then
+.      that version can be downloaded automatically.
+--- This system makes it so community code and community projects can easily be
+.   accessed and built without requiring too much pain. (It SHOULD be a simple
+.   process.)
+------ Potential drawback being plug-in discoverability in the first place, and
+.      competing plug-ins. However, this shouldn't be too much of an issue since
+.      the user would have to find the projects depending on these anyway.
+
+- Profiler tool (made in language as a plug-in for the IDE)
+--- Displays thread stats
+------ Number of jobs executed per frame
+------ Which jobs belonged to which systems
+------ Where jobs were executed (i.e., which CPU core)
+------ Number of synchronization points hit and the amount of time spent waiting
+.      for each sync point
+--- Displays memory stats
+------ Respects tags and tag names
+------ Shows number of allocations per frame
+------ Peak allocation sizes and memory usage
+--- Displays renderer stats
+------ Average frame rate (in ms/f and fps), lowest and highest too
+------ Number of polygons, textures, objects, etc in the world (inc. maximum)
+------ Number of polygons, textures, objects, etc rendered (inc. maximum)
+------ Number of draw calls, constant buffers, etc
+------ Number of command buffers dispatched, etc
+--- Displays audio stats
+------ TODO: More details
+
+- Documentation should use extensive pictures to illustrate commands
+--- e.g., show pictures of different blend modes and their effects
+--- e.g., show pictures of the types of shapes created for specific objects
+--- e.g., show pictures of layout modes for layers
+--- e.g., show pictures of different particle effects
+--- e.g., show the curves generated by mathematical functions
+--- e.g., show pictures representing different scales (centimeters, millimeters, etc)
+--- e.g., show pictures showing how different light settings work at different ranges
+--- The main idea is to visually show what something does
+
+- Swift takes into account overflow and has a set of operators for dealing with that
+--- &* = multiply, ignoring overflow
+--- &/ = divide, ignoring overflow
+--- &% = remainder, ignoring overflow
+--- &+ = add, ignoring overflow
+--- &- = subtract, ignoring overflow
+--? Should the Swift overflow system be adopted here?
+
+- Random numbers should be generated by PCG (http://www.pcg-random.org/) by
+  default
+--- Support 128-bit mode as well (use pcg-cpp)
+--- Example (minimal)
+
+	// *Really* minimal PCG32 code / (c) 2014 M.E. O'Neill / pcg-random.org
+	// Licensed under Apache License 2.0 (NO WARRANTY, etc. see website)
+
+	typedef struct { uint64_t state;  uint64_t inc; } pcg32_random_t;
+
+	uint32_t pcg32_random_r(pcg32_random_t* rng)
+	{
+		uint64_t oldstate = rng->state;
+		// Advance internal state
+		rng->state = oldstate * 6364136223846793005ULL + (rng->inc|1);
+		// Calculate output function (XSH RR), uses old state for max ILP
+		uint32_t xorshifted = ((oldstate >> 18u) ^ oldstate) >> 27u;
+		uint32_t rot = oldstate >> 59u;
+		return (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
+	}
+
+--- Above example should not be used (use pcg-cpp) but shows how simple it could
+.   be
+
+- CLEAR MOUSE DELTA
+--- Or similarly named command to clear MouseMoveX() and MouseMoveY()
+--- This functionality is commonly needed and is often implemented as redundant
+.   calls to MouseMoveX() and MouseMoveY()
+
+- Automatic hide/show mouse on key press/mouse movement (respectively)
+--- Minor feature applicable to visual novel type games
+--- Mouse is automatically hidden on a key press (except KEY MOUSE ON keys) and
+.   automatically shown on mouse movement
+--- MOUSE AUTOVISIBLE ON / MOUSE AUTOVISIBLE OFF
+
+- Desktop fullscreen + auto-hide menubar
+--- As seen in the NekoPara Vol. 1 demo (on Steam).
+--- The menubar (which allows you to save the game and configure settings, etc)
+.   is always present in windowed mode. In fullscreen mode, the menubar will be
+.   hidden unless you move the mouse toward it.
+
+- Aspect correction (as in Kune2D's layering system)
+--- Code for this simply needs porting from Kune.
+--- AxTech/Math has these operations for its SIntVector2 and SRect classes.
+
+- Support [] array notation and "as SomeType[]" (in addition to () and
+. "dim var() as SomeType")
+
+- __guard command to automatically run a given statement upon returning from a
+. function.
+--- __guard <statement>
+------ Unconditionally runs <statement> just before returning from the function
+--- __guard{ <varname> } <statement>
+------ Runs the statement if the variable is not used as the return value from
+.      the given endfunction/exitfunction statement
+--- exitfunction{ <varname>[, <varname>...] } <expression>
+------ Method to specify multiple variables as referenced automatically so their
+.      corresponding cleanup statements are not run
+--- The functions are run in the reverse order that they are specified.
+--- This is a compile-time feature and requires no specific run-time support.
+--- Example
+
+		function StringToMemblock( s$, max=255 ) as integer
+			` create the memory block and set it to delete automatically
+			local mb = make memblock( max + 2 )
+			__guard{mb} delete memblock mb
+
+			local n = len( s$ )
+
+			` failure if the string is too long
+			if n > max then exitfunction 0
+			if n > 65535 then exitfunction 0
+
+			` write the length of the string into the memory block
+			write memblock word mb, 0, len( s$ )
+
+			` write the rest of the string into the memory block
+			for i = 0 until n
+				write memblock byte mb, 2 + i, asc( s$, i )
+			next
+
+			` returning <mb> from the function will *not* delete it
+		endfunction mb
+
+- Function redefinitions while running
+--- e.g., alter a function and hit a key in the IDE to compile the changes (JIT)
+.   while the program is running and submit them.
+--- If a type or other structure is altered such that existing functions no
+.   longer reference the proper offsets then reject that change and provide an
+.   appropriate error.
+------ The ability to recover from this is desired. So as long as an altered
+.      function only refers to members of the old type that was modified (or
+.      removed) it will still be submitted... (Although that may prove to be bad
+.      practice later on.)
+--- Only applies in debug-mode
+
+- Repeat If/Until Loop
+--- Loop only runs initially if the "if" expression is true
+--- Otherwise, same as Repeat/Until
+
+		repeat if find first()
+			"Filename: " + get filename$()
+		until not find next()
+
+- Reflection based on variable references. (Requested by Prime.)
+--- e.g., varname$(numSuccesses) gives "numSuccesses"
+
+- Set a callback to be called when modifying a variable, via processor
+` breakpoints. (Requested by Prime.)
+--- TRACK varName <code>
+------ e.g., TRACK numSuccesses PRINT "numSuccesses changed!"
+--- UNTRACK varName
+
+- New jobs API -- based on Naughty Dog's design (favors ease-of-use)
+--- Separated into fibers (128 fibers with 64KB stack + 32 fibers with 512KB
+.   stack)
+--- One thread per core -- acts as execution unit for the core, while the fiber
+.   acts as the context.
+------ Jobs always execute within the context of a fiber.
+--- Only three job queues, based on priority. (Low/Normal/High.)
+------ There is no job stealing.
+------ Jobs can add additional jobs.
+------ There is a waiting list with an associated counter. Waiting jobs are
+.      added to that list, and will be awakened once the counter reaches zero.
+--------- The counter is decremented "for each job completed" (but in reality
+.         cache the last counter and the number of decrements to apply so we can
+.         reduce contention -- only "flush cache" on switching job, new counter,
+.         or no work)
+--- "I/O threads" (sockets, file I/O, system calls, ...) are separate
+------ Setup as system threads. They read data then submit new jobs to operate
+.      on that data.
+------ Basically always waiting; never does data processing
+
+- Two frame configurations -- based on Naughty Dog's frame-centric design
+--- First is default: Do all logic steps (Game, render) on sync.
+------ This is what everybody is used to. This is what casual games want.
+--- "Feed forward." Separate logical steps so they operate on separate frames.
+------ While the GPU is executing frame 1, we're working on the render logic for
+.      frame 2, and the game logic for frame 3.
+------ Each stage is executing completely independently. The next frame can be
+.      processed immediately.
+------ However this requires consideration for the memory manager.
+--- Use a "FrameParms" structure, which contains data for each displayed frame
+------ This is sent through each stage of the engine
+------ Contains per-frame state: Frame number; Delta time; Skinning matrices...
+------ State variables copied to structure each frame (e.g., camera position and
+.      the list of meshes to render)
+------ Stores start/end timestamps for each stage (Game, Render, GPU, Flip)
+--- Add "HasFrameCompleted(FrameNumber)" equivalent; mostly useful for memory
+.   managers.
+------ Tagged heaps with "HasFrameCompleted" are also a good idea.
+--------- All data associated with a tag (e.g., "Game") is freed at once, not by
+.         individual pointers.
+
+- Fixed memory pool project settings (and similar settings)
+--- Select whether a fixed memory pool should be used for the project
+------ Disabled by default
+------ Configure a size (default: 512MB if enabled)
+------ Can the user configure this value? (Default: Yes)
+--------- Minimum size (default: the value set above)
+--------- Maximum size (default: unlimited)
+--- Fiber pool settings (default to Naughty Dog's settings)
+------ Small fiber stack size (default: 64KB)
+------ Large fiber stack size (default: 512KB)
+------ Small fiber pool count (default 128)
+------ Large fiber pool count (default 32)
+--- Which frame method to use (synchronous [default], or propagating)
+--- Separating TenshiRuntime.c into smaller parts that are linked against
+.   individually might make sense for some settings...
+
+- Hot Reload Support (Code)
+--- Export a dynamic library that an engine executable will reload
+--- Reloads only happen on a Sync() call (whether implicit or explicit)
+--- User state exists in a structure
+------ Need to save previous layout of structure as new layout might change
+------ Don't edit saved previous layout until new layout is applied
+--- Detect user code changes that would never be run (e.g., because they edit
+.   some initialization routine) unless the app is restarted.
+------ Ask if they want to restart the app. (With a "Remember My Choice" option)
+------ Inform user (e.g., screen overlay) when an ineffective change was
+.      presented, a new change altogether was applied, or whether the
+.      compilation failed.
+--- Changes to a structure won't matter because no user code should be in-flight
+.   at the point that Sync() applies the changes.
+--- The engine doesn't have to unload GPU-side resources or its own internal
+.   resources.
+------ A programmer could be in the middle of testing a level, decide that
+.      gravity is too high, or that an enemy's AI behavior could be improved,
+.      then make a change while the game is running, and have that change to the
+.      code reflected almost immediately.
+
+- Hot Reload Support (Assets)
+--- Making a change to any file on disk should have that change reflected in the
+.   game (by default if running in developer mode)
+------ Verify first by a timestamp having changed (try to ignore daylight
+.      savings)
+------ Verify second by checking whether the file size changed. (Early exit if
+.      the file size did change -- need to reload.)
+------ Verify third by comparing checksums. (We really want to avoid reloading
+.      resources like shaders...)
+--- System for this should be customizable in modules. "OnCheckChange,"
+.   "OnReload," etc. (Define asset types, and tell the runtime system which
+.   files affect which (loaded) assets.)
+--- Asset dependencies
+------ And in what way they're dependent.
+------ e.g., which assets require this texture?
+--------- Should the distribution for the game pack the texture even if there
+.         are no other uses?
+--------- Should the runtime system reload the texture even if it's not being
+.         used by any other assets?
+------ e.g., does this asset need to be "rebuilt" if that asset changes?

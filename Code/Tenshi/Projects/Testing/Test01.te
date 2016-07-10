@@ -1,0 +1,129 @@
+﻿global x = 1 + 2 + 3 + 4 + 5
+global y = 1 + 7
+
+rem Display the following text on screen
+"Hello, world! x = " + x + ", y = " + y
+
+if x <> y and y = 8
+	"[OK]"
+else
+	"[KO]"
+endif
+if x = y and y = 8
+	"[KO]"
+else
+	"[OK]"
+endif
+
+"This is a test" - "s"
+
+"A"*0
+"A"*1
+"A"*2
+"A"*4
+
+"/usr/" / "test"
+"/usr" / "test"
+
+""
+"Files in current directory:"
+find first
+repeat
+	"  " + getfiletypename$() + " <" + get filename$() + "> - " + get file date$() + " " + get file time$()
+until not find next()
+""
+
+make memblock 1, 28
+"Memblock exists? " + memblock exist( 1 )
+write memblock dword 1, 0, 100
+write memblock dword 1, 4, 200
+write memblock float 1, 8, 3.1415
+write memblock qword 1, 12, 9148125
+write memblock float64 1, 20, 3.141592
+"dword@0 = " + memblock dword( 1, 0 )
+"dword@4 = " + memblock dword( 1, 4 )
+"float@8 = " + memblock float( 1, 8 )
+"qword@12 = " + memblock qword( 1, 12 )
+"float64@20 = " + memblock float64( 1, 20 )
+delete memblock 1
+"Memblock exists now? " + memblock exist( 1 )
+
+"AppData$ = " + appdatadir$()
+"Rootname of AppData$    = " + get path rootname$( appdatadir$() )
+"Rootdir of AppData$     = " + get path rootdir$( appdatadir$() )
+"Directory of AppData$   = " + get path directory$( appdatadir$() )
+"Filename of AppData$    = " + get path filename$( appdatadir$() )
+"Basename of AppData$    = " + get path basename$( appdatadir$() )
+"Extension of AppData$   = " + get path extension$( appdatadir$() )
+"Parent path of AppData$ = " + get parent path$( appdatadir$() )
+
+"Test Filename           = " + set path filename$( appdatadir$() / "file.txt", "testing.txt" )
+"Test Basename           = " + set path basename$( appdatadir$() / "file.xml", "testing" )
+"Test Extension          = " + set path extension$( appdatadir$() / "file.ext", ".js" )
+
+make directory "data/test"
+
+open directory tree 1, "data"
+while read directory( 1 )
+	"  <" + get filename$( 1 ) + "> - " + get file date$( 1 ) + " " + get file time$( 1 )
+endwhile
+close directory 1
+
+local errcode as integer
+local r = open to read( 1, "filethatdoesntexist.txt", errcode )
+if r
+	"File was found"
+	close file 1
+else
+	"File not found; errcode=" + errcode
+endif
+
+open to write 1, "test.bin"
+write uint32 1, 54263
+write float32 1, 1.23
+close file 1
+
+local rd_a as uint32
+local rd_b as float
+
+open to read 1, "test.bin"
+read uint32 1, rd_a : "rd_a = " + rd_a
+read float32 1, rd_b : "rd_b = " + rd_b
+close file 1
+
+local myfile = open to read( "test.bin" )
+read be uint32 myfile, rd_a
+myfile = close file( myfile )
+
+"rd_a(BE) = " + rd_a
+
+"address of rd_a = " + &rd_a
+"address of getfiletypename$() = " + &getfiletypename$
+
+for i = 1 until 10
+	if i mod 2 = 0 then "" + i
+next
+
+dim myarr[5] as uint32
+myarr[0] = 1234//0xFACEBEEF
+myarr[1] = 5678//0xCAFEBABE
+myarr[2] = 9101//0xDEADC0DE
+myarr[3] = 1213//0x0B5E55ED
+myarr[4] = 1415//0xFFFEFDFC
+myarr[5] = 1617//0xABCDEF38 // yes, accessing index 5 is valid here
+for i = 0 to 5
+	"myarr[" + i + "] = " + myarr[ i ]
+next
+//undim myarr[]
+
+open to read 1, "this really doesn't exist..."
+
+type exampletype
+	x, y#, z$
+endtype
+
+function getfiletypename$()
+	local n = get file type()
+	if n = 0 then exitfunction "[Reg]"
+	if n = 1 then exitfunction "[Dir]"
+endfunction "[???]"

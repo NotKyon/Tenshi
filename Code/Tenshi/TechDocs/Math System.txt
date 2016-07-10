@@ -1,0 +1,129 @@
+All angles are given and returned in degrees.
+
+The following commands are from the original:
+
+- COS, SIN, TAN, ASIN, ATAN, ATANFULL, HCOS, HSIN, HTAN, SQRT, ABS, INT, EXP,
+  FLOOR, CEIL
+- CURVEVALUE, WRAPVALUE, NEWXVALUE, NEWYVALUE, NEWZVALUE, CURVEANGLE
+
+The following commands are extensions:
+
+- ANGLE(x1,y1, x2,y2)
+--- Returns the angle of the line between (x1,y1) and (x2,y2), in degrees. Lines
+.   oriented vertically upwards would measure as zero degrees.
+- PERCENT(numerator, denominator)
+--- Returns numerator/denominator*100
+- SIGN(val)
+--- Returns -1 if val is negative, +1 if val is positive, or 0 if it is zero.
+- BITSIGN(val)
+--- Returns -1 if val is negative, or +1 if val is zero or positive.
+- COPYSIGN(a,b)
+--- Copies the sign of 'b' into 'a'; effectively BITSIGN(b)*ABS(a)
+- HEAVISIDE(val)
+--- Returns 1 if val > 0 and 0 if val <= 0
+- FRAC(val)
+--- Returns the fractional part of a value. e.g., FRAC(2.34) returns 0.34.
+- RND(min,max)
+--- Same as RND(max) but with a minimum value. (The minimum is 0 by default.)
+--- RND(min,max) = RND( max - min ) + min
+- MIN(a, b)
+--- Returns the lesser of a and b.
+- MAX(a, b)
+--- Returns the greater of a and b.
+- CLAMP(a, min, max)
+--- Returns a if it's between min and max, or returns min if a is less than it,
+.   or max if a is greater than it.
+- SATURATE(a)
+--- Returns CLAMP(a, 0, 1)
+- DISTANCE(x1,y1, x2,y2)
+--- Returns the distance between (x1,y1) and (x2,y2)
+- DISTANCE(x1,y1,z1, x2,y2,z2)
+--- Returns the distance between (x1,y1,z1) and (x2,y2,z2)
+- LERP(a, b, t)
+--- Returns the linear interpolation of x to y based on the given time (0 to 1).
+--- LERP(x,y,t) = x + ( y - x )*t
+- CERP(a, b, c, d, t)
+--- Cubically interpolate between four values.
+- WRAP180(angle)
+--- Returns an angle between -180 and +180
+- ANGLEDELTA(a, b)
+--- Returns WRAP180( a - b )
+- DEGREES(radians)
+--- Converts radians to degrees
+- RADIANS(degrees)
+--- Converts degrees to radians
+- ROUND(val)
+--- Returns val rounded to the closest integer value
+
+From AxLibs/Math/Basic.hpp
+
+    /// Cubically interpolate between four values.
+    template< typename T, typename U >
+    inline T Cerp( const T &x, const T &y, const T &z, const T &w, const U &t )
+    {
+        const T a = ( w - z ) - ( x - y );
+        const T b = ( x - y ) - a;
+        const T c = z - x;
+        return t*( t*( t*a + b ) + c ) + y;
+    }
+    /// Round a value down
+    inline float Floor( float f )
+    {
+        if( ( FloatToUintBits( f ) & 0x801FFFFF ) > 0x80000000 ) {
+            return ( float )( ( int )f - 1 );
+        }
+
+        return ( float )( int )f;
+    }
+    /// Wrap an angle between 0 and 360.
+    inline float Wrap360( float angle )
+    {
+        // This simultaneously checks whether angle is above 360 or below 0
+        // 0x43B40000 is the integer bits representation 360.0f
+        if( FloatToUintBits( angle ) >= 0x43B40000 ) {
+            angle -= Floor( angle/360.0f )*360.0f;
+        }
+        
+        return angle;
+    }
+    /// Wrap an angle between -180 and 180.
+    inline float Wrap180( float angle )
+    {
+        angle = Wrap360( angle );
+        return angle > 180.0f ? angle - 360.0f : angle;
+    }
+    /// Calculate the delta between two angles.
+    ///
+    /// @return Angle between -180 and 180.
+    inline float AngleDelta( float a, float b )
+    {
+        return Wrap180( a - b );
+    }
+
+Implementations of various math functions
+
+    float CurveValue( float fDestination, float fCurrent, float fSpeed )
+    {
+        return fCurrent + ( fDestination - fCurrent )/Max( fSpeed, 1.0f );
+    }
+    float WrapValue( float fAngle )
+    {
+        return Wrap360( fAngle );
+    }
+    float NewXValue( float fCurrentX, float fAngle, float fStep )
+    {
+        return fCurrentX + Sin( fAngle )*fStep;
+    }
+    float NewYValue( float fCurrentY, float fAngle, float fStep )
+    {
+        return fCurrentY - Sin( fAngle )*fStep;
+    }
+    float NewZValue( float fCurrentZ, float fAngle, float fStep )
+    {
+        return fCurrentZ + Cos( fAngle )*fStep;
+    }
+    float CurveAngle( float fDestination, float fCurrent, float fSpeed )
+    {
+        // NOTE: Might need to Wrap360() fDestination and fCurrent
+        return Wrap360( fCurrent + AngleDelta( fDestination, fCurrent )/fSpeed );
+    }

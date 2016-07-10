@@ -1,0 +1,124 @@
+﻿#__TEST:LEXER
+#__TEST:expect-token punctuation ,
+#__TEST:expect-token punctuation ;
+#__TEST:expect-token punctuation :
+#__TEST:expect-token punctuation .
+#__TEST:expect-token punctuation +
+#__TEST:expect-token punctuation -
+#__TEST:expect-token punctuation *
+#__TEST:expect-token punctuation /
+#__TEST:expect-token punctuation %%
+#__TEST:expect-token punctuation ^
+#__TEST:expect-token punctuation <<
+#__TEST:expect-token punctuation >>
+#__TEST:expect-token punctuation ~<<
+#__TEST:expect-token punctuation ~>>
+#__TEST:expect-token punctuation ~
+#__TEST:expect-token punctuation &
+#__TEST:expect-token punctuation |
+#__TEST:expect-token punctuation =
+#__TEST:expect-token punctuation :=
+#__TEST:expect-token punctuation += -startline
+#__TEST:expect-token punctuation -=
+#__TEST:expect-token punctuation *=
+#__TEST:expect-token punctuation /=
+#__TEST:expect-token punctuation ^=
+#__TEST:expect-token punctuation ~<<=
+#__TEST:expect-token punctuation ~>>=
+#__TEST:expect-token punctuation <<=
+#__TEST:expect-token punctuation >>=
+#__TEST:expect-token punctuation &=
+#__TEST:expect-token punctuation |=
+#__TEST:expect-token punctuation ~=
+#__TEST:expect-token punctuation ==
+#__TEST:expect-token punctuation !=
+#__TEST:expect-token punctuation <>
+#__TEST:expect-token punctuation <
+#__TEST:expect-token punctuation >
+#__TEST:expect-token punctuation <=
+#__TEST:expect-token punctuation >=
+#__TEST:expect-token punctuation ~~
+#__TEST:expect-token punctuation ||
+#__TEST:expect-token punctuation &&
+#__TEST:expect-token punctuation !
+#__TEST:expect-token punctuation <<
+#__TEST:expect-token punctuation <
+#__TEST:expect-token punctuation >>
+#__TEST:expect-token punctuation >=
+#__TEST:expect-token punctuation %%
+#__TEST:expect-token number 0b1011001
+#__TEST:expect-token punctuation +
+#__TEST:expect-token punctuation +
+#__TEST:expect-token punctuation :
+#__TEST:expect-token punctuation =
+#__TEST:expect-token punctuation :
+#__TEST:expect-token punctuation :
+#__TEST:expect-token name Command1 +startline line:80
+#__TEST:expect-token punctuation : -startline line:80
+#__TEST:expect-token name Command2 +startline line:80
+#__TEST:expect-token none
+
+REM Delimiters
+, ; : .
+
+REM Basic arithmetic
++ - * / %% ^
+
+REM Bit arithmetic
+<< >> ~<< ~>> ~ & |
+
+REM Assignments
+= := += -= *= /= ^= ~<<= ~>>= <<= >>= &= |= ~=
+
+REM Comparisons
+== != <> < > <= >= ~~ || && !
+
+REM Miscellaneous testing
+<<< >>>= %%%1011001++ : = ::
+
+REM Line separation
+Command1 : Command2
+
+
+REMSTART
+
+	+       Add (l + r)
+	-       Subtract (l - r); Negate (-r)
+	*		Multiply (l * r); Pointer indirection (*r)
+	/		Divide (l / r); Append path (l$ / r$)
+	%%		Modulus (l %% r)
+	^		Power (l ^ r)
+	<<		Bitwise left-shift (l << r)
+	>>		Bitwise right-shift (l >> r)
+	~<<		Bitwise left-rotate (l ~<< r)
+	~>>		Bitwise right-rotate (l ~>> r)
+	=		Assignment (v = r); comparison (IF v = r...)
+	:=		Clarified assignment (v := r)
+	==		Clarified equivalence comparison (v == r)
+	+=		Assignment add (v += r)
+	-=		Assignment subtract (v -= r)
+	*=		Assignment multiply (v *= r)
+	/=		Assignment divide (v /= r)
+	^=		Assignment power (v ^= r)
+	~<<=	Assignment bitwise left-rotate (v ~<<= r)
+	~>>=	Assignment bitwise right-rotate (v ~>>= r)
+	<<=		Assignment bitwise left-shift (v <<= r)
+	>>=		Assignment bitwise right-shift (v >>= r)
+	&=		Assignment bitwise and (v &= r)
+	|=		Assignment bitwise or (v |= r)
+	~=		Assignment bitwise xor (v ~= r)
+	!		Logical not (!r)
+	<>		Not-equal comparison (l <> r) :: same as l != r
+	!=		Not-equal comparison (l != r) :: same as l <> r
+	<=		Less-equal comparison (l <= r)
+	>=		Greater-equal comparison (l >= r)
+	<		Less-than comparison (l < r)
+	>		Greater-than comparison (l > r)
+	~		Bitwise exclusive-or (l ~ r); Bitwise complement (~r)
+	&		Bitwise and (l & r); Address-of (&r)
+	|		Bitwise or (l | r)
+	~~		Logical exclusive-or (IF l ~~ r)
+	||		Logical inclusive-or (IF l || r)
+	&&		Logical and (IF l && r)
+
+REMEND

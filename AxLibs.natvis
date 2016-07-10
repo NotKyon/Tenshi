@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+	<!-- Copy this file into <Documents>/Visual Studio 2012/Visualizers -->
+
+	
+	<!-- Ax::String -->
+	<Type Name="Ax::String">
+		<DisplayString Condition="m_cStr == 0">Empty</DisplayString>
+		<DisplayString Condition="m_cStr &gt; m_cMax">Invalid</DisplayString>
+		<DisplayString Condition="m_cStr &lt;= m_cMax &amp;&amp; m_pStr != 0">{m_pStr,s}</DisplayString>
+		<StringView Condition="m_cStr &lt;= m_cMax &amp;&amp; m_pStr != 0">m_pStr,s</StringView>
+	</Type>
+	<Type Name="Ax::Str">
+		<DisplayString Condition="m_cStr == 0">Empty</DisplayString>
+		<DisplayString Condition="m_cStr &gt; 0 &amp;&amp; !m_pStr">Invalid</DisplayString>
+		<DisplayString Condition="m_cStr &gt; 0 &amp;&amp; m_pStr != 0">{m_pStr,m_cStr}</DisplayString>
+		<StringView Condition="m_cStr &gt; 0 &amp;&amp; m_pStr != 0">m_pStr,m_cStr</StringView>
+	</Type>
+
+	<!-- Ax::TArray -->
+	<Type Name="Ax::TArray&lt;*&gt;">
+		<DisplayString Condition="m_cArr == 0">Empty</DisplayString>
+		<DisplayString Condition="m_cArr &gt; m_cMax">Invalid</DisplayString>
+		<DisplayString Condition="m_cArr &lt;= m_cMax">Num={m_cArr}</DisplayString>
+		<Expand>
+			<Item Name="Num">m_cArr</Item>
+			<Item Name="Max">m_cMax</Item>
+			<ArrayItems>
+				<Size>m_cArr</Size>
+				<ValuePointer>m_pArr</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+	<Type Name="Ax::TArr&lt;*&gt;">
+		<DisplayString Condition="m_cArr == 0">Empty</DisplayString>
+		<DisplayString Condition="m_cArr &gt; 0 &amp;&amp; !m_pArr">Invalid</DisplayString>
+		<DisplayString Condition="m_cArr &gt; 0 &amp;&amp; m_pArr != 0">Num={m_cArr}</DisplayString>
+		<Expand>
+			<Item Name="Num">m_cArr</Item>
+			<ArrayItems>
+				<Size>m_cArr</Size>
+				<ValuePointer>m_pArr</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+	<Type Name="Ax::TMutArr&lt;*,*&gt;">
+		<DisplayString Condition="m_cArr == 0">Empty</DisplayString>
+		<DisplayString Condition="m_cArr &gt; m_cMax">Invalid</DisplayString>
+		<DisplayString Condition="m_cMax &gt; 0 &amp;&amp; !m_pArr">Invalid</DisplayString>
+		<DisplayString Condition="m_cArr &gt; 0 &amp;&amp; m_pArr != 0">Num={m_cArr}</DisplayString>
+		<Expand>
+			<Item Name="Num">m_cArr</Item>
+			<Item Name="Max">m_cMax</Item>
+			<Item Name="Gran">m_cGranularity</Item>
+			<ArrayItems>
+				<Size>m_cArr</Size>
+				<ValuePointer>m_pArr</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+
+	<!-- Ax::TIntrusiveList -->
+	<Type Name="Ax::TIntrusiveList&lt;*&gt;">
+		<DisplayString Condition="m_pHead==0">Empty</DisplayString>
+		<DisplayString Condition="m_pHead==m_pTail">One Item: {*m_pHead}</DisplayString>
+		<DisplayString Condition="m_pHead!=m_pTail">Head={m_pHead} Tail={m_pTail}</DisplayString>
+		<Expand>
+			<LinkedListItems>
+				<HeadPointer>m_pHead</HeadPointer>
+				<NextPointer>m_pNext</NextPointer>
+				<ValueNode>*m_pNode</ValueNode>
+			</LinkedListItems>
+		</Expand>
+	</Type>
+	<Type Name="Ax::TIntrList&lt;*&gt;">
+		<DisplayString Condition="m_pHead==0">Empty</DisplayString>
+		<DisplayString Condition="m_pHead==m_pTail">One Item: {*m_pHead}</DisplayString>
+		<DisplayString Condition="m_pHead!=m_pTail">Head={m_pHead} Tail={m_pTail}</DisplayString>
+		<Expand>
+			<LinkedListItems>
+				<HeadPointer>m_pHead</HeadPointer>
+				<NextPointer>m_pNext</NextPointer>
+				<ValueNode>*m_pNode</ValueNode>
+			</LinkedListItems>
+		</Expand>
+	</Type>
+
+	<!-- Ax::TList -->
+	<Type Name="Ax::TList&lt;*&gt;">
+		<DisplayString>{m_List}</DisplayString>
+		<Expand>
+			<LinkedListItems>
+				<HeadPointer>m_List.m_pHead</HeadPointer>
+				<NextPointer>m_pNext</NextPointer>
+				<ValueNode>*m_pNode</ValueNode>
+			</LinkedListItems>
+		</Expand>
+	</Type>
+	<Type Name="Ax::TList&lt;*,*&gt;">
+		<DisplayString>{m_list}</DisplayString>
+		<Expand>
+			<LinkedListItems>
+				<HeadPointer>m_list.m_pHead</HeadPointer>
+				<NextPointer>m_pNext</NextPointer>
+				<ValueNode>*m_pNode</ValueNode>
+			</LinkedListItems>
+		</Expand>
+	</Type>
+
+	<!-- Ax::Detail::TListIterator -->
+	<Type Name="Ax::Detail::TListIterator&lt;*&gt;">
+		<DisplayString Condition="!pLink || !pLink-&gt;m_pNode">Null</DisplayString>
+		<DisplayString Condition="pLink!=0 &amp;&amp; pLink-&gt;m_pNode!=0">{*pLink-&gt;m_pNode}</DisplayString>
+		<Expand>
+			<Item Name="Node">*pLink-&gt;m_pNode</Item>
+		</Expand>
+	</Type>
+	<Type Name="Ax::Detail::TListIter&lt;*&gt;">
+		<DisplayString Condition="!pLink || !pLink-&gt;m_pNode">Null</DisplayString>
+		<DisplayString Condition="pLink!=0 &amp;&amp; pLink-&gt;m_pNode!=0">{*pLink-&gt;m_pNode}</DisplayString>
+		<Expand>
+			<Item Name="Node">*pLink-&gt;m_pNode</Item>
+		</Expand>
+	</Type>
+
+	<!-- Ax::Parser::SToken -->
+	<Type Name="Ax::Parser::SToken">
+		<DisplayString Condition="cLength == 0">Empty</DisplayString>
+		<DisplayString Condition="cLength &gt; 0">{(&amp;pSource-&gt;m_Text.m_pStr[uOffset]),[cLength]s} ({Type})</DisplayString>
+		<StringView Condition="cLength &gt; 0">(&amp;pSource-&gt;m_Text.m_pStr[uOffset]),[cLength]s</StringView>
+		<Expand>
+			<Item Name="Text">&amp;pSource-&gt;m_Text.m_pStr[uOffset],[cLength]s</Item>
+			<Item Name="Type">Type</Item>
+			<Item Name="Subtype:Comment" Condition="Type==Ax::Parser::ETokenType::Comment">CommentType</Item>
+			<Item Name="Subtype:Name" Condition="Type==Ax::Parser::ETokenType::Name">NameType</Item>
+			<Item Name="Subtype:Number" Condition="Type==Ax::Parser::ETokenType::Number">NumberType</Item>
+			<Item Name="Subtype:String" Condition="Type==Ax::Parser::ETokenType::String">StringType</Item>
+			<Item Name="Qualifier" Condition="Type==Ax::Parser::ETokenType::Number">Qualifier</Item>
+			<Item Name="Offset">uOffset</Item>
+			<Item Name="Length">cLength</Item>
+			<Item Name="Keyword" Condition="pKeyword!=0">pKeyword->pszName,su</Item>
+			<Item Name="Literal" Condition="Type==Ax::Parser::ETokenType::Number &amp;&amp; Subtype==Ax::Parser::ENumberTokenType::Integer">(*(signed __int64*)&amp;uLiteral)</Item>
+			<Item Name="Literal" Condition="Type==Ax::Parser::ETokenType::Number &amp;&amp; Subtype==Ax::Parser::ENumberTokenType::Real">(*(double*)&amp;uLiteral)</Item>
+			<Item Name="Source">*pSource</Item>
+		</Expand>
+	</Type>
+  
+</AutoVisualizer>

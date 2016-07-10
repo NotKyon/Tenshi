@@ -1,0 +1,25 @@
+#
+# This is a project file
+#
+
+# Specify the name of the project
+Name Test01
+
+# Select the target type:
+#
+# - Executable
+# - Application
+# - StaticLibrary
+# - DynamicLibrary
+# - Pipeline
+# - Editor
+# - Game
+Type Executable
+
+# Set the output file
+Target "Test 01"
+
+# Source files
++ASMList
++IRList
+Compile Test01.te

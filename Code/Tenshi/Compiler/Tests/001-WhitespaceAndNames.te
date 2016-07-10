@@ -1,0 +1,40 @@
+﻿#__TEST:LEXER
+#__TEST:expect-token name ExpectToken1 line:30 +startline
+#__TEST:expect-token name ExpectToken2 line:36 +startline
+#__TEST:expect-token name 水ＷＡＴＥＲ line:38 +startline
+#__TEST:add-keyword "make cube"
+#__TEST:expect-token name "Make Cube" line:40 +keyword +startline
+#__TEST:expect-token name ExpectToken3 line:40 -startline
+#__TEST:expect-token none
+
+// Single-line comment (1)
+` Single-line comment (2)
+REM Single-line comment (3)
+
+/* Multi-line comment */
+/*
+	Mullti-line comment (2)
+*/
+/*
+	/*
+		Nested
+	*/
+	Multi-line Comment (3)
+*/
+REMSTART
+	Multi-line Comment (4)
+	This comment does not nest
+REMEND
+
+REM REMSTART Single-line comment (4)
+ExpectToken1
+REM REMEND
+
+REMSTART
+	Multi-line Comment (5)
+REM REMEND
+ExpectToken2
+
+水ＷＡＴＥＲ
+
+Make Cube ExpectToken3

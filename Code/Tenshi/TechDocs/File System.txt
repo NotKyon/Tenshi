@@ -1,0 +1,631 @@
+The following commands are from the original:
+
+	DIR
+	DRIVELIST
+	SET DIR Path$
+	MAKE FILE Filename$
+	MAKE DIRECTORY Dirname$
+	DELETE FILE Filename$
+	DELETE DIRECTORY Dirname$
+	COPY FILE SourceFilename$, DestinationFilename$
+	MOVE FILE SourceFilename$, DestinationFilename$
+	RENAME FILE SourceFilename$, DestinationFilename$
+	EXECUTE FILE Filename$, Commandline$, Directory$
+	FIND FIRST
+	FIND NEXT
+	CD Path$
+
+	OPEN TO READ FileNumber, Filename$
+	OPEN TO WRITE FileNumber, Filename$
+	CLOSE FILE FileNumber
+	READ BYTE FileNumber, Variable
+	READ FILE FileNumber, Variable
+	READ DIRBLOCK FileNumber, FolderToRead$ ;; Extracts a directory from a pack file
+	READ FILEBLOCK FileNumber, FilenameToRead$ ;; Extracts a file from a pack file
+	READ FLOAT FileNumber, Variable#
+	READ LONG FileNumber, Int32Variable
+	READ MEMBLOCK FileNumber, MemblockNumber
+	READ STRING FileNumber, Variable$
+	READ WORD FileNumber, Variable
+	WRITE WORD FileNumber, Variable
+	WRITE BYTE FileNumber, Variable
+	WRITE LONG FileNumber, Variable
+	WRITE DIRBLOCK FileNumber, FolderToCreate$
+	WRITE FILEBLOCK FileNumber, FilenameToCreate$
+	WRITE FLOAT FileNumber, Variable#
+	WRITE FILE FileNumber, Variable
+	WRITE MEMBLOCK FileNumber, MemblockNumber
+	WRITE STRING FileNumber, String$
+	SKIP BYTES FileNumber, BytesToSkip
+	WRITE BYTE TO FILE Filename, Position, ByteValue
+	READ BYTE FROM FILE( Filename, Position ) -> Integer
+
+	PERFORM CHECKLIST FOR DRIVES
+	PERFORM CHECKLIST FOR FILES
+	MAKE MEMBLOCK FROM FILE MemblockNumber, FileNumber
+	MAKE FILE FROM MEMBLOCK FileNumber, MemblockNumber
+
+	FILE EXIST( Filename$ ) -> Integer
+	PATH EXIST( Pathname$ ) -> Integer
+	GET DIR$() -> String
+	APPNAME$() -> String
+	WINDIR$() -> String
+	MYDOCDIR$() -> String
+
+	FILE END( FileNumber ) -> Integer
+	FILE OPEN( FileNumber ) -> Integer
+	FILE SIZE( Filename$ ) -> Integer
+	GET FILE DATE$() -> String
+	GET FILE NAME$() -> String
+	GET FILE TYPE() -> Integer
+	GET FILE CREATION$() -> String
+	CAN MAKE FILE( Filename$ ) -> Integer
+
+	EXECUTABLE RUNNING( ExecutableID ) -> Integer
+	EXECUTE EXECUTABLE( Filename$, Commandline$, Directory$ ) -> Dword
+	STOP EXECUTABLE ExecutableID
+
+	WRITE FILEMAP STRING FilemapName$, String$
+	WRITE FILEMAP VALUE FilemapName$, Value
+	READ FILEMAP STRING( FilemapName$ ) -> String
+	READ FILEMAP VALUE( FilemapName$ ) -> Dword
+
+The "EXECUTABLE" and "FILEMAP" command-sets are similar to what Kune offers:
+
+	See kuneExtensions.hpp.
+
+However, such functionality belongs in "API.System," not "API.FileSystem," which
+is equivalent to where that functionality exists in the original.
+
+
+[[==File Management==]]
+CD( Dirname$ [, Ref ErrorCode ] ) -> Boolean
+SET DIR( Dirname$ [, Ref ErrorCode ] ) -> Boolean
+Set the current working directory. The versions without an error code reference
+will throw an error upon failure.
+
+ENTER DIR( Dirname$ [, Ref ErrorCode ] ) -> Boolean
+Push the current working directory to a stack, then set the current working
+directory to Dirname$. The versions without an error code reference will throw
+an error upon failure.
+
+LEAVE DIR( [ Ref ErrorCode ] ) -> Boolean
+Pop the working directory from the stack if the stack is non-empty. It is not an
+error to call LEAVE DIR() without an item on the stack. The versions without an
+error code reference will throw an error upon failure to change the directory.
+
+GET DIR$() -> String
+Retrieves the current working directory as an absolute path.
+
+GET FILE UNIQUE ID( Path$ ) -> UInt64
+Retrieves a unique file ID from the given path. The ID is guaranteed to be
+unique within the file system it resides in.
+
+FILE EXIST( Path$ ) -> Boolean
+Returns true if the given path exists and refers to a file that can be opened
+with any of the OPEN FILE commands.
+
+PATH EXIST( Path$ ) -> Boolean
+Returns true if the given path exists, ignoring the type of the file the path
+refers to. (Can be a file, directory, character device, etc.)
+
+IS REGULAR FILE( Path$ ) -> Boolean
+FILE IS REGULAR( [ DirNumber ] ) -> Boolean
+Returns true if the given path exists and refers to a regular file.
+
+IS DIRECTORY( Path$ ) -> Boolean
+FILE IS DIRECTORY( [ DirNumber ] ) -> Boolean
+Returns true if the given path exists and refers to a directory.
+
+IS DEVICE( Path$ ) -> Boolean
+FILE IS DEVICE( [ DirNumber ] ) -> Boolean
+Returns true if the given path exists and refers to either a character device or
+a block device.
+
+IS CHARACTER DEVICE( Path$ ) -> Boolean
+FILE IS CHARACTER DEVICE( [ DirNumber ] ) -> Boolean
+Returns true if the given path exists and refers to a character device.
+
+IS BLOCK DEVICE( Path$ ) -> Boolean
+FILE IS BLOCK DEVICE( [ DirNumber ] ) -> Boolean
+Returns true if the given path exists and refers to a block device.
+
+IS PIPE( Path$ ) -> Boolean
+FILE IS PIPE( [ DirNumber ] ) -> Boolean
+Returns true if the given path exists and refers to a FIFO/pipe.
+
+IS SOCKET( Path$ ) -> Boolean
+FILE IS SOCKET( [ DirNumber ] ) -> Boolean
+Returns true if the given path exists and refers to a socket.
+
+MAKE FILE Filename$
+MAKE FILE( Filename$, Ref ErrorCode ) -> Boolean
+Creates a blank file.
+
+DELETE FILE Filename$
+Removes the given file.
+
+COPY FILE SourceFilename$, DestinationFilename$ [, Flags]
+COPY FILE( SourceFilename$, DestinationFilename$ [, Flags], Ref ErrorCode ) -> Boolean
+Copy SourceFilename$ to DestinationFilename$.
+
+MOVE FILE SourceFilename$, DestinationFilename$ [, Flags]
+MOVE FILE( SourceFilename$, DestinationFilename$ [, Flags], Ref ErrorCode ) -> Boolean
+Move SourceFilename$ to DestinationFilename$.
+
+RENAME FILE SourceFilename$, DestinationFilename$ [, Flags]
+RENAME FILE( SourceFilename$, DestinationFilename$ [, Flags ], Ref ErrorCode ) -> Boolean
+Rename SourceFilename$ to DestinationFilename$. This is a move operation with
+slightly different semantics:
+
+* If DestinationFilename$ is a relative path, then it is considered relative to
+` SourceFilename$.
+
+[Flags for COPY/MOVE/RENAME FILE]
+These are the same as C++ N3940's copy_options (See [enum.copy_options]).
+
+Options controlling effects for existing target files:
+
+&0   none               (Default) Error; file already exists.
+&1   skip_existing      Do not overwrite existing  file, do not report an error.
+&2   overwrite_existing Overwrite the existing file.
+&4   update_existing    Overwrite the existing file if it is older than the
+`                       replacement file.
+
+Options controlling effects for sub-directories:
+
+&0   none               (Default) Do not copy sub-directories.
+&8   recursive          Recursively copy sub-directories and their contents.
+
+Options controlling effects for symbolic links:
+
+&0   none               (Default) Follow symbolic links.
+&16  copy_symlinks      Copy symbolic links as symbolic links rather than
+`                       copying the files that they point to.
+&32  skip_symlinks      Ignore symbolic links.
+
+Options controlling effects for the type of copy operation:
+
+&0   none               (Default) Copy content.
+&64  directories_only   Copy directory structure only, do not copy non-directory
+`                       files.
+&128 create_symlinks    Make symbolic links instead of copies of files.
+&256 create_hard_links  Make hard links instead of copies of files.
+
+[ TODO: Define the actual flags and constants used. ]
+
+
+[[==Paths==]]
+APPDIR$() -> String
+Retrieves the absolute path to the directory the application lives in.
+
+HOMEDIR$() -> String
+Retrieves the absolute path to the current user's home directory.
+
+WINDIR$() -> String
+Retrieves the absolute path to the Windows directory. (MS specific.)
+
+MYDOCDIR$() -> String
+Retrieves the absolute path to the user's Documents directory.
+
+APPDATADIR$() -> String
+Retrieves the absolute path to "%APPDATA%" (on Windows) or some platform-
+specific equivalent for where per-app data should reside. e.g.,
+
+	C:\Users\<username>\AppData\Roaming\
+
+TEMPDIR$() -> String
+Retrieves the absolute path to "%TEMP%" (on Windows) or some platform-specific
+equivalent. e.g.,
+
+	C:\Users\<username>\AppData\Local\Temp\
+
+ABSOLUTE PATH$( RelativePath$ [, Base$ ] ) -> String
+Convert the given relative or absolute path to an absolute path. If Base$ is
+passed then this considers the path to be relative from there.
+
+RELATIVE PATH$( AbsolutePath$ [, Base$ ] ) -> String
+Convert the given absolute path to a path relative to the current working
+directory. If Base$ is passed then this will make the path relative from there.
+
+PATH IS ABSOLUTE( Path$ ) -> Boolean
+Returns true if the given path is absolute.
+
+PATH IS RELATIVE( Path$ ) -> Boolean
+Returns true if the given path is relative.
+
+GET PATH ROOTNAME$( Path$ ) -> String
+If this is an absolute path then this returns the starting location. e.g., C:
+on Windows, or \\SomeNetworkPath. The starting location might just be a single
+directory separator, even on Windows. In that case this returns an empty string.
+
+GET PATH ROOTDIR$() -> String
+If this is an absolute path then this returns the starting location plus the
+directory separator. e.g., C:\ on Windows, or \\SomeNetworkPath\.
+
+GET PATH DIRECTORY$( Path$ ) -> String
+Returns the directory part of a given path. (Everything except the file-name.)
+
+GET PATH FILENAME$( Path$ ) -> String
+Returns the filename part of a given path.
+
+GET PATH BASENAME$( Path$ ) -> String
+Returns the filename part of the given path, without the extension.
+
+GET PATH EXTENSION$( Path$ ) -> String
+Returns the extension part of the filename part of a given path.
+
+GET PARENT PATH$( Path$ ) -> String
+Returns the path containing the given path.
+
+PATH HAS ROOTNAME( Path$ ) -> Boolean
+Returns true if the path has a root-name. (See GET PATH ROOTNAME$().)
+
+PATH HAS ROOTDIR( Path$ ) -> Boolean
+Returns true if the path has a root-directory. (See GET PATH ROOTDIR$().)
+
+PATH HAS DIRECTORY( Path$ ) -> Boolean
+Returns true if the path has a directory.
+
+PATH HAS FILENAME( Path$ ) -> Boolean
+Returns true if the path has a file-name.
+
+PATH HAS BASENAME( Path$ ) -> Boolean
+Returns true if the path has a file-name where the part without an extension is
+non-empty.
+
+PATH HAS EXTENSION( Path$ ) -> Boolean
+Returns true if the path has a file-name with an extension.
+
+SET PATH FILENAME$( Path$, Filename$ ) -> String
+Change the file-name part of a path (if it exists) or adds it (if it doesn't).
+
+SET PATH EXTENSION$( Path$, Extension$ ) -> String
+Changes the extension part of the file-name part of a path (if it exists) or
+adds it (if it doesn't).
+
+
+[[==File I/O==]]
+OPEN TO READ FileNumber, Filename$
+OPEN TO READ( FileNumber, Filename$, Ref ErrorCode ) -> Boolean
+OPEN TO READ( Filename$ [, Ref ErrorCode ] ) -> FileNumber As Integer
+Opens the file for reading (binary mode). The versions without an error code
+reference will throw an error upon failure.
+
+OPEN TO WRITE FileNumber, Filename$
+OPEN TO WRITE( FileNumber, Filename$, Ref ErrorCode ) -> Boolean
+OPEN TO WRITE( Filename$ [, Ref ErrorCode ] ) -> FileNumber As Integer
+Opens the file for writing (binary mode). The versions without an error code
+reference will throw an error upon failure.
+
+OPEN TO APPEND FileNumber, Filename$
+OPEN TO APPEND( FileNumber, Filename$, Ref ErrorCode ) -> Boolean
+OPEN TO APPEND( Filename$ [, Ref ErrorCode ] ) -> FileNumber As Integer
+Opens the file for appending (binary mode). The file does not need to exist. The
+versions without an error code reference will throw an error upon failure.
+
+OPEN FILE FileNumber, Filename$ [, Flags]
+OPEN FILE( FileNumber, Filename$ [, Flags ], Ref ErrorCode ) -> Boolean
+OPEN FILE( Filename$ [, Flags ] [, Ref ErrorCode ] ) -> FileNumber As Integer
+Opens the file for reading and writing. The optional set of flags control
+behavior. The versions without an error code reference will throw an error upon
+failure.
+
+CLOSE FILE( FileNumber ) -> Zero
+Closes the given file. Returns the value zero.
+
+WRITE FROM PTR( FileNumber, Address, NumberOfBytes [, Ref ErrorCode ] ) -> Boolean
+Writes NumberOfBytes amount of data from the given address. The version without
+an error code reference will throw an error upon failure.
+
+READ TO PTR( FileNumber, Address, NumberOfBytes [, Ref ErrorCode ] ) -> Boolean
+Reads NumberOfBytes amount of data into the given address. The version without
+an error code reference will throw an error upon failure.
+
+WRITE INT8( FileNumber, Value [, Ref ErrorCode ] ) -> Boolean
+WRITE INT16( FileNumber, Value [, Ref ErrorCode ] ) -> Boolean
+WRITE INT32( FileNumber, Value [, Ref ErrorCode ] ) -> Boolean
+WRITE INT64( FileNumber, Value [, Ref ErrorCode ] ) -> Boolean
+WRITE UINT8( FileNumber, Value [, Ref ErrorCode ] ) -> Boolean
+WRITE UINT16( FileNumber, Value [, Ref ErrorCode ] ) -> Boolean
+WRITE UINT32( FileNumber, Value [, Ref ErrorCode ] ) -> Boolean
+WRITE UINT64( FileNumber, Value [, Ref ErrorCode ] ) -> Boolean
+WRITE FLOAT16( FileNumber, Value# [, Ref ErrorCode ] ) -> Boolean
+WRITE FLOAT32( FileNumber, Value# [, Ref ErrorCode ] ) -> Boolean
+WRITE FLOAT64( FileNumber, Value# [, Ref ErrorCode ] ) -> Boolean
+Writes the value to the file in the native byte order. The versions without an
+error code reference will throw an error upon failure.
+
+WRITE BE INT16( FileNumber, Value [, Ref ErrorCode ] ) -> Boolean
+WRITE BE INT32( FileNumber, Value [, Ref ErrorCode ] ) -> Boolean
+WRITE BE INT64( FileNumber, Value [, Ref ErrorCode ] ) -> Boolean
+WRITE BE UINT16( FileNumber, Value [, Ref ErrorCode ] ) -> Boolean
+WRITE BE UINT32( FileNumber, Value [, Ref ErrorCode ] ) -> Boolean
+WRITE BE UINT64( FileNumber, Value [, Ref ErrorCode ] ) -> Boolean
+WRITE BE FLOAT16( FileNumber, Value# [, Ref ErrorCode ] ) -> Boolean
+WRITE BE FLOAT32( FileNumber, Value# [, Ref ErrorCode ] ) -> Boolean
+WRITE BE FLOAT64( FileNumber, Value# [, Ref ErrorCode ] ) -> Boolean
+Same as the normal WRITE functions, but will swap the bytes if the native order
+of the machine is not big Endian.
+
+WRITE LE INT16( FileNumber, Value [, Ref ErrorCode ] ) -> Boolean
+WRITE LE INT32( FileNumber, Value [, Ref ErrorCode ] ) -> Boolean
+WRITE LE INT64( FileNumber, Value [, Ref ErrorCode ] ) -> Boolean
+WRITE LE UINT16( FileNumber, Value [, Ref ErrorCode ] ) -> Boolean
+WRITE LE UINT32( FileNumber, Value [, Ref ErrorCode ] ) -> Boolean
+WRITE LE UINT64( FileNumber, Value [, Ref ErrorCode ] ) -> Boolean
+WRITE LE FLOAT16( FileNumber, Value# [, Ref ErrorCode ] ) -> Boolean
+WRITE LE FLOAT32( FileNumber, Value# [, Ref ErrorCode ] ) -> Boolean
+WRITE LE FLOAT64( FileNumber, Value# [, Ref ErrorCode ] ) -> Boolean
+Same as the normal WRITE functions, but will swap the bytes if the native order
+of the machine is not little Endian.
+
+WRITE STRING BYTES( FileNumber, String$ [, Ref ErrorCode ] )
+WRITE STRING BYTES( FileNumber, String$, BeginBytePos, EndBytePos [, Ref ErrorCode ] ) -> Boolean
+Writes the bytes of a string to the file. If BeginBytePos and EndBytePos are
+passed then the they reference a range in String$. (EndBytePos represents one
+past the end of the range.) If BeginBytePos is greater than EndBytePos then the
+string is written in reverse order. If a negative value is passed for either of
+the byte positions then the value should be represented as a "distance from one
+past the NUL terminator of the string." For example, 0 to -1 represents the full
+range of the string. The versions of this function without an error code
+reference will throw an error upon failure.
+
+READ INT8( FileNumber, Ref Value [, Ref ErrorCode ] ) -> Boolean
+READ INT16( FileNumber, Ref Value [, Ref ErrorCode ] ) -> Boolean
+READ INT32( FileNumber, Ref Value [, Ref ErrorCode ] ) -> Boolean
+READ INT64( FileNumber, Ref Value [, Ref ErrorCode ] ) -> Boolean
+READ UINT8( FileNumber, Ref Value [, Ref ErrorCode ] ) -> Boolean
+READ UINT16( FileNumber, Ref Value [, Ref ErrorCode ] ) -> Boolean
+READ UINT32( FileNumber, Ref Value [, Ref ErrorCode ] ) -> Boolean
+READ UINT64( FileNumber, Ref Value [, Ref ErrorCode ] ) -> Boolean
+READ FLOAT16( FileNumber, Ref Value# [, Ref ErrorCode ] ) -> Boolean
+READ FLOAT32( FileNumber, Ref Value# [, Ref ErrorCode ] ) -> Boolean
+READ FLOAT64( FileNumber, Ref Value# [, Ref ErrorCode ] ) -> Boolean
+Reads the value from the given file in native byte order. The versions without
+an error code reference will throw an error upon failure.
+
+READ BE INT16( FileNumber, Ref Value [, Ref ErrorCode ] ) -> Boolean
+READ BE INT32( FileNumber, Ref Value [, Ref ErrorCode ] ) -> Boolean
+READ BE INT64( FileNumber, Ref Value [, Ref ErrorCode ] ) -> Boolean
+READ BE UINT16( FileNumber, Ref Value [, Ref ErrorCode ] ) -> Boolean
+READ BE UINT32( FileNumber, Ref Value [, Ref ErrorCode ] ) -> Boolean
+READ BE UINT64( FileNumber, Ref Value [, Ref ErrorCode ] ) -> Boolean
+READ BE FLOAT16( FileNumber, Ref Value# [, Ref ErrorCode ] ) -> Boolean
+READ BE FLOAT32( FileNumber, Ref Value# [, Ref ErrorCode ] ) -> Boolean
+READ BE FLOAT64( FileNumber, Ref Value# [, Ref ErrorCode ] ) -> Boolean
+Reads the value from the given file in Big Endian byte order. The versions
+without an error code reference will throw an error upon failure.
+
+READ LE INT16( FileNumber, Ref Value [, Ref ErrorCode ] ) -> Boolean
+READ LE INT32( FileNumber, Ref Value [, Ref ErrorCode ] ) -> Boolean
+READ LE INT64( FileNumber, Ref Value [, Ref ErrorCode ] ) -> Boolean
+READ LE UINT16( FileNumber, Ref Value [, Ref ErrorCode ] ) -> Boolean
+READ LE UINT32( FileNumber, Ref Value [, Ref ErrorCode ] ) -> Boolean
+READ LE UINT64( FileNumber, Ref Value [, Ref ErrorCode ] ) -> Boolean
+READ LE FLOAT16( FileNumber, Ref Value# [, Ref ErrorCode ] ) -> Boolean
+READ LE FLOAT32( FileNumber, Ref Value# [, Ref ErrorCode ] ) -> Boolean
+READ LE FLOAT64( FileNumber, Ref Value# [, Ref ErrorCode ] ) -> Boolean
+Reads the value from the given file in Little Endian byte order. The versions
+without an error code reference will throw an error upon failure.
+
+SKIP BYTES FileNumber, Distance
+SKIP BYTES( FileNumber, Distance, Ref ErrorCode ) -> Boolean
+Move forward or backward in the file (relative to the file's current position)
+by the given number of bytes. The version without the error code reference will
+throw an error if it fails.
+
+SET FILE POSITION FileNumber, BytePos
+SET FILE POSITION( FileNumber, BytePos, Ref ErrorCode ) -> Boolean
+Move the file to the specific position specified.
+
+GET FILE POSITION( FileNumber ) -> UInt64
+Retrieves the current position of the file.
+
+WRITE MEMBLOCK( FileNumber, MemblockNumber [, Ref ErrorCode ] ) -> Boolean
+Writes the given memblock to the file. The memblock must not reference data in
+excess of 2GB. The version without the error code reference will throw an error
+upon failure.
+
+READ MEMBLOCK( FileNumber, MemblockNumber [, Ref ErrorCode ] ) -> Boolean
+READ MEMBLOCK( FileNumber [, Ref ErrorCode ] ) -> MemblockNumber As Integer
+Reads the memblock from the file. The memblock ID passed cannot exist yet. The
+version without the error code reference will throw an error upon failure.
+
+
+[[==Directories==]]
+MAKE DIRECTORY( Dirname$ [, Ref ErrorCode ] ) -> Boolean
+Creates the given directory path, creating all subdirectories as necessary.
+
+The version taking an error code also returns a boolean indicating whether it
+succeeded or failed. The version without an error code will throw an error upon
+failure.
+
+DELETE DIRECTORY( Dirname$ [, Ref ErrorCode ] ) -> Boolean
+Deletes the given directory, including all files and subdirectories within it.
+
+The version taking an error code also returns a boolean indicating whether it
+succeeded or failed. The version without an error code will throw an error upon
+failure.
+
+OPEN DIRECTORY DirNumber, DirName$
+OPEN DIRECTORY( DirNumber, DirName$, Ref ErrorCode ) -> Boolean
+OPEN DIRECTORY( DirName$ [, Ref ErrorCode ] ) -> DirNumber As Integer
+Opens the given directory.
+
+OPEN DIRECTORY TREE DirNumber, DirName$
+OPEN DIRECTORY TREE( DirNumber, DirName$, Ref ErrorCode ) -> Boolean
+OPEN DIRECTORY TREE( DirName$ [, Ref ErrorCode ] ) -> DirNumber As Integer
+Opens the given directory, recursively.
+
+CLOSE DIRECTORY DirNumber
+Closes the directory.
+
+IS DIRECTORY OPEN( DirNumber ) -> Boolean
+Returns true if the given directory number is in use.
+
+SET DIRECTORY FILTER DirNumber, Extensions$
+Tell the given directory to only show files that use the given (semicolon-
+delimited) list of extensions. (e.g., "txt;asc;log" or "c;cc;cpp;cxx;c++")
+
+GET DIRECTORY FILTER$( DirNumber ) -> String
+Retrieve the currently applied directory filter.
+
+RESET DIRECTORY DirNumber
+Reset the directory to start reporting files from the beginning again.
+
+DIRECTORY END( DirNumber ) -> Boolean
+Returns true if the directory has no more entries to read.
+
+READ DIRECTORY( DirNumber ) -> Boolean
+Returns true if the directory was able to be read from.
+
+GET FILE NAME$( [ DirNumber ] ) -> String
+Returns the name of the current entry, relative to the opened directory.
+
+GET FILE TYPE( [ DirNumber ] ) -> Integer
+Returns 0 if the current entry is a file, 1 if it's a directory, or -1 if it's
+invalid.
+
+GET FILE DATE$( [ DirNumber ] ) -> String
+Returns the string representation of the date the file was last modified.
+
+GET FILE TIME$( [ DirNumber ] ) -> String
+Returns the string representation of the time the file was last modified.
+
+GET FILE CREATION$( [ DirNumber ] ) -> String
+Returns the string representation of the date the file was created.
+
+GET FILE CREATION TIME$( [ DirNumber ] ) -> String
+Returns the string representation of the time the file was created.
+
+GET FILE MODIFIED TIMESTAMP( [ DirNumber ] ) -> UInt64
+Returns when the file was last modified as a proper time-stamp.
+
+GET FILE CREATED TIMESTAMP( [ DirNumber ] ) -> UInt64
+Returns when the file was created as a proper time-stamp.
+
+FIND FIRST() -> Boolean
+Opens the current working directory and sets the current entry to the first
+entry found.
+
+FIND NEXT() -> Boolean
+Uses the directory opened by FIND FIRST() to grab the next entry (returning true
+on success). If it fails to do so then it closes the directory, then returns
+false.
+
+
+[[==File Loading/Saving==]]
+LOAD TEXT$( Filename$ [, Ref ErrorCode ] ) -> String
+Opens the file, detects its Unicode encoding, then converts it to a UTF-8
+string. The version without the error code reference will throw an error upon
+failure.
+
+SAVE TEXT$( Filename$, Text$ [, Encoding [, Ref ErrorCode ] ] ) -> Boolean
+Writes the text to the given filename. An optional encoding can be used. The
+version without the error code reference will throw an error upon failure.
+
+MAKE MEMBLOCK FROM FILE MemblockNumber, FileNumber
+MAKE MEMBLOCK FROM FILE( FileNumber ) -> MemblockNumber As Integer
+MAKE MEMBLOCK FROM FILE MemblockNumber, Filename$
+MAKE MEMBLOCK FROM FILE( Filename$ ) -> MemblockNumber As Integer
+Creates a memblock from the given file.
+
+MAKE FILE FROM MEMBLOCK FileNumber, MemblockNumber
+MAKE FILE FROM MEMBLOCK Filename$, MemblockNumber
+Writes the file from the given memblock.
+
+TODO: ErrorCode versions of the above.
+
+
+[[==Streaming==]]
+TODO: Merge this with the basic VFS ideas.
+
+MAKE STREAM TYPE StreamTypeNumber
+MAKE STREAM TYPE() -> StreamTypeNumber As Integer
+Creates an empty stream type -- needed for operating on custom streams.
+
+DELETE STREAM TYPE StreamTypeNumber
+Deletes the given stream type and invalidates all open files associated with it.
+
+STREAM TYPE EXIST( StreamTypeNumber ) -> Boolean
+Determine whether the given stream type number is in use.
+
+SET STREAM WRITER StreamTypeNumber, FuncPtr Writer(FileNumber,DataPtr,DataSize) As Boolean
+SET STREAM READER StreamTypeNumber, FuncPtr Reader(FileNumber,DataPtr,DataSize) As Boolean
+SET STREAM SEEKER StreamTypeNumber, FuncPtr Seeker(FileNumber,RelPosition,RelTo) As Boolean
+SET STREAM TELLER StreamTypeNumber, FuncPtr Teller(FileNumber) As UInt64
+SET STREAM IS END StreamTypeNumber, FuncPtr IsEnd(FileNumber) As Boolean
+Set the basic callbacks for a stream type.
+
+(And "Get" equivalents for the above.)
+
+GET FILE STREAM TYPE( FileNumber ) -> StreamNumber As Integer
+Retrieves the stream type from an open file.
+
+
+[[==Pipes==]]
+MAKE PIPE PipeNumber
+MAKE PIPE() -> PipeNumber As Integer
+Create a pipe (holds a read/write file number).
+
+MAKE PIPE PipeNumber, Name$
+MAKE PIPE( Name$ ) -> PipeNumber As Integer
+Create a named pipe for read/write. The pipe name selected is platform-specific.
+
+MAKE PIPE TO READ PipeNumber, Name$
+MAKE PIPE TO READ( Name$ ) -> PipeNumber As Integer
+Create a named pipe for reading.
+
+MAKE PIPE TO WRITE PipeNumber, Name$
+MAKE PIPE TO WRITE( Name$ ) -> PipeNumber As integer
+Create a named pipe for writing.
+
+MAKE MESSAGE PIPE PipeNumber, Name$
+MAKE MESSAGE PIPE( Name$ ) -> PipeNumber As Integer
+Create a named message pipe. Message pipes essentially chain their reads/writes
+as segmented operations. For example, if you write "Hello," first, then "world!"
+second, it would take two read operations (at least) to get the whole message,
+with the first operation receiving only "Hello," and the second receiving the
+remaining "world!"
+
+MAKE MESSAGE PIPE TO READ PipeNumber, Name$
+MAKE MESSAGE PIPE TO READ( Name$ ) -> PipeNumber As Integer
+Create a named message pipe for reading.
+
+MAKE MESSAGE PIPE TO WRITE PipeNumber, Name$
+MAKE MESSAGE PIPE TO WRITE( Name$ ) -> PipeNumber As Integer
+Create a named message pipe for writing.
+
+OPEN PIPE PipeNumber, Name$
+OPEN PIPE( Name$ ) -> PipeNumber As Integer
+Opens an existing named pipe for reading and writing.
+
+OPEN PIPE TO READ PipeNumber, Name$
+OPEN PIPE TO READ( Name$ ) -> PipeNumber As Integer
+Opens an existing named pipe for reading.
+
+OPEN PIPE TO WRITE PipeNumber, Name$
+OPEN PIPE TO WRITE( Name$ ) -> PipeNumber As Integer
+Opens an existing named pipe for writing.
+
+PIPE EXIST( PipeNumber ) -> Boolean
+Determine whether a given pipe number is in use.
+
+DELETE PIPE PipeNumber
+Deletes the given pipe.
+
+PIPE READ FILE( PipeNumber ) -> FileNumber As Integer
+PIPE WRITE FILE( PipeNumber ) -> FileNumber As Integer
+Retrieve the read/write ends of the pipe, as a file number.
+
+STDOUT FILE() -> FileNumber As Integer
+STDERR FILE() -> FileNumber As Integer
+STDIN FILE() -> FileNumber As Integer
+Retrieve the corresponding standard handle as a file.
+
+SET STDOUT FILE FileNumber
+SET STDERR FILE FileNumber
+SET STDIN FILE FileNumber
+Set the corresponding standard handle to the given file.
+

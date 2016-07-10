@@ -1,0 +1,131 @@
+#__TEST:CODEGEN
+#__TEST:load-mod $core
+#__TEST:+optimize
+#__TEST:compile
+#__TEST:dump
+
+REMSTART
+
+	=== Basic Statements ===
+
+REMEND
+
+local x as integer
+
+if x = 7 : goto someOtherLabel : endif
+
+goto someLabel
+
+someOtherLabel:
+
+x = 5
+
+someLabel:
+
+local someVar as integer
+
+someVar = 7 + 3
+someVar = someVar*someVar
+
+local someOtherVar = someVar
+
+someOtherVar = someOtherVar - 3
+
+"someVar      = " + someVar
+"someOtherVar = " + someOtherVar
+
+function getSum2( x, y )
+endfunction x + y
+
+local combined = getSum2( someVar, someOtherVar )
+
+"combined     = " + combined
+
+function getDiff( x, y )
+endfunction x - y
+
+local difference = getDiff( someVar, someOtherVar )
+
+"difference   = " + difference
+
+local loopIter = 0
+while loopIter < 10
+	loopIter = loopIter + 1
+endwhile
+
+for i = 1 to 5
+	loopIter = loopIter - 1
+next
+
+repeat
+	loopIter = loopIter + 1
+until loopIter = 15
+
+rem loopIter -= 5
+loopIter = loopIter - 5
+
+printfor( 3 )
+
+do
+	"loopIter     = " + loopIter
+	loopIter = loopIter*loopIter
+loop
+
+function fib( x )
+	if x < 3 : exitfunction 1 : endif
+endfunction fib( x - 1 ) + fib( x - 2 )
+
+function printfor( n )
+	for j = 1 to n
+		"printing: " + j
+	next
+endfunction
+
+
+REMSTART
+
+	==== Types ====
+
+REMEND
+
+type statstype
+	myArmStrength
+	myBodyStrength
+	myAgility
+	myReflex
+	myConcentration
+	myJudgement
+	myLuck
+endtype
+
+`global theSitarStatMod as statstype
+`increaseStats theSitarStatMod, 20
+REMSTART
+	theSitarStatMod.myArmStrength = 20
+	theSitarStatMod.myBodyStrength = 20
+	theSitarStatMod.myAgility = 20
+	theSitarStatMod.myReflex = 20
+	theSitarStatMod.myConcentration = 20
+	theSitarStatMod.myJudgement = 20
+	theSitarStatMod.myLuck = 20
+REMEND
+
+global theSitarStatMod = createStats( 20 )
+
+function increaseStats( stats as statstype, amount )
+	stats.myArmStrength = stats.myArmStrength + amount
+	stats.myBodyStrength = stats.myBodyStrength + amount
+	stats.myAgility = stats.myAgility + amount
+	stats.myReflex = stats.myReflex + amount
+	stats.myConcentration = stats.myConcentration + amount
+	stats.myJudgement = stats.myJudgement + amount
+	stats.myLuck = stats.myLuck + amount
+endfunction
+
+function increaseStats2( stats as statstype, amount ) as statstype
+	increaseStats stats, amount
+endfunction stats
+
+function createStats( amount ) as statstype
+	local stats as statstype
+endfunction increaseStats2( stats, amount )

@@ -1,0 +1,270 @@
+.name			API.FileSystem
+
+.object			API.FileSystem.dll
+.object-dbg		API.FileSystemDbg.dll
+
+.fn-init		FS_Init
+.fn-fini		FS_Fini
+
+//==== Path ====//
+
+AppDir$[%S%FS_AppDir
+HomeDir$[%S%FS_HomeDir
+WinDir$[%S%FS_WinDir
+MyDocDir$[%S%FS_MyDocDir
+MusicDir$[%S%FS_MusicDir
+VideosDir$[%S%FS_VideosDir
+PicturesDir$[%S%FS_PicturesDir
+AppDataDir$[%S%FS_AppDataDir
+TempDir$[%S%FS_TempDir
+
+Absolute Path$[%GS%FS_AbsolutePath
+Absolute Path$[%GSS%FS_AbsolutePathBase
+Relative Path$[%GS%FS_RelativePath
+Relative Path$[%GSS%FS_RelativePathBase
+
+Path Is Absolute[%BS%FS_PathIsAbsolute
+Path Is Relative[%BS%FS_PathIsRelative
+
+Get Path Rootname$[%GS%FS_GetPathRootname
+Get Path Rootdir$[%GS%FS_GetPathRootdir
+Get Path Directory$[%GS%FS_GetPathDirectory
+Get Path Filename$[%GS%FS_GetPathFilename
+Get Path Basename$[%GS%FS_GetPathBasename
+Get Path Extension$[%GS%FS_GetPathExtension
+Get Parent Path$[%GS%FS_GetParentPath
+
+Path Has Rootname[%BS%FS_PathHasRootname
+Path Has Rootdir[%BS%FS_PathHasRootdir
+Path Has Directory[%BS%FS_PathHasDirectory
+Path Has Filename[%BS%FS_PathHasFilename
+Path Has Basename[%BS%FS_PathHasBasename
+Path Has Extension[%BS%FS_PathHasExtension
+
+Set Path Filename$[%GSS%FS_SetPathFilename
+Set Path Basename$[%GSS%FS_SetPathBasename
+Set Path Extension$[%GSS%FS_SetPathExtension
+
+
+// Find the first file in the current directory
+// Returns true if a file has been found
+Find First[%B%FS_FindFirst
+// Find the next file in the current directory (called after Find First)
+// Returns true upon success
+Find Next[%B%FS_FindNext
+
+// Retrieve the last modified date of the found file (as a string)
+Get File Date$[%S%FS_GetFileDateStr
+// Retrieve the last modified time of the found file (as a string)
+Get File Time$[%S%FS_GetFileTimeStr
+// Retrieve the name of the file (relative to the current directory)
+Get Filename$[%S%FS_GetFilenameStr
+// Retrieve the *type* of the found file
+//
+//	* -1 if no file was found
+//	* 0 is file
+//	* 1 is directory
+Get File Type[%L%FS_GetFileType
+
+
+Make Directory%S%FS_MakeDirectory
+Make Directory[%BSL>%FS_MakeDirectoryEC
+Delete Directory%S%FS_DeleteDirectory
+Delete Directory[%BSL>%FS_DeleteDirectoryEC
+
+Open Directory%LS%FS_OpenDirectory
+Open Directory[%BLSL>%FS_OpenDirectoryEC
+Open Directory[%LS%FS_OpenDirectoryAlloc
+Open Directory[%LSL>%FS_OpenDirectoryAllocEC
+Open Directory Tree%LS%FS_OpenDirectoryTree
+Open Directory Tree[%BLSL>%FS_OpenDirectoryTreeEC
+Open Directory Tree[%LS%FS_OpenDirectoryTreeAlloc
+Open Directory Tree[%LSL>%FS_OpenDirectoryTreeAllocEC
+Close Directory[%LL%FS_CloseDirectory
+
+Is Directory Open[%BL%FS_IsDirectoryOpen
+
+Set Directory Filter%LS%FS_SetDirectoryFilter
+Get Directory Filter[%SL%FS_GetDirectoryFilter
+
+Reset Directory%L%FS_ResetDirectory
+Directory End[%BL%FS_DirectoryEnd
+Read Directory[%BL%FS_ReadDirectory
+Read Directory[%BLL>%FS_ReadDirectoryEC
+
+Get Filename$[%SL%FS_GetEntryFileName
+Get File Type[%LL%FS_GetEntryFileType
+Get File Date$[%SL%FS_GetEntryFileDateStr
+Get File Time$[%SL%FS_GetEntryFileTimeStr
+Get File Creation$[%SL%FS_GetEntryFileCreationDateStr
+Get File Creation Time$[%SL%FS_GetEntryFileCreationTimeStr
+Get File Accessed$[%SL%FS_GetEntryFileAccessedDateStr
+Get File Accessed Time$[%SL%FS_GetEntryFileAccessedTimeStr
+Get File Modified Timestamp[%QL%FS_GetEntryFileModifiedTimestamp
+Get File Creation Timestamp[%QL%FS_GetEntryFileCreationTimestamp
+Get File Accessed Timestamp[%QL%FS_GetEntryFileAccessedTimestamp
+
+CD%S%FS_SetDir
+CD[%BSL>%FS_SetDirE
+Set Dir%S%FS_SetDir
+Set Dir[%BSL>%FS_SetDirE
+Enter Dir%S%FS_EnterDir
+Enter Dir[%BSL>%FS_EnterDirE
+Leave Dir%0%FS_LeaveDir
+Leave Dir[%BL>%FS_LeaveDirE
+Get Dir$[%G%FS_GetDir
+
+Get File Unique ID[%QS%FS_GetFileUniqueID
+File Exist[%BS%FS_FileExist
+Path Exist[%BS%FS_PathExist
+Is Regular File[%BS%FS_IsRegularFile
+Is Directory[%BS%FS_IsDirectory
+Is Device[%BS%FS_IsDevice
+Is Character Device[%BS%FS_IsCharacterDevice
+Is Block Device[%BS%FS_IsBlockDevice
+Is Pipe[%BS%FS_IsPipe
+Is Socket[%BS%FS_IsSocket
+
+
+
+Open To Read%LS%FS_OpenToRead
+Open To Read[%BLSL>%FS_OpenToReadE
+Open To Read[%LS%FS_OpenToReadA
+Open To Read[%LSL>%FS_OpenToReadEA
+
+Open To Write%LS%FS_OpenToWrite
+Open To Write[%BLSL>%FS_OpenToWriteE
+Open To Write[%LS%FS_OpenToWriteA
+Open To Write[%LSL>%FS_OpenToWriteEA
+
+Open To Append%LS%FS_OpenToAppend
+Open To Append[%BLSL>%FS_OpenToAppendE
+Open To Append[%LS%FS_OpenToAppendA
+Open To Append[%LSL>%FS_OpenToAppendEA
+
+Open To Read And Write%LS%FS_OpenFile
+Open To Read And Write[%BLSL>%FS_OpenFileE
+Open To Read And Write[%LS%FS_OpenFileA
+Open To Read And Write[%LSL>%FS_OpenFileEA
+
+Open File%LSL%FS_OpenFileF
+Open File[%BLSLL>%FS_OpenFileFE
+Open File[%LSL%FS_OpenFileFA
+Open File[%LSLL>%FS_OpenFileFEA
+
+Close File[%LL%FS_CloseFile
+
+Write From Ptr[%UPLUPUP%FS_WriteFromPtr
+Write From Ptr[%UPLUPUPL>%FS_WriteFromPtrE
+Read To Ptr[%UPLUPUP%FS_ReadToPtr
+Read To Ptr[%UPLUPUPL>%FS_ReadToPtrE
+
+Write Int8%LI1%FS_Write8
+Write Int8[%BLI1L>%FS_Write8E
+Write UInt8%LU1%FS_Write8
+Write UInt8[%BLU1L>%FS_Write8E
+Write Int16%LI2%FS_Write16
+Write Int16[%BLI2L>%FS_Write16E
+Write UInt16%LU2%FS_Write16
+Write UInt16[%BLU2L>%FS_Write16E
+Write Int32%LI4%FS_Write32
+Write Int32[%BLI4L>%FS_Write32E
+Write UInt32%LU4%FS_Write32
+Write UInt32[%BLU4L>%FS_Write32E
+Write Int64%LI8%FS_Write64
+Write Int64[%BLI8L>%FS_Write64E
+Write UInt64%LU8%FS_Write64
+Write UInt64[%BLU8L>%FS_Write64E
+Write Float32%LF%FS_WriteF32
+Write Float32[%BLFL>%FS_WriteF32E
+Write Float64%LO%FS_WriteF64
+Write Float64[%BLOL>%FS_WriteF64E
+
+Write BE Int16%LI2%FS_WriteBE16
+Write BE Int16[%BLI2L>%FS_WriteBE16E
+Write BE UInt16%LU2%FS_WriteBE16
+Write BE UInt16[%BLU2L>%FS_WriteBE16E
+Write BE Int32%LI4%FS_WriteBE32
+Write BE Int32[%BLI4L>%FS_WriteBE32E
+Write BE UInt32%LU4%FS_WriteBE32
+Write BE UInt32[%BLU4L>%FS_WriteBE32E
+Write BE Int64%LI8%FS_WriteBE64
+Write BE Int64[%BLI8L>%FS_WriteBE64E
+Write BE UInt64%LU8%FS_WriteBE64
+Write BE UInt64[%BLU8L>%FS_WriteBE64E
+Write BE Float32%LF%FS_WriteBEF32
+Write BE Float32[%BLFL>%FS_WriteBEF32E
+Write BE Float64%LO%FS_WriteBEF64
+Write BE Float64[%BLOL>%FS_WriteBEF64E
+
+Write LE Int16%LI2%FS_WriteLE16
+Write LE Int16[%BLI2L>%FS_WriteLE16E
+Write LE UInt16%LU2%FS_WriteLE16
+Write LE UInt16[%BLU2L>%FS_WriteLE16E
+Write LE Int32%LI4%FS_WriteLE32
+Write LE Int32[%BLI4L>%FS_WriteLE32E
+Write LE UInt32%LU4%FS_WriteLE32
+Write LE UInt32[%BLU4L>%FS_WriteLE32E
+Write LE Int64%LI8%FS_WriteLE64
+Write LE Int64[%BLI8L>%FS_WriteLE64E
+Write LE UInt64%LU8%FS_WriteLE64
+Write LE UInt64[%BLU8L>%FS_WriteLE64E
+Write LE Float32%LF%FS_WriteLEF32
+Write LE Float32[%BLFL>%FS_WriteLEF32E
+Write LE Float64%LO%FS_WriteLEF64
+Write LE Float64[%BLOL>%FS_WriteLEF64E
+
+Read Int8%LI1>%FS_Read8
+Read Int8[%BLI1>L>%FS_Read8E
+Read UInt8%LU1>%FS_Read8
+Read UInt8[%BLU1>L>%FS_Read8E
+Read Int16%LI2>%FS_Read16
+Read Int16[%BLI2>L>%FS_Read16E
+Read UInt16%LU2>%FS_Read16
+Read UInt16[%BLU2>L>%FS_Read16E
+Read Int32%LI4>%FS_Read32
+Read Int32[%BLI4>L>%FS_Read32E
+Read UInt32%LU4>%FS_Read32
+Read UInt32[%BLU4>L>%FS_Read32E
+Read Int64%LI8>%FS_Read64
+Read Int64[%BLI8>L>%FS_Read64E
+Read UInt64%LU8>%FS_Read64
+Read UInt64[%BLU8>L>%FS_Read64E
+Read Float32%LF>%FS_ReadF32
+Read Float32[%BLF>L>%FS_ReadF32E
+Read Float64%LO>%FS_ReadF64
+Read Float64[%BLO>L>%FS_ReadF64E
+
+Read BE Int16%LI2>%FS_ReadBE16
+Read BE Int16[%BLI2>L>%FS_ReadBE16E
+Read BE UInt16%LU2>%FS_ReadBE16
+Read BE UInt16[%BLU2>L>%FS_ReadBE16E
+Read BE Int32%LI4>%FS_ReadBE32
+Read BE Int32[%BLI4>L>%FS_ReadBE32E
+Read BE UInt32%LU4>%FS_ReadBE32
+Read BE UInt32[%BLU4>L>%FS_ReadBE32E
+Read BE Int64%LI8>%FS_ReadBE64
+Read BE Int64[%BLI8>L>%FS_ReadBE64E
+Read BE UInt64%LU8>%FS_ReadBE64
+Read BE UInt64[%BLU8>L>%FS_ReadBE64E
+Read BE Float32%LF>%FS_ReadBEF32
+Read BE Float32[%BLF>L>%FS_ReadBEF32E
+Read BE Float64%LO>%FS_ReadBEF64
+Read BE Float64[%BLO>L>%FS_ReadBEF64E
+
+Read LE Int16%LI2>%FS_ReadLE16
+Read LE Int16[%BLI2>L>%FS_ReadLE16E
+Read LE UInt16%LU2>%FS_ReadLE16
+Read LE UInt16[%BLU2>L>%FS_ReadLE16E
+Read LE Int32%LI4>%FS_ReadLE32
+Read LE Int32[%BLI4>L>%FS_ReadLE32E
+Read LE UInt32%LU4>%FS_ReadLE32
+Read LE UInt32[%BLU4>L>%FS_ReadLE32E
+Read LE Int64%LI8>%FS_ReadLE64
+Read LE Int64[%BLI8>L>%FS_ReadLE64E
+Read LE UInt64%LU8>%FS_ReadLE64
+Read LE UInt64[%BLU8>L>%FS_ReadLE64E
+Read LE Float32%LF>%FS_ReadLEF32
+Read LE Float32[%BLF>L>%FS_ReadLEF32E
+Read LE Float64%LO>%FS_ReadLEF64
+Read LE Float64[%BLO>L>%FS_ReadLEF64E

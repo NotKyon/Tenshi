@@ -1,0 +1,550 @@
+[GENERAL SYNTAX]
+Source files are composed as a set of statements. A statement runs until the end
+of the line or the end-of-statement token (":").
+
+All symbols can have spaces in them. Symbols are resolved (during parsing)
+through a "longest match" algorithm.
+
+The following characters are acceptable for any identifier, including at the
+start of the identifier, as in Apple Swift:
+
+	- a-z, A-Z
+	- U+00A8, U+00AA, U+00AD, U+00AF
+	- U+00B2-U+00B5, U+00B7-U+00BA
+	- U+00BC-U+00BE, U+00C0-U+00D6, U+00D8-U+00F6, U+00F8-U+00FF
+	- U+0100-U+02FF, U+0370-U+167F, U+1681-U+180D, U+180F-U+1DBF
+	- U+1E00-U+1FFF
+	- U+200B-U+200D, U+202A-U+202E, U+203F-U+2040, U+2054, U+2060-U+206F
+	- U+2070-U+20CF, U+2100-U+218F, U+2460-U+24FF, U+2776-U+2793
+	- U+2C00-U+2DFF, U+2E80-U+2FFF
+	- U+3004-U+3007, U+3021-U+302F, U+3031-U+303F, U+3040-U+D7FF
+	- U+F900-U+FD3D, U+FD40-U+FDCF, U+FDF0-U+FE1F, U+FE30-U+FE44
+	- U+FE47-U+FFFD
+	- U+10000-U+1FFFD, U+20000-U+2FFFD, U+30000-U+3FFFD, U+40000-U+4FFFD
+	- U+50000-U+5FFFD, U+60000-U+6FFFD, U+70000-U+7FFFD, U+80000-U+8FFFD
+	- U+90000-U+9FFFD, U+A0000-U+AFFFD, U+B0000-U+BFFFD, U+C0000-U+CFFFD
+	- U+D0000-U+DFFFD, U+E0000-U+EFFFD
+
+In addition to the above, the following characters are acceptable for any part
+of an identifier after the initial character:
+
+	- 0-9
+	- U+0300-U+036F, U+1DC0-U+1DFF, U+20D0-U+20FF, U+FE20-U+FE2F
+
+NOTE: The above unicode ranges were selected from Apple's Swift language
+-     specification. We wish to remain consistent with that.
+
+Functions can be called without parentheses if the call is not part of an
+expression. (i.e., if the function call is itself the statement.)
+
+
+[COMMENTS]
+Single-line comments can start with:
+
+//
+`
+
+Multi-line nestable comments start with /* and end at */.
+
+Another single-line comment starts with REM (and some white-space).
+
+A non-nestable multi-line comment starts with REMSTART and ends with REMEND.
+
+In the case of the REM-family of comments they must be the only part of the
+identifier.
+
+
+[BUILT-IN NATURAL TYPES]
+NOTE: "Natural types" means "without runtime assistance"
+
+- INT8, INT16, INT32, INT64, INTPTR -- signed integers
+- UINT8, UINT16, UINT32, UINT64, UINTPTR -- unsigned integers
+- FLOAT32, FLOAT64 -- floating point values
+- FLOAT32X4, INT32X4, FLOAT64X2, INT64X2 -- SIMD vector types
+- FLOAT64X4, INT64X4 -- SIMD vector types (higher hardware requirement)
+
+- BOOLEAN
+
+
+[BUILT-IN COMPLEX TYPES]
+NOTE: "Complex types" means "requiring runtime assistance"
+
+- INT128
+- UINT128
+
+- STRING
+
+NOTE: The string type supports special operators:
+-      "+" for concatenation of two strings
+-      "*" for repeating a string a set number of times
+-      "/" for appending a path to another string
+
+- VECTOR2
+- VECTOR3
+- VECTOR4
+
+- MATRIX2
+- MATRIX3
+- MATRIX4
+- MATRIX23
+- MATRIX24
+- MATRIX32
+- MATRIX34
+- MATRIX42
+- MATRIX43
+
+- QUATERNION
+
+NOTE: The vector and matrix types support swizzling and special operators.
+
+
+[BUILT-IN TYPE ALIASES]
+- BYTE = UINT8
+- WORD = UINT16
+- DWORD = UINT32
+- QWORD = UINT64
+
+- INTEGER = INT32
+- DOUBLE INTEGER = INT64
+
+- FLOAT = FLOAT32
+- DOUBLE FLOAT = FLOAT64
+
+
+[BUILT-IN COLLECTION TYPES]
+- ARRAY
+- LIST
+- BTREE
+
+
+[BUILT-IN CONSTANTS]
+- TRUE = 1 (BOOLEAN)
+- FALSE = 0 (BOOLEAN)
+- NULL = 0 (UINTPTR)
+
+
+[TYPE DESIGNATIONS]
+Variables can be suffixed with a single-character type designation, which maps
+to a particular type. These are:
+
+	#				FLOAT32
+	$				STRING
+	?				BOOLEAN
+
+If no type is specified the type defaults to INTPTR.
+
+
+[FUNCTION POINTER TYPE]
+A function pointer type is specified with the FUNCPTR keyword. For example,
+
+	local pfnMyFunc as funcptr int32( int32, int32 )
+
+The syntax of FUNCPTR is:
+
+	"FUNCPTR" ( string-literal )? typename "(" parameters ")"
+
+If a string-literal is present then the string-literal specifies the calling
+convention. The calling conventions are:
+
+	"c"             C calling convention (__cdecl)
+	"win"           Windows standard (__stdcall)
+
+The default calling convention is "c."
+
+
+[INTEGER LITERALS]
+Decimal form		: (0[dD])?[0-9_]+
+Hexadecimal form	: ($|0[xX])[0-9a-fA-F_]+
+Octal form			: 0[cC][0-7_]+
+Binary form			: (%|0[bB])[01_]+
+
+There's also the arbitrary radix form. This is a decimal number between 2 and 36
+followed immediately by an 'x'. The radix (base) specified by that number is the
+notation used for the remainder of the token. The digit separator (_) can be
+used.
+
+
+[FLOAT LITERALS]
+Standard form		: [0-9_]+\.[0-9_]+
+Scientific form		: [0-9_]+(\.[0-9_]+)?[eE][-+]?[0-9_]+
+Hexadecimal form	: ($|0[xX])[0-9a-fA-F_]+\.[0-9a-fA-F_]+
+Hexadecimal sci form: ($|0[xX])[0-9a-fA-F_]+(\.[0-9a-fA-F_]+)?[pP][-+]?[0-9a-fA-F_]+
+Binary form			: (%|0[bB])[01_]+\.[01_]+
+Binary sci form		: (%|0[bB])[01_]+(\.[01_]+)?[pPeE][-+]?[01_]+
+
+
+[NUMERIC LITERALS]
+As shown in "INTEGER LITERALS" and "FLOAT LITERALS" both literals support
+multiple different bases, as well as a digit separator.
+
+The "bases" specify how the number is notated. e.g., base-16 (hexadecimal)'s
+20 (0x20, $20, 16x20) is equal to 32 in base-10 (decimal). (2*16 + 0 = 32)
+
+The digit separator is meaningless and simply ignored. It exists only to provide
+a useful visual cue to the programmer. (e.g., 1_000_000 = one million.)
+
+
+[STRING LITERALS]
+String literals do not have escape sequences by default. If escape sequences are
+desired, they need to be opted into.
+
+Escape sequences are enabled by prefixing a string with a "\" (backslash). When
+such a string literal is prefixed, the following are escape sequences are
+processed:
+
+	\a
+	\b
+	\f
+	\n
+	\r
+	\t
+	\u[0-9a-fA-F]{4}
+	\U[0-9a-fA-F]{8}
+	\v
+	\x[0-9a-fA-F]{2}
+	\0
+	\'
+	\"
+	\?
+	\\
+
+All strings are encoded in UTF-8. Therefore all Unicode sequences are converted
+to UTF-8. The "\x" sequence inserts that exact byte into the string, without any
+consideration for encoding.
+
+
+[KEYWORDS]
+TYPE
+ENDTYPE
+FUNCTION
+EXITFUNCTION
+ENDFUNCTION
+SELECT
+CASE
+CASE DEFAULT
+ENDCASE
+FALLTHROUGH
+ENDSELECT
+EXIT
+IF
+THEN
+ELSE
+ELSEIF
+ENDIF
+DO
+LOOP
+FOR
+FOR EACH
+TO
+STEP
+NEXT
+REPEAT
+UNTIL
+WHILE
+ENDWHILE
+GOTO
+GOSUB
+RETURN
+LOCAL
+GLOBAL
+AS
+NOT
+AND
+OR
+XOR
+ENUM
+ENDENUM
+IS ANY OF
+HAS ANY OF
+HAS ALL OF
+HAS ONLY
+IN
+
+
+[MATH AND THREAD KEYWORDS]
+MOD
+BITWISE LSHIFT
+BITWISE RSHIFT
+BITWISE LROTATE
+BITWISE RROTATE
+BITWISE AND
+BITWISE OR
+BITWISE XOR
+BITWISE NOT
+INC
+DEC
+PRE INC
+PRE DEC
+ATOMIC INC
+ATOMIC DEC
+ATOMIC ADD
+ATOMIC SUB
+ATOMIC AND
+ATOMIC OR
+ATOMIC XOR
+ATOMIC SET
+ATOMIC COMPARE SET
+ATOMIC FENCE
+JOB FUNCTION
+THREAD FUNCTION
+PARALLEL FOR
+PARALLEL FOR EACH
+
+
+[RUNTIME-INVOKING KEYWORDS]
+END
+PRINT
+DATA
+READ
+RESTORE
+DIM
+REDIM
+UNDIM
+
+
+[PREPROCESSOR COMMANDS]
+#INCLUDE
+#CONSTANT
+#MESSAGE
+#WARNING
+#ERROR
+#DEFINE
+#IF
+#ELSE
+#ELIF
+#ELSEIF
+#ENDIF
+#IFDEF
+#IFNDEF
+#ELIFDEF
+#ELIFNDEF
+#ELSEIFDEF
+#ELSEIFNDEF
+#ONCE
+#STRICT
+#CRITICAL
+DEFINED
+DEFINED?
+
+
+[OPERATORS]
++       Add (l + r)
+-       Subtract (l - r); Negate (-r)
+*		Multiply (l * r); Pointer indirection (*r)
+/		Divide (l / r); Append path (l$ / r$)
+%%		Modulus (l %% r)
+^		Power (l ^ r)
+<<		Bitwise left-shift (l << r)
+>>		Bitwise right-shift (l >> r)
+~<<		Bitwise left-rotate (l ~<< r)
+~>>		Bitwise right-rotate (l ~>> r)
+=		Assignment (v = r); comparison (IF v = r...)
+:=		Clarified assignment (v := r)
+==		Clarified equivalence comparison (v == r)
++=		Assignment add (v += r)
+-=		Assignment subtract (v -= r)
+*=		Assignment multiply (v *= r)
+/=		Assignment divide (v /= r)
+^=		Assignment power (v ^= r)
+~<<=	Assignment bitwise left-rotate (v ~<<= r)
+~>>=	Assignment bitwise right-rotate (v ~>>= r)
+<<=		Assignment bitwise left-shift (v <<= r)
+>>=		Assignment bitwise right-shift (v >>= r)
+&=		Assignment bitwise and (v &= r)
+|=		Assignment bitwise or (v |= r)
+~=		Assignment bitwise xor (v ~= r)
+!		Logical not (!r)
+<>		Not-equal comparison (l <> r) :: same as l != r
+!=		Not-equal comparison (l != r) :: same as l <> r
+<=		Less-equal comparison (l <= r)
+>=		Greater-equal comparison (l >= r)
+<		Less-than comparison (l < r)
+>		Greater-than comparison (l > r)
+~		Bitwise exclusive-or (l ~ r); Bitwise complement (~r)
+&		Bitwise and (l & r); Address-of (&r)
+|		Bitwise or (l | r)
+~~		Logical exclusive-or (IF l ~~ r)
+||		Logical inclusive-or (IF l || r)
+&&		Logical and (IF l && r)
+
+
+[GRAMMAR]
+
+PROGRAM			: PROGRAM_LINES
+				;
+
+PROGRAM_LINES	: PROGRAM_LINES PROGRAM_LINE
+				| PROGRAM_LINE
+				;
+
+PROGRAM_LINE	: STATEMENT
+				| DECLARATION
+				| <blank>
+				;
+
+STATEMENT		: STATEMENT_MINI
+				;
+STATEMENT_MINI	: VARIABLE_ASSIGNMENT
+				| VARIABLE_DECLARATION
+				| FUNCTION_CALL
+				| FUNCTION_INVOKE
+				| LOOP_STATEMENT
+				| IF_STATEMENT
+				| GOTOSUBRET_STATEMENT
+				| REUNDIM_STATEMENT
+				;
+STATEMENT_FLOW	: <if inside function> STATEMENT_FUNC <else> STATEMENT_MINI
+				| "EXIT"
+				| "EXIT" <integer>
+				;
+STATEMENT_FUNC	: STATEMENT_MINI
+				| "EXITFUNCTION"
+				| "EXITFUNCTION" EXPRESSION
+				;
+
+DECLARATION		: TYPE_DECLARATION
+				| FUNCTION_DECLARATION
+				;
+						
+STATEMENT_LIST			: STATEMENT
+						| STATEMENT_LIST <nl> STATEMENT
+						;
+STATEMENT_FLOW_LIST		: STATEMENT_FLOW
+						| STATEMENT_FLOW_LIST <nl> STATEMENT_FLOW
+						;
+STATEMENT_FUNC_LIST		: STATEMENT_FUNC
+						| STATEMENT_FUNC_LIST <nl> STATEMENT_FUNC
+						;
+CODE_BLOCK				: <nl>
+						| <nl> STATEMENT_LIST <nl>
+						;
+FLOW_CODE_BLOCK			: <nl>
+						| <nl> STATEMENT_FLOW_LIST <nl>
+						;
+FUNC_CODE_BLOCK			: <nl>
+						| <nl> STATEMENT_FUNC_LIST <nl>
+						;
+
+TERMINAL				: <integer>
+						| <string>
+						| NAME_TERMINAL
+						;
+NAME_TERMINAL			: <name>
+						| NAME_TERMINAL "." NAME_TERMINAL
+						| NAME_TERMINAL "(" EXPRESSION_LIST ")"
+						;
+
+VARIABLE_ASSIGNMENT		: NAME_TERMINAL <assign-op> EXPRESSION
+						;
+VARIABLE_DECLARATION	: VARIABLE_DECL_NAME
+						| VARIABLE_DECL_NAME "=" EXPRESSION
+						| VARIABLE_SCOPE "DIM" <name -keyword> "(" EXPRESSION_LIST ")"
+						;
+VARIABLE_DECL_NAME		: VARIABLE_SCOPE <name -keyword> "AS" TYPE
+						| VARIABLE_SCOPE TYPE NAME_LIST
+						| VARIABLE_SCOPE <name -keyword +typeSuffix>
+						;
+VARIABLE_SCOPE			: <blank>
+						| "LOCAL"
+						| "GLOBAL"
+						;
+NAME_LIST				: <name -keyword >
+						| NAME_LIST "," <name -keyword>
+						;
+TYPE					: <name>
+						| <name> "LIST"
+						| <name> "BINARY TREE"
+						;
+
+FUNCTION_CALL			: TERMINAL "(" EXPRESSION_LIST ")"
+						;
+FUNCTION_INVOKE			: <name> EXPRESSION_LIST
+						;
+EXPRESSION_LIST			: <blank>
+						| EXPRESSION_LIST_ITEMS
+						;
+EXPRESSION_LIST_ITEMS	: EXPRESSION
+						| EXPRESSION_LIST_ITEMS "," EXPRESSION
+						;
+EXPRESSION				: <not defined here>
+						;
+
+LOOP_STATEMENT			: DO_LOOP
+						| WHILE_LOOP
+						| REPEAT_LOOP
+						| FOR_LOOP
+						;
+DO_LOOP					: "DO" FLOW_CODE_BLOCK "LOOP"
+						;
+WHILE_LOOP				: "WHILE" EXPRESSION FLOW_CODE_BLOCK "ENDWHILE"
+						;
+REPEAT_LOOP				: "REPEAT" FLOW_CODE_BLOCK "UNTIL" EXPRESSION
+						;
+FOR_LOOP				: FOR_LOOP_INIT FOR_LOOP_COND FOR_LOOP_STEP FLOW_CODE_BLOCK FOR_LOOP_FINI
+						;
+FOR_LOOP_INIT			: <name -keyword> "=" EXPRESSION
+						;
+FOR_LOOP_COND			: "TO" EXPRESSION
+						| "UNTIL" EXPRESSION
+						;
+FOR_LOOP_STEP			: <blank>
+						| "STEP" EXPRESSION
+						;
+FOR_LOOP_FINI			: "NEXT" <name -keyword>
+						| "NEXT"
+						;
+
+IF_STATEMENT			: "IF" EXPRESSION "THEN" STATEMENT
+						| "IF" EXPRESSION "THEN" STATEMENT "ELSE" STATEMENT
+						| IF_BLOCK_START ELSE_BLOCK "ENDIF"
+						;
+
+IF_BLOCK_START			: "IF" EXPRESSION CODE_BLOCK
+						;
+ELSEIF_LINE				: "ELSEIF" EXPRESSION CODE_BLOCK
+						;
+ELSE_LINE				: "ELSE" CODE_BLOCK
+						;
+ELSEIF_BLOCK			: ELSEIF_LINE
+						| ELSEIF_BLOCK ELSEIF_LINE
+						;
+ELSE_BLOCK				: <blank>
+						| ELSE_LINE
+						| ELSEIF_BLOCK
+						| ELSEIF_BLOCK ELSE_LINE
+						;
+
+GOTOSUBRET_STATEMENT	: "GOTO" <name -keyword>
+						| "GOSUB" <name -keyword>
+						| "RETURN"
+						;
+REUNDIM_STATEMENT		: "REDIM" NAME_TERMINAL
+						| "UNDIM" NAME_TERMINAL
+						;
+
+TYPE_DECLARATION		: "TYPE" <name -keyword> FIELD_BLOCK "ENDTYPE"
+						;
+FIELD_BLOCK				: <nl>
+						| <nl> FIELD_LIST <nl>
+						;
+FIELD_LIST				: FIELD
+						| FIELD_LIST <nl> FIELD
+						;
+FIELD					: FIELD_NAME_DECL
+						| FIELD_NAME_DECL "=" EXPRESSION
+						| FIELD_ARRAY_DECL
+						;
+FIELD_NAME_DECL			: <name -keyword> "AS" TYPE
+						| TYPE NAME_LIST
+						;
+FIELD_ARRAY_DECL		: <name -keyword> "(" ")"
+						| <name -keyword> "(" EXPRESSION_LIST ")"
+						;
+
+FUNCTION_DECLARATION	: FUNCTION_NAME_DECL FUNC_CODE_BLOCK FUNCTION_END_DECL
+						;
+FUNCTION_NAME_DECL		: "FUNCTION" <name -keyword> "(" PARAMETER_LIST ")"
+						;
+FUNCTION_END_DECL		: "ENDFUNCTION"
+						| "ENDFUNCTION" EXPRESSION
+						;

@@ -1,0 +1,228 @@
+remstart
+
+	Project: Line Math
+	Created: 2014-11-16
+	
+	***** Main Source File *****
+
+remend
+
+type TVec2
+	x as integer
+	y as integer
+endtype
+type TVec2f
+	x as float
+	y as float
+endtype
+
+type TLine
+	a as TVec2
+	b as TVec2
+endtype
+
+#constant DefaultForegroundColor rgb(222,222,222)
+#constant DefaultBackgroundColor rgb(11,33,88)
+
+global g_line as TLine
+global g_lineCenter as TVec2
+global g_lineNormP as TVec2
+global g_lineN as TVec2f
+
+global g_isClamped as boolean : g_isClamped = 0
+
+SelectPoints
+
+do
+	ink DefaultForegroundColor, DefaultBackgroundColor
+	cls
+
+	rem Draw the line
+	line g_line.a.x, g_line.a.y, g_line.b.x, g_line.b.y
+	if g_isClamped
+		circle g_line.a.x, g_line.a.y, 5
+		circle g_line.b.x, g_line.b.y, 5
+	endif
+	ink rgb(0,255,0), 0
+	line g_lineCenter.x, g_lineCenter.y, g_lineNormP.x, g_lineNormP.y
+
+	rem c = mouse position (point to test)	
+	local c as TVec2
+	c.x = mousex()
+	c.y = mousey()
+
+	rem ab = b - a	
+	local ab as TVec2
+	ab.x = g_line.b.x - g_line.a.x
+	ab.y = g_line.b.y - g_line.a.y
+
+	rem ac = c - a
+	local ac as TVec2
+	ac.x = c.x - g_line.a.x
+	ac.y = c.y - g_line.a.y
+
+	rem t = linear position on the line	
+	local t as float
+	t = Dot2#( ac, ab )/Dot2#( ab, ab )
+
+	if g_isClamped <> 0 then t = Saturate#( t )
+
+	rem The closest point on the line (or segment if g_isClamped <> 0)	
+	local pt as TVec2
+	pt.x = g_line.a.x + t*ab.x
+	pt.y = g_line.a.y + t*ab.y
+
+	rem Draw the guide
+	DrawMouseGuide c.x, c.y
+
+	ink rgb(222,0,0), 0
+	circle pt.x, pt.y, 10
+	
+	rem Determine which side of the line the mouse is on
+	local d as float
+	local Lp as TVec2f
+	Local p as TVec2f
+
+    Lp.x = g_line.a.x
+    Lp.y = g_line.a.y
+    
+    p.x = 1.0*c.x - Lp.x
+    p.y = 1.0*c.y - Lp.y
+    	
+	d = g_lineN.x*p.x + g_lineN.y*p.y `dot product of mouse position and line normal
+	
+	rem Show message
+	ink DefaultForegroundColor, DefaultBackgroundColor
+	"a = (" + g_line.a.x + ", " + g_line.a.y + ")"
+	"b = (" + g_line.b.x + ", " + g_line.b.y + ")"
+	"p = (" + pt.x + ", " + pt.y + ")"
+	"LN = (" + str$(g_lineN.x,4) + ", " + str$(g_lineN.y,4) + "); angle = " + str$( wrapvalue( atanfull( g_lineN.y, g_lineN.x ) ), 2 )
+	"Lp = (" + str$(Lp.x,4) + ", " + str$(Lp.y,4) + ")"
+	if d < -1
+	   "(mouse is behind line) d=" + str$(d,4)
+    	else
+	   if d > 1
+	       "(mouse is past line) d=" + str$(d,4)
+	   else
+	       "(mouse is on line) d=" + str$(d,4)
+	   endif
+	endif
+	""
+	"Press SPACE to choose new points for the line"
+	"Press TAB to switch between a line and a segment"
+	"Press ENTER or ESCAPE to exit"
+	" SCANCODE ***   " + str$(scancode()) + "   ***"
+	
+	sync
+	
+	if spacekey() then SelectPoints
+	if keystate(15)=1 `tab=15
+		while keystate(15)=1
+			sync
+		endwhile
+		
+		g_isClamped = 1 - g_isClamped
+	endif
+	if returnkey() or escapekey() then exit
+loop
+
+function DrawMouseGuide( x as integer , y as integer )
+	ink rgb(133,99,99), 0 : line 0, y, screen width(), y
+	ink rgb(99,133,99), 0 : line x, 0, x, screen height()
+endfunction
+
+function SelectPoints()
+	SelectPoint 0
+	SelectPoint 1
+endfunction
+function SelectPoint( pointId )
+	local pointName$ as string
+	
+	select pointId
+		case 0
+			pointName$ = "A"
+		endcase
+		
+		case 1
+			pointName$ = "B"
+		endcase
+		
+		case default
+			pointName$ = "(unknown point)"
+		endcase
+	endselect
+	
+	while mouseclick() <> 0
+		sync
+	endwhile
+	
+	local mx as integer
+	local my as integer
+	
+	while mouseclick() = 0
+		ink DefaultForegroundColor, DefaultBackgroundColor
+		cls
+
+        mx = mousex()
+        my = mousey()
+        		
+		DrawMouseGuide mx, my
+		
+		ink DefaultForegroundColor, DefaultBackgroundColor
+		"Select point " + pointName$
+
+		if pointId > 0
+		    ink rgb(77,77,77),0
+            line g_line.a.x, g_line.a.y, mx, my
+
+			ink rgb(222,0,0), DefaultBackgroundColor
+			circle g_line.a.x, g_line.a.y, 10
+		endif
+		
+		sync
+	endwhile
+	
+	select pointId
+		case 0
+			g_line.a.x = mousex()
+			g_line.a.y = mousey()
+		
+		case 1
+			g_line.b.x = mousex()
+			g_line.b.y = mousey()
+	
+	        rem Calculate the line's normal
+	        local invmag as float
+	        local v as TVec2
+	
+	        `v.x = g_line.a.y - g_line.b.y
+            `v.y = g_line.b.x - g_line.a.x
+            
+            v.x = g_line.b.y - g_line.a.y
+            v.y = g_line.a.x - g_line.b.x
+            
+	        invmag = 1.0/sqrt( v.x*v.x + v.y*v.y )
+	        g_lineN.x = invmag*v.x
+            g_lineN.y = invmag*v.y
+            
+            rem Calculate the center of the line
+            g_lineCenter.x = g_line.a.x + ( g_line.b.x - g_line.a.x )/2
+            g_lineCenter.y = g_line.a.y + ( g_line.b.y - g_line.a.y )/2
+            
+            rem Calculate the end-point of the normal of the line
+            g_lineNormP.x = g_lineN.x*50.0 + g_lineCenter.x
+            g_lineNormP.y = g_lineN.y*50.0 + g_lineCenter.y
+	endselect
+
+	while mouseclick() <> 0
+		sync
+	endwhile
+endfunction
+
+function Dot2#( a as TVec2, b as TVec2 )
+endfunction a.x*b.x + a.y*b.y
+function Saturate#( x as float )
+	if x < 0.0 then exitfunction 0.0
+	if x > 1.0 then exitfunction 1.0
+endfunction x
+

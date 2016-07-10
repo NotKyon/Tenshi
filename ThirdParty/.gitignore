@@ -1,0 +1,14 @@
+# Only exceptions are retained in version control
+*
+!.gitignore
+!ReadMe.txt
+
+# These binaries are used to get more third-party packages
+!Bin/
+!Bin/*.exe
+!Bin/*.dll
+!Bin/*.html
+
+# These are needed for successful builds with Clang presently.
+!GCCLibs/
+!GCCLibs/lib/*.a

@@ -1,0 +1,94 @@
+#__TEST:PARSER
+#__TEST:parse-program
+#__TEST:print-ast
+
+REM This shouldn't show up at all
+
+// Mark the start of the program (with a label)
+L_programStart:
+	` Declare a simple variable
+	myCheese as integer
+
+	` Greet the world!
+	"Hello, world!" //doesn't require a "PRINT" prefix (auto-print, woo!)
+
+	` Set your cheese to something useful
+	myCheese = 7
+
+	` Tell the world of your cheese!
+	"My cheese is awesome, because " + myCheese
+
+	` Function calls are cool!
+	funkyMonkey( myCheese )
+	blankMonkey()
+	coolsMonkey
+		(
+			myCheese,
+			3 + myCheese,
+			4
+		)
+
+	` Gosub statement
+	GoSub L_init
+	` Then start!
+	GoTo L_main
+
+L_main:
+	` Test out select statements
+	select myCheese
+		case 4
+			"Four!"
+			fallthrough
+		endcase
+		case default
+			"Cheese in a select statement"
+		endcase
+	endselect
+
+	` Iffy cheese!
+	if myCheese = 7
+		"My cheese = seven!"
+	elseif myCheese = 8
+		"My cheese = eight!"
+	else
+		"I don't know *what* my cheese is!"
+	endif
+
+	` For/To
+	for i = 1 to 10
+		"i = " + i
+	next i
+
+	` For/Until
+	for i = 0 until 10
+		"i = " + i
+	next
+
+	` Main loop
+	do
+		if myCheese = 7
+			` Exit the loop if myCheese is seven
+			exit
+		endif
+	loop
+
+	` While loop
+	while myCheese > 5
+		dec myCheese
+		"myCheese = " + myCheese
+	endwhile
+
+	` Repeat/until loop
+	repeat
+		myCheese -= 1
+		"myCheese = " + myCheese
+	until myCheese = 0
+
+	` Done with this all
+	goto L_fini
+
+L_init:
+	return
+
+L_fini:
+	"Done with cheese for today. ~Nyoron"

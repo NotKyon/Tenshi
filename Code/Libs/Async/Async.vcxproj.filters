@@ -1,0 +1,143 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Detail">
+      <UniqueIdentifier>{4089aad7-b38e-4726-9835-c20e020cad84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Schedulers">
+      <UniqueIdentifier>{2d0a881c-0cd5-4c4a-9f83-5d35b8179e0b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Schedulers\01">
+      <UniqueIdentifier>{1537459b-927e-4fe9-b46d-c57fea388c1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Schedulers\02">
+      <UniqueIdentifier>{0ccb3e07-c00c-4bc6-92b7-6668ac71e61e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Schedulers\03">
+      <UniqueIdentifier>{d4fb87fb-4d6f-4a11-a7aa-3b2f33b2b2e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Schedulers\04">
+      <UniqueIdentifier>{a74a2c4b-ba20-43c5-89c4-79bec9098af0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Atomic.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Barrier.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CPU.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mutex.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RWLock.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Signal.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Thread.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Detail\Threading.hpp">
+      <Filter>Header Files\Detail</Filter>
+    </ClInclude>
+    <ClInclude Include="Detail\Threading_PThread.hpp">
+      <Filter>Header Files\Detail</Filter>
+    </ClInclude>
+    <ClInclude Include="Detail\Threading_Windows.hpp">
+      <Filter>Header Files\Detail</Filter>
+    </ClInclude>
+    <ClInclude Include="Semaphore.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scheduler.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Schedulers\Scheduler01.hpp">
+      <Filter>Schedulers\01</Filter>
+    </ClInclude>
+    <ClInclude Include="Schedulers\Scheduler02.hpp">
+      <Filter>Schedulers\02</Filter>
+    </ClInclude>
+    <ClInclude Include="QuickMutex.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Schedulers\Scheduler03.hpp">
+      <Filter>Schedulers\03</Filter>
+    </ClInclude>
+    <ClInclude Include="Schedulers\SchedulerMutex.hpp">
+      <Filter>Schedulers</Filter>
+    </ClInclude>
+    <ClInclude Include="Schedulers\ExecStats.hpp">
+      <Filter>Schedulers</Filter>
+    </ClInclude>
+    <ClInclude Include="QuickSemaphore.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Schedulers\SchedulerSemaphore.hpp">
+      <Filter>Schedulers</Filter>
+    </ClInclude>
+    <ClInclude Include="Schedulers\Profiling.hpp">
+      <Filter>Schedulers</Filter>
+    </ClInclude>
+    <ClInclude Include="Schedulers\Notify.hpp">
+      <Filter>Schedulers</Filter>
+    </ClInclude>
+    <ClInclude Include="Detail\Atomics_GCC.hpp">
+      <Filter>Header Files\Detail</Filter>
+    </ClInclude>
+    <ClInclude Include="Detail\Atomics_MSVC.hpp">
+      <Filter>Header Files\Detail</Filter>
+    </ClInclude>
+    <ClInclude Include="Detail\MemoryOrder.hpp">
+      <Filter>Header Files\Detail</Filter>
+    </ClInclude>
+    <ClInclude Include="Schedulers\Scheduler04.hpp">
+      <Filter>Schedulers\04</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="CPU.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Thread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Schedulers\ExecStats.cpp">
+      <Filter>Schedulers</Filter>
+    </ClCompile>
+    <ClCompile Include="Schedulers\Profiling.cpp">
+      <Filter>Schedulers</Filter>
+    </ClCompile>
+    <ClCompile Include="Schedulers\Scheduler01.cpp">
+      <Filter>Schedulers\01</Filter>
+    </ClCompile>
+    <ClCompile Include="Schedulers\Scheduler02.cpp">
+      <Filter>Schedulers\02</Filter>
+    </ClCompile>
+    <ClCompile Include="Schedulers\Scheduler03.cpp">
+      <Filter>Schedulers\03</Filter>
+    </ClCompile>
+    <ClCompile Include="Schedulers\Notify.cpp">
+      <Filter>Schedulers</Filter>
+    </ClCompile>
+    <ClCompile Include="Schedulers\Scheduler04.cpp">
+      <Filter>Schedulers\04</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+</Project>

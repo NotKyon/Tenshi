@@ -1,0 +1,76 @@
+#__TEST:PARSER
+#__TEST:parse-program
+#__TEST:print-ast
+
+REMSTART
+
+	== A simple vector type ==
+
+REMEND
+
+type TVec3
+	float x, y
+	z as float
+endtype
+
+REMSTART
+
+	== Vector basic arithmetic ==
+
+REMEND
+
+function VecAdd( P as TVec3, Q as TVec3 ) as TVec3
+	R as TVec3
+
+	R.x = P.x + Q.x
+	R.y = P.y + Q.y
+	R.z = P.z + Q.z
+endfunction R
+function VecSub( P as TVec3, Q as TVec3 ) as TVec3
+	R as TVec3
+
+	R.x = P.x - Q.x
+	R.y = P.y - Q.y
+	R.z = P.z - Q.z
+endfunction R
+function VecMul( P as TVec3, Q as TVec3 ) as TVec3
+	R as TVec3
+
+	R.x = P.x*Q.x
+	R.y = P.y*Q.y
+	R.z = P.z*Q.z
+endfunction R
+function VecDiv( P as TVec3, Q as TVec3 ) as TVec3
+	R as TVec3
+
+	R.x = P.x/Q.x
+	R.y = P.y/Q.y
+	R.z = P.z/Q.z
+endfunction R
+
+function VecDot#( P as TVec3, Q as TVec3 )
+endfunction P.x*Q.x + P.y*Q.y + P.z*Q.z
+
+function VecCross( P as TVec3, Q as TVec3 ) as TVec3
+	R as TVec3
+
+	R.x = P.y*Q.z - P.z*Q.y
+	R.y = P.z*Q.x - P.x*Q.z
+	R.z = P.x*Q.y - P.y*Q.x
+endfunction R
+
+function VecMagnitude#( V as TVec3 )
+endfunction VecDot#( V, V )
+
+function VecLength#( V as TVec3 )
+endfunction Sqrt( VecMagnitude#( V ) )
+
+function VecNormalize( V as TVec3 ) as TVec3
+	R as TVec3
+
+	InvLength as float = 1.0/VecLength#( V )
+
+	R.x = InvLength*V.x
+	R.y = InvLength*V.y
+	R.z = InvLength*V.z
+endfunction R

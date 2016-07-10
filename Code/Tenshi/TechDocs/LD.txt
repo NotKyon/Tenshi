@@ -1,0 +1,12 @@
+ld -o <OutputName> \
+	<MinGW>/lib/crt2.o \
+	<MinGW>/lib/gcc/i686-w64-mingw32/4.8.0/crtbegin.o \
+	-L <MinGW>/lib \
+	-L <MinGW>/lib/gcc/i686-w64-mingw32/4.8.0 \
+	<InputObjects> \
+	-lmingw32 -lgcc -lmsvcrt -lkernel32 \
+	<MinGW>/lib/gcc/i686-w64-mingw32/4.8.0/crtend.o
+
+The above will successfully link everything.
+
+The "-lgcc" option can be removed.
