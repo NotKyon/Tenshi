@@ -556,7 +556,7 @@ namespace Tenshi { namespace Compiler {
 				pArrExpr->m_pList = ParseExpressionList( &m_Lexer.Token() );
 				if( !pArrExpr->m_pList ) {
 					delete pArrExpr;
-					return false;
+					return nullptr;
 				}
 
 				pLeftExpr = pArrExpr;
@@ -573,7 +573,7 @@ namespace Tenshi { namespace Compiler {
 				pCallExpr->m_pList = ParseExpressionList( &m_Lexer.Token() );
 				if( !pCallExpr->m_pList ) {
 					delete pCallExpr;
-					return false;
+					return nullptr;
 				}
 
 				pLeftExpr = pCallExpr;

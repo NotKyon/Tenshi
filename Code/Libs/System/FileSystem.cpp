@@ -543,9 +543,9 @@ bool Ax::System::ReadFile( String &dst, const char *filename, EEncoding InEncodi
 	fseek( fp, 0, SEEK_END );
 #ifdef _WIN32
 # ifdef _WIN64
-	const size_t n = ( size_t )_ftelli64_nolock( fp );
+	const size_t n = ( size_t )_ftelli64( fp );
 # else
-	const long long tempn = _ftelli64_nolock( fp );
+	const long long tempn = _ftelli64( fp );
 	if( tempn < 0 || tempn > 0xFFFFFFFF ) {
 		fclose( fp );
 		Errorf( filename, "File is too large" );

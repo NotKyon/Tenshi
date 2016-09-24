@@ -73,13 +73,12 @@ namespace Tenshi { namespace Compiler {
 
 		auto R = m_Projects.AddTail();
 		AX_EXPECT_MSG( R != m_Projects.end(), "Out of memory" );
-		auto &CleanR = Ax::MakeScopeGuard([&](){m_Projects.Remove(R);});
 
 		if( !R->LoadFromFile( pszProjFile ) ) {
+			m_Projects.Remove( R );
 			return nullptr;
 		}
 
-		CleanR.Commit();
 		return R.Get();
 	}
 

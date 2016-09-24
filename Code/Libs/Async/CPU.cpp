@@ -176,7 +176,7 @@ namespace Ax { namespace Async {
 				enum { EAX=0, EBX=1, ECX=2, EDX=3 };
 				uint32 Regs[ 4 ];
 
-				// CPUID( EAX=00h ) ÅÀ EAX: highest function number; EBX,ECX,EDX: vendor string
+				// CPUID( EAX=00h ) ÔøΩÔøΩ EAX: highest function number; EBX,ECX,EDX: vendor string
 				CPUID( Regs, 0 );
 				uLastNormalId = Regs[ EAX ];
 				*( uint32 * )&szVendor[ 0x00 ] = Regs[ EBX ];
@@ -205,7 +205,7 @@ namespace Ax { namespace Async {
 					uF07EBX = Regs[ EBX ];
 				}
 
-				// CPUID( EAX=80000000h ) ÅÀ EAX: highest extended function number
+				// CPUID( EAX=80000000h ) ÔøΩÔøΩ EAX: highest extended function number
 				CPUID( Regs, 0x80000000 );
 				uLastExtendedId = Regs[ EAX ];
 
@@ -348,9 +348,14 @@ namespace Ax { namespace Async {
 # endif
 #elif defined( __GNUC__ ) || defined( __clang__ )
 # if defined( __x64__ ) || defined( __x86_64__ ) || defined( __amd64__ )
-#  error TODO: GCC: AT&T-style RDTSC call for x64
+		uint64 cycles = 0;
+		__asm__ __volatile__( "rdtsc;" : "=a" (cycles) );
+		return cycles;
 # elif defined( __x86__ ) || defined( __i386__ )
-#  error TODO: GCC: AT&T-style RDTSC call for x86
+		uint32 a, b;
+		__asm__ __volatile__( "rdtsc;" : "=a" (a), "=d" (b) );
+		const uint64 cycles = ( uint64(a)<<32 ) | uint64(b);
+		return cycles; 
 # else
 #  error Unhandled architecture for GetCPUCycles()
 # endif

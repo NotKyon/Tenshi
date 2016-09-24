@@ -1452,9 +1452,11 @@ namespace Ax { namespace Parser {
 		}
 
 		if( bIsFloat ) {
+			typedef long double BigFloat;
+
 			OutType = ENumberTokenType::Real;
 
-			long double f = long double( whole );
+			BigFloat f = BigFloat( whole );
 
 			uint64 fractmag = 1;
 			uint64 tmpfract = fract;
@@ -1463,7 +1465,7 @@ namespace Ax { namespace Parser {
 				tmpfract /= radix;
 			}
 
-			f += long double( fract )/long double( fractmag );
+			f += BigFloat( fract )/BigFloat( fractmag );
 			if( expsign > 0 ) {
 				while( exp > 0 ) {
 					f *= 10;

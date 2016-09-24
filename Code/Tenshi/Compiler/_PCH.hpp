@@ -31,18 +31,20 @@
 #include <Parser/Source.hpp>
 #include <Parser/Token.hpp>
 
-#pragma warning(push)
-#pragma warning(disable:4244)
-#pragma warning(disable:4267)
-#pragma warning(disable:4800)
-#pragma warning(disable:4996)
+#ifdef _MSC_VER
+# pragma warning(push)
+# pragma warning(disable:4244)
+# pragma warning(disable:4267)
+# pragma warning(disable:4800)
+# pragma warning(disable:4996)
+#endif
 
 #include <llvm/ADT/Triple.h>
 #include <llvm/Analysis/Passes.h>
 #include <llvm/Bitcode/ReaderWriter.h>
 #include <llvm/CodeGen/LinkAllAsmWriterComponents.h>
 #include <llvm/CodeGen/LinkAllCodegenComponents.h>
-#include <llvm/ExecutionEngine/ExecutionEngine.h>
+//#include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/IR/DataLayout.h>
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/IRBuilder.h>
@@ -52,7 +54,7 @@
 #include <llvm/IR/Verifier.h>
 #include <llvm/MC/SubtargetFeature.h>
 #include <llvm/Pass.h>
-#include <llvm/PassManager.h>
+#include <llvm/IR/LegacyPassManager.h>
 #include <llvm/Support/FileSystem.h>
 #include <llvm/Support/FormattedStream.h>
 #include <llvm/Support/Host.h>
@@ -65,4 +67,6 @@
 
 template class llvm::IRBuilder<>;
 
-#pragma warning(pop)
+#ifdef _MSC_VER
+# pragma warning(pop)
+#endif

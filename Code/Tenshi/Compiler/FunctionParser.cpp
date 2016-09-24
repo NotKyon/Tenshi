@@ -377,7 +377,7 @@ namespace Tenshi { namespace Compiler {
 
 			// This just creates the alloca -- TODO: Just pull into here
 			if( pDecl->m_Semanted.pSym->pVar->Type.BuiltinType == EBuiltinType::UserDefined ) {
-				pDecl->m_Semanted.pSym->Translated.pValue = arg;
+				pDecl->m_Semanted.pSym->Translated.pValue = &*arg;
 			} else {
 				if( !pDecl->CodeGen() ) {
 					CG->LeaveScope();
@@ -390,7 +390,7 @@ namespace Tenshi { namespace Compiler {
 				// Note that LLVM optimizes this away pretty well.
 				AX_ASSERT_NOT_NULL( pDecl->m_Semanted.pSym );
 				AX_ASSERT_NOT_NULL( pDecl->m_Semanted.pSym->Translated.pValue );
-				CG->Builder().CreateStore( arg, pDecl->m_Semanted.pSym->Translated.pValue );
+				CG->Builder().CreateStore( &*arg, pDecl->m_Semanted.pSym->Translated.pValue );
 			}
 		}
 

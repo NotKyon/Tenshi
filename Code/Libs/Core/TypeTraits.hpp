@@ -167,7 +167,7 @@ namespace Ax
 	struct THasTrivialDestructor: public TIntConst< bool, AX_HAS_TRIVIAL_DESTRUCTOR( tObject ) > {};
 
 #define AX_DECLARE_HAS_TRIVIAL_DESTRUCTOR( tElement )\
-	template<> struct Ax::THasTrivialDestructor< tElement >: public TTrue {}
+	template<> struct THasTrivialDestructor< tElement >: public TTrue {}
 
 	AX_DECLARE_HAS_TRIVIAL_DESTRUCTOR( int8 );
 	AX_DECLARE_HAS_TRIVIAL_DESTRUCTOR( int16 );

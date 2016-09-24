@@ -259,7 +259,7 @@ namespace Ax
 	template< typename tElement >
 	inline typename TDictionary< tElement >::SEntry *TDictionary< tElement >::Find( const char *pKey ) const
 	{
-		return const_cast< TDictionary< tElement > * >( this )->FindFromEntry( const_cast< TDictionary< tElement >::SEntry * >( m_pEntries ), pKey, EFindOption::ExistingOnly );
+		return const_cast< TDictionary< tElement > * >( this )->FindFromEntry( const_cast< TDictionary< tElement >::SEntry *& >( m_pEntries ), pKey, EFindOption::ExistingOnly );
 	}
 	template< typename tElement >
 	inline typename TDictionary< tElement >::SEntry *TDictionary< tElement >::Lookup( const char *pKey )
@@ -274,7 +274,7 @@ namespace Ax
 			return nullptr;
 		}
 
-		return const_cast< TDictionary< tElement > * >( this )->FindFromEntry( const_cast< TDictionary< tElement >::SEntry * >( Entry.pEntries ), pszKey, EFindOption::ExistingOnly );
+		return const_cast< TDictionary< tElement > * >( this )->FindFromEntry( const_cast< TDictionary< tElement >::SEntry *& >( Entry.pEntries ), pszKey, EFindOption::ExistingOnly );
 	}
 	template< typename tElement >
 	inline typename TDictionary< tElement >::SEntry *TDictionary< tElement >::LookupFrom( const char *pszKey, SEntry &Entry )

@@ -276,7 +276,7 @@ namespace Ax
 					const uintptr uStartBit = cReservedElements%kMaskBits;
 					for( uintptr uSubloopIndex = 0; uSubloopIndex < kMaskBits; ++uSubloopIndex ) {
 						const uintptr uBitIndex = ( uStartBit + uSubloopIndex )%kMaskBits;
-						if( ~uMask & ( uintptr( 1 )<<uBItIndex ) ) {
+						if( ~uMask & ( uintptr( 1 )<<uBitIndex ) ) {
 							continue;
 						}
 
@@ -299,7 +299,7 @@ namespace Ax
 			}
 		};
 
-		SChunk::IList				m_FreeChunks;
+		typename SChunk::IList		m_FreeChunks;
 		Ax::TArray< SChunk * >		m_Chunks;
 		uintptr						m_cElements;
 

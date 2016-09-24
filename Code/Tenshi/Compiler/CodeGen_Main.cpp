@@ -129,16 +129,15 @@ namespace Tenshi { namespace Compiler {
 		AX_EXPECT_MEMORY( m_pModule );
 
 		m_pModule->setTargetTriple( TripleName );
-		//m_pModule->setDataLayout( *m_pTargetMachine->getDataLayout() );
-		m_pModule->setDataLayout( m_pTargetMachine->getSubtargetImpl()->getDataLayout() );
+		m_pModule->setDataLayout( m_pTargetMachine->createDataLayout() );
 
 		m_pObjFile = nullptr;
 		m_pAsmFile = nullptr;
 
-		m_pPM = new llvm::PassManager();
+		m_pPM = new llvm::legacy::PassManager();
 		AX_EXPECT_MEMORY( m_pPM );
 
-		m_pFPM = new llvm::FunctionPassManager( m_pModule );
+		m_pFPM = new llvm::legacy::FunctionPassManager( m_pModule );
 		AX_EXPECT_MEMORY( m_pFPM );
 
 		/*
@@ -149,7 +148,7 @@ namespace Tenshi { namespace Compiler {
 		*/
 
 		m_pFPM->add( llvm::createVerifierPass() );
-		m_pFPM->add( llvm::createBasicAliasAnalysisPass() );
+		//m_pFPM->add( llvm::createBasicAliasAnalysisPass() );
 		m_pFPM->add( llvm::createInstructionCombiningPass() );
 		m_pFPM->add( llvm::createReassociatePass() );
 		m_pFPM->add( llvm::createGVNPass() );

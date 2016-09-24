@@ -489,6 +489,8 @@ namespace Ax { namespace Math {
 	===========================================================================
 	*/
 
+#if !defined(__GNUC__) || defined(__clang__)
+
 	inline v128 AX_VECTORCALL operator+( p_v128 a )
 	{
 		return a;
@@ -560,5 +562,7 @@ namespace Ax { namespace Math {
 		a = a*( 1.0f/b );
 		return a;
 	}
+
+#endif
 
 }}

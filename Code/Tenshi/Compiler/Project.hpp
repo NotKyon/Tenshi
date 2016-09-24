@@ -218,7 +218,7 @@ namespace Tenshi { namespace Compiler {
 
 	private:
 		friend class MProjects;
-		friend class List;
+		friend List;
 
 		CProject();
 		~CProject();

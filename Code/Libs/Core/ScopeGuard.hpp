@@ -73,7 +73,8 @@ namespace Ax
 	template< class Functor >
 	inline ScopeGuard< Functor > MakeScopeGuard( const Functor &func )
 	{
-		return Forward< ScopeGuard< Functor > >( func );
+		//return Forward< ScopeGuard< Functor > >( func );
+		return ScopeGuard< Functor >( func );
 	}
 
 }

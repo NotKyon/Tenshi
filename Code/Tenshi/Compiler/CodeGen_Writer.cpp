@@ -57,13 +57,15 @@ namespace Tenshi { namespace Compiler {
 
 		m_pPM->run( *m_pModule );
 
+		const bool noVerify = false;
+
 		if( m_pAsmFile != nullptr ) {
-			llvm::PassManager AsmPM;
-			llvm::formatted_raw_ostream AsmFOS( m_pAsmFile->os() );
+			llvm::legacy::PassManager AsmPM;
+			llvm::raw_pwrite_stream *AsmFOS = &m_pAsmFile->os();
 
 			//AsmPM.add( new llvm::DataLayoutPass() );
 
-			if( m_pTargetMachine->addPassesToEmitFile( AsmPM, AsmFOS, llvm::TargetMachine::CGFT_AssemblyFile ) ) {
+			if( m_pTargetMachine->addPassesToEmitFile( AsmPM, *AsmFOS, llvm::TargetMachine::CGFT_AssemblyFile, noVerify ) ) {
 				Ax::BasicErrorf( "Target does not support assembly output" );
 				return false;
 			}
@@ -76,12 +78,12 @@ namespace Tenshi { namespace Compiler {
 		m_pAsmFile = nullptr;
 
 		if( m_pObjFile != nullptr ) {
-			llvm::PassManager ObjPM;
-			llvm::formatted_raw_ostream ObjFOS( m_pObjFile->os() );
+			llvm::legacy::PassManager ObjPM;
+			llvm::raw_pwrite_stream *ObjFOS = &m_pObjFile->os();
 
 			//ObjPM.add( new llvm::DataLayoutPass() );
 
-			if( m_pTargetMachine->addPassesToEmitFile( ObjPM, ObjFOS, llvm::TargetMachine::CGFT_ObjectFile ) ) {
+			if( m_pTargetMachine->addPassesToEmitFile( ObjPM, *ObjFOS, llvm::TargetMachine::CGFT_ObjectFile, noVerify ) ) {
 				Ax::BasicErrorf( "Target does not support object output" );
 				return false;
 			}

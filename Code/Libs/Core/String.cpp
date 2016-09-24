@@ -2907,97 +2907,97 @@ bool Ax::String::ConvertFromEncoding( const TArray< uint8 > &Data, EEncoding InE
 	return true;
 }
 static const Ax::uint32 g_KatakanaConversions[] = {
-	0x0000FF67, // §	30A1
-	0x0000FF71, // ±	30A2
-	0x0000FF68, // ¨	30A3
-	0x0000FF72, // ²	30A4
-	0x0000FF69, // ©	30A5
-	0x0000FF73, // ³	30A6
-	0x0000FF6A, // ª	30A7
-	0x0000FF74, // ´	30A8
-	0x0000FF6B, // «	30A9
-	0x0000FF75, // µ	30AA
-	0x0000FF76, // ¶	30AB
-	0xFF9EFF76, // ¶Þ	30AC
-	0x0000FF77, // ·	30AD
-	0xFF9EFF77, // ·Þ	30AE
-	0x0000FF78, // ¸	30AF
-	0xFF9EFF78, // ¸Þ	30B0
-	0x0000FF79, // ¹	30B1
-	0xFF9EFF79, // ¹Þ	30B2
-	0x0000FF7A, // º	30B3
-	0xFF9EFF7A, // ºÞ	30B4
-	0x0000FF7B, // »	30B5
-	0xFF9EFF7B, // »Þ	30B6
-	0x0000FF7C, // ¼	30B7
-	0xFF9EFF7C, // ¼Þ	30B8
-	0x0000FF7D, // ½	30B9
-	0xFF9EFF7D, // ½Þ	30BA
-	0x0000FF7E, // ¾	30BB
-	0xFF9EFF7E, // ¾Þ	30BC
-	0x0000FF7F, // ¿	30BD
-	0xFF9EFF7F, // ¿Þ	30BE
-	0x0000FF80, // À	30BF
-	0xFF9EFF80, // ÀÞ	30C0
-	0x0000FF81, // Á	30C1
-	0xFF9EFF81, // ÁÞ	30C2
-	0x0000FF6F, // ¯	30C3
-	0x0000FF82, // Â	30C4
-	0xFF9EFF82, // ÂÞ	30C5
-	0x0000FF83, // Ã	30C6
-	0xFF9EFF83, // ÃÞ	30C7
-	0x0000FF84, // Ä	30C8
-	0xFF9EFF84, // ÄÞ	30C9
-	0x0000FF85, // Å	30CA
-	0x0000FF86, // Æ	30CB
-	0x0000FF87, // Ç	30CC
-	0x0000FF88, // È	30CD
-	0x0000FF89, // É	30CE
-	0x0000FF8A, // Ê	30CF
-	0xFF9EFF8A, // ÊÞ	30D0
-	0xFF9FFF8A, // Êß	30D1
-	0x0000FF8B, // Ë	30D2
-	0xFF9EFF8B, // ËÞ	30D3
-	0xFF9FFF8B, // Ëß	30D4
-	0x0000FF8C, // Ì	30D5
-	0xFF9EFF8C, // ÌÞ	30D6
-	0xFF9FFF8C, // Ìß	30D7
-	0x0000FF8D, // Í	30D8
-	0xFF9EFF8D, // ÍÞ	30D9
-	0xFF9FFF8D, // Íß	30DA
-	0x0000FF8E, // Î	30DB
-	0xFF9EFF8E, // ÎÞ	30DC
-	0xFF9FFF8E, // Îß	30DD
-	0x0000FF8F, // Ï	30DE
-	0x0000FF90, // Ð	30DF
-	0x0000FF91, // Ñ	30E0
-	0x0000FF92, // Ò	30E1
-	0x0000FF93, // Ó	30E2
-	0x0000FF6C, // ¬	30E3
-	0x0000FF94, // Ô	30E4
-	0x0000FF6D, // ­	30E5
-	0x0000FF95, // Õ	30E6
-	0x0000FF6E, // ®	30E7
-	0x0000FF96, // Ö	30E8
-	0x0000FF97, // ×	30E9
-	0x0000FF98, // Ø	30EA
-	0x0000FF99, // Ù	30EB
-	0x0000FF9A, // Ú	30EC
-	0x0000FF9B, // Û	30ED
-	0x0000FF9C, // Ü	30EE	NOTE: No half-width small wa? This uses the half-width wa.
-	0x0000FF9C, // Ü	30EF
+	0x0000FF67, // ï¿½	30A1
+	0x0000FF71, // ï¿½	30A2
+	0x0000FF68, // ï¿½	30A3
+	0x0000FF72, // ï¿½	30A4
+	0x0000FF69, // ï¿½	30A5
+	0x0000FF73, // ï¿½	30A6
+	0x0000FF6A, // ï¿½	30A7
+	0x0000FF74, // ï¿½	30A8
+	0x0000FF6B, // ï¿½	30A9
+	0x0000FF75, // ï¿½	30AA
+	0x0000FF76, // ï¿½	30AB
+	0xFF9EFF76, // ï¿½ï¿½	30AC
+	0x0000FF77, // ï¿½	30AD
+	0xFF9EFF77, // ï¿½ï¿½	30AE
+	0x0000FF78, // ï¿½	30AF
+	0xFF9EFF78, // ï¿½ï¿½	30B0
+	0x0000FF79, // ï¿½	30B1
+	0xFF9EFF79, // ï¿½ï¿½	30B2
+	0x0000FF7A, // ï¿½	30B3
+	0xFF9EFF7A, // ï¿½ï¿½	30B4
+	0x0000FF7B, // ï¿½	30B5
+	0xFF9EFF7B, // ï¿½ï¿½	30B6
+	0x0000FF7C, // ï¿½	30B7
+	0xFF9EFF7C, // ï¿½ï¿½	30B8
+	0x0000FF7D, // ï¿½	30B9
+	0xFF9EFF7D, // ï¿½ï¿½	30BA
+	0x0000FF7E, // ï¿½	30BB
+	0xFF9EFF7E, // ï¿½ï¿½	30BC
+	0x0000FF7F, // ï¿½	30BD
+	0xFF9EFF7F, // ï¿½ï¿½	30BE
+	0x0000FF80, // ï¿½	30BF
+	0xFF9EFF80, // ï¿½ï¿½	30C0
+	0x0000FF81, // ï¿½	30C1
+	0xFF9EFF81, // ï¿½ï¿½	30C2
+	0x0000FF6F, // ï¿½	30C3
+	0x0000FF82, // ï¿½	30C4
+	0xFF9EFF82, // ï¿½ï¿½	30C5
+	0x0000FF83, // ï¿½	30C6
+	0xFF9EFF83, // ï¿½ï¿½	30C7
+	0x0000FF84, // ï¿½	30C8
+	0xFF9EFF84, // ï¿½ï¿½	30C9
+	0x0000FF85, // ï¿½	30CA
+	0x0000FF86, // ï¿½	30CB
+	0x0000FF87, // ï¿½	30CC
+	0x0000FF88, // ï¿½	30CD
+	0x0000FF89, // ï¿½	30CE
+	0x0000FF8A, // ï¿½	30CF
+	0xFF9EFF8A, // ï¿½ï¿½	30D0
+	0xFF9FFF8A, // ï¿½ï¿½	30D1
+	0x0000FF8B, // ï¿½	30D2
+	0xFF9EFF8B, // ï¿½ï¿½	30D3
+	0xFF9FFF8B, // ï¿½ï¿½	30D4
+	0x0000FF8C, // ï¿½	30D5
+	0xFF9EFF8C, // ï¿½ï¿½	30D6
+	0xFF9FFF8C, // ï¿½ï¿½	30D7
+	0x0000FF8D, // ï¿½	30D8
+	0xFF9EFF8D, // ï¿½ï¿½	30D9
+	0xFF9FFF8D, // ï¿½ï¿½	30DA
+	0x0000FF8E, // ï¿½	30DB
+	0xFF9EFF8E, // ï¿½ï¿½	30DC
+	0xFF9FFF8E, // ï¿½ï¿½	30DD
+	0x0000FF8F, // ï¿½	30DE
+	0x0000FF90, // ï¿½	30DF
+	0x0000FF91, // ï¿½	30E0
+	0x0000FF92, // ï¿½	30E1
+	0x0000FF93, // ï¿½	30E2
+	0x0000FF6C, // ï¿½	30E3
+	0x0000FF94, // ï¿½	30E4
+	0x0000FF6D, // ï¿½	30E5
+	0x0000FF95, // ï¿½	30E6
+	0x0000FF6E, // ï¿½	30E7
+	0x0000FF96, // ï¿½	30E8
+	0x0000FF97, // ï¿½	30E9
+	0x0000FF98, // ï¿½	30EA
+	0x0000FF99, // ï¿½	30EB
+	0x0000FF9A, // ï¿½	30EC
+	0x0000FF9B, // ï¿½	30ED
+	0x0000FF9C, // ï¿½	30EE	NOTE: No half-width small wa? This uses the half-width wa.
+	0x0000FF9C, // ï¿½	30EF
 	0x00000000, // .	30F0	NOTE: No half-width version (uncommon; wi)
 	0x00000000, // .	30F1	NOTE: No half-width version (uncommon; we)
-	0x0000FF66, // ¦	30F2
-	0x0000FF9D, // Ý	30F3
-	0x0000FF73, // ³Þ	30F4	NOTE: vu = u + diacritic
+	0x0000FF66, // ï¿½	30F2
+	0x0000FF9D, // ï¿½	30F3
+	0x0000FF73, // ï¿½ï¿½	30F4	NOTE: vu = u + diacritic
 	0x00000000, // .	30F5	NOTE: No half-width version (small ka)
 	0x00000000, // .	30F6	NOTE: No half-width version (small ke)
-	0xFF9EFF73, // ÜÞ	30F7	NOTE: va = wa + diacritic
+	0xFF9EFF73, // ï¿½ï¿½	30F7	NOTE: va = wa + diacritic
 	0x00000000, // .	30F8	NOTE: No half-width version (vi = wi + diacritic; no wi)
 	0x00000000, // .	30F9	NOTE: No half-width version (ve = we + diacritic; no we)
-	0xFF9EFF66, // ¦Þ	30FA	NOTE: vo = wo + diacritic
-	0x0000FF65  // ¥	30FB	NOTE: This is a middle dot (half-width) not a period
+	0xFF9EFF66, // ï¿½ï¿½	30FA	NOTE: vo = wo + diacritic
+	0x0000FF65  // ï¿½	30FB	NOTE: This is a middle dot (half-width) not a period
 };
 
 static Ax::uint32 HalfwidthKatakanaToFullwidthKatakana( Ax::uint32 UTF32Char, Ax::uint32 *pDstMark = NULL )
@@ -3244,7 +3244,9 @@ double Ax::String::ToFloat( const char *p, int radix, char chDigitSep )
 		e = ReadUIntPart( p, radix, chDigitSep );
 	}
 
-	long double f = long double( whole );
+	typedef long double BigFloat;
+
+	BigFloat f = BigFloat( whole );
 
 	uint64 fractmag = 1;
 	uint64 tmpfract = fract;
@@ -3253,7 +3255,7 @@ double Ax::String::ToFloat( const char *p, int radix, char chDigitSep )
 		tmpfract /= radix;
 	}
 
-	f += long double( fract )/long double( fractmag );
+	f += BigFloat( fract )/BigFloat( fractmag );
 	while( e > 0 ) {
 		if( esign > 0 ) {
 			f *= 10;

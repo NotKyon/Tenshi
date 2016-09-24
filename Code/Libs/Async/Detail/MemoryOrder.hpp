@@ -4,7 +4,6 @@
 # include <intrin.h>
 # pragma intrinsic( _ReadWriteBarrier )
 # pragma intrinsic( _mm_mfence )
-#elif defined( __GNUC__ ) || defined( __clang__ )
 #else
 # include <atomic>
 #endif

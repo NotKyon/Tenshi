@@ -398,6 +398,7 @@ namespace Tenshi { namespace Compiler {
 #define TENSHI_RTTI_COUNT_SYM "__tenshi_rtti__count"
 #define TENSHI_RTTI_ARRAY_SYM "__tenshi_rtti__array"
 
+		llvm::Type *const pUInt8PtrTy = llvm::Type::getInt8PtrTy( m_Context );
 		llvm::Type *const pUInt32Ty = llvm::Type::getInt32Ty( m_Context );
 		llvm::Type *const pUIntPtrTy = llvm::Type::getIntNTy( m_Context, g_Env->GetPointerBits() );
 
@@ -512,8 +513,8 @@ namespace Tenshi { namespace Compiler {
 			llvm::Constant *const pTyFlag = llvm::ConstantInt::get( pUInt32Ty, ( uint64_t )uFlags, false );
 			llvm::Constant *const pTySize = llvm::ConstantInt::get( pUInt32Ty, ( uint64_t )UDT.cBytes, false );
 			
-			llvm::Constant *const pTyName = llvm::ConstantExpr::getInBoundsGetElementPtr( pStringBuffer, pIndexes1 );
-			llvm::Constant *const pTyPtrn = llvm::ConstantExpr::getInBoundsGetElementPtr( pStringBuffer, pIndexes2 );
+			llvm::Constant *const pTyName = llvm::ConstantExpr::getInBoundsGetElementPtr( pUInt8PtrTy, pStringBuffer, pIndexes1 );
+			llvm::Constant *const pTyPtrn = llvm::ConstantExpr::getInBoundsGetElementPtr( pUInt8PtrTy, pStringBuffer, pIndexes2 );
 
 			llvm::Constant *const pTyInit = UDT.bIsInitTrivial ? pNullInitFn : UDT.pLLVMInitFn;
 			llvm::Constant *const pTyFini = UDT.bIsFiniTrivial ? pNullFiniFn : UDT.pLLVMFiniFn;

@@ -4,6 +4,7 @@
 #undef Yield
 
 #include "../Platform/Platform.hpp"
+#include "../Core/Types.hpp"
 #if AX_DEBUG_ENABLED
 # include "../Core/String.hpp"
 #endif

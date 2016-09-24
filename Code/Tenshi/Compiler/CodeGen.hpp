@@ -118,7 +118,7 @@ namespace Tenshi { namespace Compiler {
 		{
 			return m_IRBuilder;
 		}
-		inline llvm::FunctionPassManager &FPM()
+		inline llvm::legacy::FunctionPassManager &FPM()
 		{
 			AX_ASSERT_NOT_NULL( m_pFPM );
 			return *m_pFPM;
@@ -215,8 +215,8 @@ namespace Tenshi { namespace Compiler {
 		llvm::Function *			m_pEntryFunc;
 		llvm::Function *			m_pCurrentFunc;
 		llvm::BasicBlock *			m_pCurrentBlock;
-		llvm::PassManager *			m_pPM;
-		llvm::FunctionPassManager *	m_pFPM;
+		llvm::legacy::PassManager *	m_pPM;
+		llvm::legacy::FunctionPassManager *m_pFPM;
 		const llvm::Target *		m_pTarget;
 		llvm::TargetMachine *		m_pTargetMachine;
 		llvm::tool_output_file *	m_pObjFile;

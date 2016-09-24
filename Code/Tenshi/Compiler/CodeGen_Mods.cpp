@@ -88,6 +88,7 @@ namespace Tenshi { namespace Compiler {
 			llvm::Constant *const pModName =
 					llvm::ConstantExpr::getInBoundsGetElementPtr
 					(
+						pModNameBufferInit->getType(),
 						pModNameBuffer,
 						llvm::makeArrayRef( pIndexes )
 					);

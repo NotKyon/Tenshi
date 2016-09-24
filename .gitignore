@@ -20,13 +20,8 @@ code/.temp/*
 [Oo]bj/
 [Oo]bj32/
 [Oo]bj64/
-
-# Special exception
-
-!Build/
-!Build/Win32/
-!Build/Win32/Bin64/
-!Build/Win32/Bin64/script.ini
+.target/
+.build/
 
 # Distribution results
 

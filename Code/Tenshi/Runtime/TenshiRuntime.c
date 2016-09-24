@@ -3339,12 +3339,17 @@ TENSHI_FUNC void TENSHI_CALL teCopyMemblock( TenshiIndex_t MemblockFrom, TenshiI
 ===============================================================================
 */
 
+/*
+	FIXME: Convert argc/argv to proper UTF-8 strings on Windows
+	TODO: Look into widestring variants of argc/argv for other platforms
+*/
+
 extern void TenshiMain( void );
 
-int main( int argc, char **argv )
+static int commonMain( int argc, char **argv )
 {
-	( void )argc;
-	( void )argv;
+	g_RTGlob.argc = argc;
+	g_RTGlob.argv = argv;
 
 	/*teInitGlob();*/
 	atexit( &teFini );
@@ -3353,3 +3358,22 @@ int main( int argc, char **argv )
 
 	return EXIT_SUCCESS;
 }
+
+int main( int argc, char **argv )
+{
+	return commonMain( argc, argv );
+}
+
+#ifdef _WIN32
+# ifndef WINAPI
+#  define WINAPI __stdcall
+#  define HINSTANCE void*
+#  define LPSTR char *
+# endif
+int WINAPI WinMain(HINSTANCE a, HINSTANCE b, LPSTR c, int d) {
+	/* unused parameters */
+	((void)a); ((void)b); ((void)c); ((void)d);
+
+	return commonMain( __argc, __argv );
+}
+#endif

@@ -1400,6 +1400,8 @@ namespace Tenshi { namespace Compiler {
 
 		llvm::Value *pResultVal = nullptr;
 
+		llvm::Value *pArgs[] = { pLHSVal, pRHSVal };
+
 		if( bIsRelOp ) {
 			CG->SetCurrentBlock( *pEndEval );
 
@@ -1489,19 +1491,19 @@ namespace Tenshi { namespace Compiler {
 			break;
 
 		case EBuiltinOp::StrConcat:
-			pResultVal = CG->Builder().CreateCall2( CG->InternalFuncs().pStrConcat, pLHSVal, pRHSVal, "strcattmp" );
+			pResultVal = CG->Builder().CreateCall( CG->InternalFuncs().pStrConcat, pArgs, "strcattmp" );
 			CG->AddCleanCall( CG->InternalFuncs().pStrReclaim, pResultVal );
 			break;
 		case EBuiltinOp::StrRemove:
-			pResultVal = CG->Builder().CreateCall2( CG->InternalFuncs().pStrFindRm, pLHSVal, pRHSVal, "strremtmp" );
+			pResultVal = CG->Builder().CreateCall( CG->InternalFuncs().pStrFindRm, pArgs, "strremtmp" );
 			CG->AddCleanCall( CG->InternalFuncs().pStrReclaim, pResultVal );
 			break;
 		case EBuiltinOp::StrRepeat:
-			pResultVal = CG->Builder().CreateCall2( CG->InternalFuncs().pStrRepeat, pLHSVal, pRHSVal, "strreptmp" );
+			pResultVal = CG->Builder().CreateCall( CG->InternalFuncs().pStrRepeat, pArgs, "strreptmp" );
 			CG->AddCleanCall( CG->InternalFuncs().pStrReclaim, pResultVal );
 			break;
 		case EBuiltinOp::StrAddPath:
-			pResultVal = CG->Builder().CreateCall2( CG->InternalFuncs().pStrCatDir, pLHSVal, pRHSVal, "strdirtmp" );
+			pResultVal = CG->Builder().CreateCall( CG->InternalFuncs().pStrCatDir, pArgs, "strdirtmp" );
 			CG->AddCleanCall( CG->InternalFuncs().pStrReclaim, pResultVal );
 			break;
 

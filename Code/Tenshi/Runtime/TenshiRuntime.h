@@ -557,6 +557,9 @@ struct TenshiRuntimeGlob_s
 {
 	TenshiUInt32_t					uRuntimeVersion;
 
+	int								argc;
+	char **							argv;
+
 	struct TenshiRTTypeInfo_s *		pTypeInfo;
 	struct TenshiEngineTypes_s *	pEngineTypes;
 

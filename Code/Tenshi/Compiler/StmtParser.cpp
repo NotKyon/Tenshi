@@ -417,7 +417,8 @@ namespace Tenshi { namespace Compiler {
 			return false;
 		}
 
-		llvm::Value *const pCanContinue = CG->Builder().CreateCall( CG->InternalFuncs().pSafeSync, "cancontinue" );
+		llvm::ArrayRef<llvm::Value*> args;
+		llvm::Value *const pCanContinue = CG->Builder().CreateCall( CG->InternalFuncs().pSafeSync, args, "cancontinue" );
 		CG->Builder().CreateCondBr( pCanContinue, pLoopEnter, pLoopLeave );
 
 		CG->SetCurrentBlock( *pLoopLeave );
