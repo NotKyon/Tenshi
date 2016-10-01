@@ -118,6 +118,8 @@ namespace Tenshi { namespace Compiler {
 					++cFailures;
 					continue;
 				}
+
+				ArgType = pOpt->GetArgumentType();
 			}
 
 			AX_ASSERT_NOT_NULL( pOpt );

@@ -26,7 +26,7 @@ using namespace Tenshi::Compiler;
 
 namespace Tenshi { namespace Compiler {
 
-	class CHelpOption: public virtual IOption
+	class CHelpOption: public IOption
 	{
 	public:
 		CHelpOption(): IOption()
@@ -253,7 +253,7 @@ namespace Tenshi { namespace Compiler {
 		}
 	};
 
-	class CCompileOnlyOption: public virtual IOption
+	class CCompileOnlyOption: public IOption
 	{
 	public:
 		CCompileOnlyOption()
