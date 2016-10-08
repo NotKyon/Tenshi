@@ -327,7 +327,7 @@ The following are additional functions to be added:
 - SKIP ANY OF$( Original$, Characters$ )
 --- Parses the string, skipping past all starting characters in Characters$
 
-- SKIPPED()
+- SKIPPED?()
 --- Returns TRUE if the last SKIP <x>$() call processed anything
 - SKIPPED LEN()
 --- Returns the length (in bytes) of whatever was skipped

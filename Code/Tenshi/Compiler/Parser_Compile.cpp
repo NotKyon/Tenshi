@@ -106,7 +106,7 @@ namespace Tenshi { namespace Compiler {
 		}
 
 		// Save reflection data
-		CG->EmitReflectionData();
+		//CG->EmitReflectionData();
 
 		// Finally, write out all of the module information we have
 		CG->EmitModuleInfo();

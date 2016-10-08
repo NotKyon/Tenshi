@@ -3,6 +3,7 @@
 
 #include <stdarg.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 #ifndef TENSHI_STATIC_LINK_ENABLED
 # define TENSHI_STATIC_LINK_ENABLED	0
@@ -119,12 +120,10 @@ typedef struct TenshiChecklistItem_s TenshiChecklistItem_t;
 #endif
 
 #ifndef TENSHI_SELECTANY
-# if defined( _MSC_VER )
-#  define TENSHI_SELECTANY			__declspec( selectany )
-# elif defined( __GNU__ ) || defined( __clang__ )
-#  define TENSHI_SELECTANY			__attribute__(( weak ))
+# if defined( _WIN32 ) || defined( _MSC_VER )
+#  define TENSHI_SELECTANY			__declspec(selectany)
 # else
-#  define TENSHI_SELECTANY
+#  define TENSHI_SELECTANY			__attribute__((weak))
 # endif
 #endif
 
@@ -1034,31 +1033,39 @@ inline void operator delete( void *, void *, Tenshi::PlcmntNw )
 namespace Tenshi
 {
 
-	TENSHI_SELECTANY extern TenshiRuntimeGlob_t *			g_pGlob						= 0;
+#ifndef TENSHI_SHAREDLINK
+# ifdef _MSC_VER
+#  define TENSHI_SHAREDLINK TENSHI_SELECTANY extern
+# else
+#  define TENSHI_SHAREDLINK TENSHI_SELECTANY
+# endif
+#endif
+
+	TENSHI_SHAREDLINK TenshiRuntimeGlob_t *			g_pGlob						= 0;
 
 # if !TENSHI_STATIC_LINK_ENABLED
-	TENSHI_SELECTANY extern TenshiFnAlloc_t					g_pfnAlloc					= 0;
-	TENSHI_SELECTANY extern TenshiFnDealloc_t				g_pfnDealloc				= 0;
+	TENSHI_SHAREDLINK TenshiFnAlloc_t				g_pfnAlloc					= 0;
+	TENSHI_SHAREDLINK TenshiFnDealloc_t				g_pfnDealloc				= 0;
 
-	TENSHI_SELECTANY extern TenshiFnString_t				g_pfnString					= 0;
-	TENSHI_SELECTANY extern TenshiFnStrDup_t				g_pfnStrDup					= 0;
+	TENSHI_SHAREDLINK TenshiFnString_t				g_pfnString					= 0;
+	TENSHI_SHAREDLINK TenshiFnStrDup_t				g_pfnStrDup					= 0;
 
-	TENSHI_SELECTANY extern TenshiFnLogfv_t					g_pfnLogfv					= 0;
-	TENSHI_SELECTANY extern TenshiFnRuntimeError_t			g_pfnRuntimeError			= 0;
+	TENSHI_SHAREDLINK TenshiFnLogfv_t				g_pfnLogfv					= 0;
+	TENSHI_SHAREDLINK TenshiFnRuntimeError_t		g_pfnRuntimeError			= 0;
 	
-	TENSHI_SELECTANY extern TenshiFnAllocEnginePool_t		g_pfnAllocEnginePool		= 0;
-	TENSHI_SELECTANY extern TenshiFnEngineObjectExists_t	g_pfnEngineObjectExists		= 0;
-	TENSHI_SELECTANY extern TenshiFnReserveEngineObjects_t	g_pfnReserveEngineObjects	= 0;
-	TENSHI_SELECTANY extern TenshiFnAllocEngineObject_t		g_pfnAllocEngineObject		= 0;
-	TENSHI_SELECTANY extern TenshiFnDeallocEngineObject_t	g_pfnDeallocEngineObject	= 0;
-	TENSHI_SELECTANY extern TenshiFnUnwrapEngineObject_t	g_pfnUnwrapEngineObject		= 0;
+	TENSHI_SHAREDLINK TenshiFnAllocEnginePool_t		g_pfnAllocEnginePool		= 0;
+	TENSHI_SHAREDLINK TenshiFnEngineObjectExists_t	g_pfnEngineObjectExists		= 0;
+	TENSHI_SHAREDLINK TenshiFnReserveEngineObjects_t	g_pfnReserveEngineObjects	= 0;
+	TENSHI_SHAREDLINK TenshiFnAllocEngineObject_t	g_pfnAllocEngineObject		= 0;
+	TENSHI_SHAREDLINK TenshiFnDeallocEngineObject_t	g_pfnDeallocEngineObject	= 0;
+	TENSHI_SHAREDLINK TenshiFnUnwrapEngineObject_t	g_pfnUnwrapEngineObject		= 0;
 
-	TENSHI_SELECTANY extern TenshiFnAllocMemblock_t			g_pfnAllocMemblock			= 0;
-	TENSHI_SELECTANY extern TenshiFnMakeMemblock_t			g_pfnMakeMemblock			= 0;
-	TENSHI_SELECTANY extern TenshiFnDeleteMemblock_t		g_pfnDeleteMemblock			= 0;
-	TENSHI_SELECTANY extern TenshiFnMemblockExist_t			g_pfnMemblockExist			= 0;
-	TENSHI_SELECTANY extern TenshiFnGetMemblockPtr_t		g_pfnGetMemblockPtr			= 0;
-	TENSHI_SELECTANY extern TenshiFnGetMemblockSize_t		g_pfnGetMemblockSize		= 0;
+	TENSHI_SHAREDLINK TenshiFnAllocMemblock_t		g_pfnAllocMemblock			= 0;
+	TENSHI_SHAREDLINK TenshiFnMakeMemblock_t		g_pfnMakeMemblock			= 0;
+	TENSHI_SHAREDLINK TenshiFnDeleteMemblock_t		g_pfnDeleteMemblock			= 0;
+	TENSHI_SHAREDLINK TenshiFnMemblockExist_t		g_pfnMemblockExist			= 0;
+	TENSHI_SHAREDLINK TenshiFnGetMemblockPtr_t		g_pfnGetMemblockPtr			= 0;
+	TENSHI_SHAREDLINK TenshiFnGetMemblockSize_t		g_pfnGetMemblockSize		= 0;
 # endif
 
 	TENSHI_FORCEINLINE void *Alloc( TenshiUIntPtr_t cBytes, int iMemtag = TENSHI_MEMTAG )
@@ -1121,7 +1128,7 @@ namespace Tenshi
 		g_pfnLogfv( flags, pszMod, pszFile, Line, pszFunc, pszExpr, pszFormat, args );
 # endif
 	}
-	TENSHI_FORCEINLINE void Logf( TenshiUInt16_t flags, const char *pszMod, const char *pszFile,
+	inline void Logf( TenshiUInt16_t flags, const char *pszMod, const char *pszFile,
 	TenshiUInt32_t Line, const char *pszFunc, const char *pszExpr, const char *pszFormat, ... )
 	{
 		va_list args;
@@ -1141,6 +1148,7 @@ namespace Tenshi
 # else
 		g_pfnRuntimeError( Facility, pszModName, ErrorId );
 # endif
+		abort();
 	}
 
 	TENSHI_FORCEINLINE TenshiObjectPool_t *AllocEnginePool( TenshiFnAllocObject_t pfnAlloc, TenshiFnDeallocObject_t pfnDealloc )

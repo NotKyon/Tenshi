@@ -3346,7 +3346,7 @@ TENSHI_FUNC void TENSHI_CALL teCopyMemblock( TenshiIndex_t MemblockFrom, TenshiI
 
 extern void TenshiMain( void );
 
-static int commonMain( int argc, char **argv )
+static int CommonMain( int argc, char **argv )
 {
 	g_RTGlob.argc = argc;
 	g_RTGlob.argv = argv;
@@ -3361,7 +3361,7 @@ static int commonMain( int argc, char **argv )
 
 int main( int argc, char **argv )
 {
-	return commonMain( argc, argv );
+	return CommonMain( argc, argv );
 }
 
 #ifdef _WIN32
@@ -3374,6 +3374,6 @@ int WINAPI WinMain(HINSTANCE a, HINSTANCE b, LPSTR c, int d) {
 	/* unused parameters */
 	((void)a); ((void)b); ((void)c); ((void)d);
 
-	return commonMain( __argc, __argv );
+	return CommonMain( __argc, __argv );
 }
 #endif

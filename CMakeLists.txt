@@ -2,6 +2,7 @@
 project(Tenshi)
 
 set_property(GLOBAL PROPERTY CXX_STANDARD 14)
+set_property(GLOBAL PROPERTY DEBUG_SUFFIX Dbg)
 
 find_package(LLVM REQUIRED CONFIG)
 
@@ -18,6 +19,35 @@ llvm_map_components_to_libnames(llvm_libs support core cppbackend cppbackendcode
 
 # The following is probably what we want on more full LLVM systems
 # llvm_map_components_to_libnames(llvm_libs support xcorecodegen core bpfcodegen hexagoncodegen mipscodegen msp430codegen nvptxcodegen powerpccodegen sparccodegen systemzcodegen cppbackend cppbackendcodegen armcodegen amdgpucodegen aarch64codegen native asmprinter systemz)
+
+# ============================================================================ #
+
+set(AXMODS_DIR "Code/Tenshi/Modules")
+
+function(prepend var prefix)
+	set(result "")
+	foreach(arg ${ARGN})
+		list(APPEND result "${prefix}/${arg}")
+	endforeach()
+	set(${var} "${result}" PARENT_SCOPE)
+endfunction()
+
+function(add_tenshi_api moduleName)
+	set(files "")
+	prepend(files "${AXMODS_DIR}/${moduleName}" ${ARGN})
+
+	add_library("${moduleName}" SHARED ${files})
+	set_target_properties("${moduleName}" PROPERTIES RUNTIME_OUTPUT_DIRECTORY "plugins-core")
+	set_target_properties("${moduleName}" PROPERTIES PREFIX "")
+	set_target_properties("${moduleName}" PROPERTIES DEBUG_SUFFIX "Dbg")
+
+	file(COPY "${AXMODS_DIR}/${moduleName}/${moduleName}.commands" DESTINATION "plugins-core")
+
+	target_link_libraries("${moduleName}"
+		${ax_libs}
+		${llvm_libs}
+	)
+endfunction()
 
 #==============================================================================#
 
@@ -40,6 +70,20 @@ set(AXLIBS_PARSERDIR "${AXLIBS_DIR}/Parser")
 set(AXLIBS_PLATDIR "${AXLIBS_DIR}/Platform")
 set(AXLIBS_SYSDIR "${AXLIBS_DIR}/System")
 set(AXLIBS_WINDIR "${AXLIBS_DIR}/Window")
+
+set(ax_libs
+	AxAllocation
+	AxAsync
+	AxCollections
+	AxConsole
+	AxCore
+	AxInput
+	AxMath
+	AxParser
+	AxPlatform
+	AxSystem
+	AxWindow
+)
 
 add_library(AxAllocation
 	${AXLIBS_ALLOCDIR}/AxAllocation.cpp
@@ -259,4 +303,25 @@ target_link_libraries(Tenshi
 add_library(TenshiRuntime
 	${TENSHI_RDIR}/TenshiRuntime.c
 	${TENSHI_RDIR}/TenshiRuntime.h
+)
+
+file(COPY "ThirdParty/GNU" DESTINATION ".")
+
+# Modules
+
+add_tenshi_api("API.FileSystem"
+	../APICommon.hpp
+	_PCH.cpp
+	_PCH.hpp
+	Directory.cpp
+	Directory.hpp
+	File.cpp
+	File.hpp
+	FileMgr.cpp
+	FileMgr.hpp
+	FindFiles.cpp
+	Main.cpp
+	Path.cpp
+	Path.hpp
+	StreamType.hpp
 )

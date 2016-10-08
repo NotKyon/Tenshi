@@ -162,7 +162,7 @@ namespace Tenshi { namespace Compiler {
 			case EModule::Internal:
 			case EModule::DynamicLibrary:
 			case EModule::StaticLibrary:
-				Linkage = llvm::GlobalValue::LinkageTypes::AvailableExternallyLinkage;
+				Linkage = llvm::GlobalValue::LinkageTypes::ExternalLinkage;
 				break;
 			case EModule::UserCode:
 				break;

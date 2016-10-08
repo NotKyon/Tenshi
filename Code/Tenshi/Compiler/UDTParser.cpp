@@ -268,6 +268,8 @@ namespace Tenshi { namespace Compiler {
 				llvm::APInt( 32, ( uint64_t )uElementIndex, false )
 			);
 
+#if 0 // FIXME: Actually generate the functions
+
 		// Constructor
 		if( !m_pTypeInfo->bIsInitTrivial ) {
 			m_pTypeInfo->pLLVMInitFn = llvm::Function::Create
@@ -311,6 +313,8 @@ namespace Tenshi { namespace Compiler {
 					&CG->Module()
 				);
 		}
+
+#endif
 
 		CG->RegisterUDT( *m_pTypeInfo );
 

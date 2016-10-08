@@ -4,11 +4,18 @@
 #include <sys/stat.h>
 
 #ifndef TENSHIRUNTIME_O
-# if AX_DEBUG_ENABLED
-#  define TENSHIRUNTIME_O "TenshiRuntimeDbg.o"
+# if 0
+#  if AX_DEBUG_ENABLED
+#   define TENSHIRUNTIME_O "TenshiRuntimeDbg.o"
+#  else
+#   define TENSHIRUNTIME_O "TenshiRuntime.o"
+#  endif
 # else
-#  define TENSHIRUNTIME_O "TenshiRuntime.o"
+#  define TENSHIRUNTIME_O "libTenshiRuntime.a"
 # endif
+#endif
+#ifndef GNU_SYSROOT_DIR
+# define GNU_SYSROOT_DIR "GNU"
 #endif
 
 namespace Tenshi { namespace Compiler {
@@ -74,7 +81,7 @@ namespace Tenshi { namespace Compiler {
 	{
 		char szBuff[ PATH_MAX + 1 ];
 
-		if( !GetPath( szBuff, "../../ThirdParty/GNU" ) ) {
+		if( !GetPath( szBuff, GNU_SYSROOT_DIR ) ) {
 			Ax::BasicErrorf( "Could not obtain path to GNU sysroot" );
 			return false;
 		}

@@ -497,12 +497,16 @@ namespace Tenshi { namespace Compiler {
 				continue;
 			}
 
+#define ORIGINAL_MODE 0
+
+#if ORIGINAL_MODE
 			llvm::Constant *const pOff1 = llvm::ConstantInt::get( pUIntPtrTy, ( uint64_t )StringOffs[ uIndex + 0 ], false );
 			llvm::Constant *const pOff2 = llvm::ConstantInt::get( pUIntPtrTy, ( uint64_t )StringOffs[ uIndex + 1 ], false );
 			uIndex += 2;
 
 			llvm::Constant *const pIndexes1[] = { pZero, pOff1 };
 			llvm::Constant *const pIndexes2[] = { pZero, pOff2 };
+#endif
 
 			unsigned uFlags = 0;
 			if( UDT.bIsInitTrivial ) { uFlags |= 0x01; }
@@ -513,8 +517,43 @@ namespace Tenshi { namespace Compiler {
 			llvm::Constant *const pTyFlag = llvm::ConstantInt::get( pUInt32Ty, ( uint64_t )uFlags, false );
 			llvm::Constant *const pTySize = llvm::ConstantInt::get( pUInt32Ty, ( uint64_t )UDT.cBytes, false );
 			
-			llvm::Constant *const pTyName = llvm::ConstantExpr::getInBoundsGetElementPtr( pUInt8PtrTy, pStringBuffer, pIndexes1 );
-			llvm::Constant *const pTyPtrn = llvm::ConstantExpr::getInBoundsGetElementPtr( pUInt8PtrTy, pStringBuffer, pIndexes2 );
+#if ORIGINAL_MODE
+			llvm::Constant *const pTyName = llvm::ConstantExpr::getGetElementPtr( pUInt8PtrTy, pStringBuffer, pIndexes1 );
+			llvm::Constant *const pTyPtrn = llvm::ConstantExpr::getGetElementPtr( pUInt8PtrTy, pStringBuffer, pIndexes2 );
+#else
+			Pattern = GetTypePattern( UDT.Members );
+			AX_EXPECT_MSG( Pattern.Len() > 0, "Out of memory" );
+
+			llvm::Constant *const pTyNameConst =
+				llvm::ConstantDataArray::getString( m_Context, LLVMStr( UDT.Name ), true );
+			llvm::Constant *const pTyPtrnConst =
+				llvm::ConstantDataArray::getString( m_Context, LLVMStr( Pattern ), true );
+#endif
+
+			llvm::Constant *const pZero = llvm::Constant::getNullValue( pUIntPtrTy );
+#if ORIGINAL_MODE
+			llvm::Constant *const pOffs = llvm::ConstantInt::get( pUIntPtrTy, ( uint64_t )DataOffsets[ uOffsetIndex++ ], false );
+			llvm::Constant *const pIndexes[] = { pZero, pOffs };
+#else
+			llvm::Constant *const pIndexes[] = { pZero, pZero };
+#endif
+
+#if !ORIGINAL_MODE
+			llvm::Constant *const pTyName =
+				llvm::ConstantExpr::getInBoundsGetElementPtr
+				(
+					pUInt8PtrTy,
+					pTyNameConst,
+					llvm::makeArrayRef( pIndexes )
+				);
+			llvm::Constant *const pTyPtrn =
+				llvm::ConstantExpr::getInBoundsGetElementPtr
+				(
+					pUInt8PtrTy,
+					pTyPtrnConst,
+					llvm::makeArrayRef( pIndexes )
+				);
+#endif
 
 			llvm::Constant *const pTyInit = UDT.bIsInitTrivial ? pNullInitFn : UDT.pLLVMInitFn;
 			llvm::Constant *const pTyFini = UDT.bIsFiniTrivial ? pNullFiniFn : UDT.pLLVMFiniFn;
