@@ -155,7 +155,7 @@ namespace Tenshi { namespace Compiler {
 				}
 
 				Parser::TokenIter VTok = m_VirtualTokens.AddTail();
-				AX_EXPECT_MSG( VTok != m_VirtualTokens.end(), "Out of memory" );
+				AX_EXPECT_MEMORY( VTok != m_VirtualTokens.end() );
 
 				VTok->Type = Parser::ETokenType::Name;
 				VTok->NameType = Parser::ENameTokenType::Keyword;
@@ -190,8 +190,8 @@ namespace Tenshi { namespace Compiler {
 					if( ColonTok->IsPunctuation( ":" ) ) {
 						if( TokenDirectlyFollows( Tok, ColonTok ) && NewlineFollows( ColonTok ) && NewlinePrecedes( Tok ) ) {
 							// Keep both tokens (for label declaration)
-							AX_EXPECT_MSG( m_Tokens.Append( Tok.Get() ), "Out of memory" );
-							AX_EXPECT_MSG( m_Tokens.Append( ColonTok.Get() ), "Out of memory" );
+							AX_EXPECT_MEMORY( m_Tokens.Append( Tok.Get() ) );
+							AX_EXPECT_MEMORY( m_Tokens.Append( ColonTok.Get() ) );
 
 							++m_CurrentToken;
 							return *Tok.Get();
@@ -234,7 +234,7 @@ namespace Tenshi { namespace Compiler {
 		}
 
 		AX_ASSERT_NOT_NULL( pFoundTok );
-		AX_EXPECT_MSG( m_Tokens.Append( pFoundTok ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_Tokens.Append( pFoundTok ) );
 
 		++m_CurrentToken;
 		if( m_bDebugPrintTokens ) {
@@ -294,16 +294,16 @@ namespace Tenshi { namespace Compiler {
 		
 		const SToken &Tok = Token();
 
-		AX_EXPECT_MSG( Message.Assign( What ), "Out of memory" );
-		AX_EXPECT_MSG( Message.Append( ", but got " ), "Out of memory" );
+		AX_EXPECT_MEMORY( Message.Assign( What ) );
+		AX_EXPECT_MEMORY( Message.Append( ", but got " ) );
 		if( Tok.IsPunctuation() ) {
-			AX_EXPECT_MSG( Message.Append( "'" + Tok.GetString() + "'" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Message.Append( "'" + Tok.GetString() + "'" ) );
 		} else if( Tok.IsName() ) {
-			AX_EXPECT_MSG( Message.Append( "identifier '" + Tok.GetString() + "'" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Message.Append( "identifier '" + Tok.GetString() + "'" ) );
 		} else if( !Tok ) {
-			AX_EXPECT_MSG( Message.Append( "end-of-file" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Message.Append( "end-of-file" ) );
 		} else {
-			AX_EXPECT_MSG( Message.Append( Parser::TokenTypeToString( Tok.Type ) ), "Out of memory" );
+			AX_EXPECT_MEMORY( Message.Append( Parser::TokenTypeToString( Tok.Type ) ) );
 		}
 
 		Error( Message );
@@ -357,23 +357,23 @@ namespace Tenshi { namespace Compiler {
 		String ExpectedMsg = "Expected ";
 		for( uintptr i = 0; i < cTypes; ++i ) {
 			if( i > 0 ) {
-				AX_EXPECT_MSG( ExpectedMsg.Append( ", " ), "Out of memory" );
+				AX_EXPECT_MEMORY( ExpectedMsg.Append( ", " ) );
 
 				if( i + 1 == cTypes ) {
-					AX_EXPECT_MSG( ExpectedMsg.Append( "or " ), "Out of memory" );
+					AX_EXPECT_MEMORY( ExpectedMsg.Append( "or " ) );
 				}
 			}
 
 			if( ppValues != nullptr && ppValues[ i ] != nullptr ) {
-				AX_EXPECT_MSG( ExpectedMsg.Append( String( "'" ) + ppValues[ i ] + "'" ), "Out of memory" );
+				AX_EXPECT_MEMORY( ExpectedMsg.Append( String( "'" ) + ppValues[ i ] + "'" ) );
 			} else {
-				AX_EXPECT_MSG( ExpectedMsg.Append( Parser::TokenTypeToString( pTypes[ i ] ) ), "Out of memory" );
+				AX_EXPECT_MEMORY( ExpectedMsg.Append( Parser::TokenTypeToString( pTypes[ i ] ) ) );
 			}
 		}
 		if( Placement == ETokenPlace::SameLine ) {
-			AX_EXPECT_MSG( ExpectedMsg.Append( " on same line" ), "Out of memory" );
+			AX_EXPECT_MEMORY( ExpectedMsg.Append( " on same line" ) );
 		} else if( Placement == ETokenPlace::NewLine ) {
-			AX_EXPECT_MSG( ExpectedMsg.Append( " on different line" ), "Out of memory" );
+			AX_EXPECT_MEMORY( ExpectedMsg.Append( " on different line" ) );
 		}
 
 		Expected( ExpectedMsg );
@@ -436,7 +436,7 @@ namespace Tenshi { namespace Compiler {
 		}
 
 		Parser::TokenIter Tok = m_VirtualTokens.AddTail();
-		AX_EXPECT_MSG( Tok != m_VirtualTokens.end(), "Out of memory" );
+		AX_EXPECT_MEMORY( Tok != m_VirtualTokens.end() );
 
 		Tok->Type = Parser::ETokenType::Punctuation;
 		Tok->Subtype = 0;

@@ -96,8 +96,8 @@ namespace Tenshi { namespace Compiler {
 
 		AX_EXPECT_NOT_NULL( Ax::System::GetAppDir( szAppDir ) );
 
-		AX_EXPECT_MSG( PluginsCoreDir.Assign( szAppDir ), "Out of memory" );
-		AX_EXPECT_MSG( PluginsCoreDir.AppendPath( "plugins-core" ), "Out of memory" );
+		AX_EXPECT_MEMORY( PluginsCoreDir.Assign( szAppDir ) );
+		AX_EXPECT_MEMORY( PluginsCoreDir.AppendPath( "plugins-core" ) );
 
 		AX_DEBUG_LOG += "CoreMods: \"" + PluginsCoreDir + "\"";
 
@@ -121,7 +121,7 @@ namespace Tenshi { namespace Compiler {
 		Ax::uint32 uLineNum = 0;
 
 		Ax::TList< SModule >::Iterator ModIter = m_Mods.AddTail();
-		AX_EXPECT_MSG( ModIter != m_Mods.end(), "Out of memory" );
+		AX_EXPECT_MEMORY( ModIter != m_Mods.end() );
 
 		SModule &Mod = *ModIter;
 
@@ -131,7 +131,7 @@ namespace Tenshi { namespace Compiler {
 		}
 
 		const Ax::String ModDir = Ax::String( szAbsPath ).ExtractDirectory();
-		AX_EXPECT_MSG( ModDir.IsEmpty() == false, "Out of memory" );
+		AX_EXPECT_MEMORY( ModDir.IsEmpty() == false );
 
 		Ax::String ObjectFilename;
 		Ax::String ObjectDbgFilename;
@@ -395,7 +395,7 @@ namespace Tenshi { namespace Compiler {
 				}
 
 				Ax::TList< SFunctionOverload >::Iterator OverloadIter = pSym->pFunc->Overloads.AddTail();
-				AX_EXPECT_MSG( OverloadIter != pSym->pFunc->Overloads.end(), "Out of memory" );
+				AX_EXPECT_MEMORY( OverloadIter != pSym->pFunc->Overloads.end() );
 
 				SFunctionOverload &Func = *OverloadIter;
 				
@@ -434,15 +434,15 @@ namespace Tenshi { namespace Compiler {
 			const Ax::String &DLLExt = g_Env->BuildInfo().Platform.DLLExt;
 
 			Ax::String BaseFilename;
-			AX_EXPECT_MSG( BaseFilename.Assign( ObjectFilename.ExtractDirectory() ), "Out of memory" );
-			AX_EXPECT_MSG( BaseFilename.AppendPath( ObjectFilename.ExtractBasename() ), "Out of memory" );
+			AX_EXPECT_MEMORY( BaseFilename.Assign( ObjectFilename.ExtractDirectory() ) );
+			AX_EXPECT_MEMORY( BaseFilename.AppendPath( ObjectFilename.ExtractBasename() ) );
 
-			AX_EXPECT_MSG( ObjectFilename.Assign( BaseFilename + DLLExt ), "Out of memory" );
+			AX_EXPECT_MEMORY( ObjectFilename.Assign( BaseFilename + DLLExt ) );
 			if( ObjectDbgFilename.IsEmpty() ) {
-				AX_EXPECT_MSG( ObjectDbgFilename.Assign( BaseFilename + "Dbg" + DLLExt ), "Out of memory" );
+				AX_EXPECT_MEMORY( ObjectDbgFilename.Assign( BaseFilename + "Dbg" + DLLExt ) );
 			}
 		} else if( ObjectDbgFilename.IsEmpty() ) {
-			AX_EXPECT_MSG( ObjectDbgFilename.Assign( Filename ), "Out of memory" );
+			AX_EXPECT_MEMORY( ObjectDbgFilename.Assign( Filename ) );
 		}
 
 		if( ObjectFilename.CaseEndsWith( ".dll" ) || ObjectFilename.CaseEndsWith( ".dylib" ) || ObjectFilename.CaseEndsWith( ".so" ) ) {
@@ -451,11 +451,11 @@ namespace Tenshi { namespace Compiler {
 			Mod.Type = EModule::StaticLibrary;
 		}
 
-		AX_EXPECT_MSG( Mod.Filename.Assign( ModDir ), "Out of memory" );
-		AX_EXPECT_MSG( Mod.DebugFilename.Assign( ModDir ), "Out of memory" );
+		AX_EXPECT_MEMORY( Mod.Filename.Assign( ModDir ) );
+		AX_EXPECT_MEMORY( Mod.DebugFilename.Assign( ModDir ) );
 
-		AX_EXPECT_MSG( Mod.Filename.AppendPath( ObjectFilename ), "Out of memory" );
-		AX_EXPECT_MSG( Mod.DebugFilename.AppendPath( ObjectDbgFilename ), "Out of memory" );
+		AX_EXPECT_MEMORY( Mod.Filename.AppendPath( ObjectFilename ) );
+		AX_EXPECT_MEMORY( Mod.DebugFilename.AppendPath( ObjectDbgFilename ) );
 
 		return &Mod;
 	}
@@ -485,7 +485,7 @@ namespace Tenshi { namespace Compiler {
 		Ax::String Filename;
 		Ax::String Text;
 		for( uintptr i = 0; i < Files.Num(); ++i ) {
-			AX_EXPECT_MSG( Filename.Assign( Files.GetFile( i ) ), "Out of memory" );
+			AX_EXPECT_MEMORY( Filename.Assign( Files.GetFile( i ) ) );
 
 			if( !System::ReadFile( Text, Files.GetFile( i ) ) ) {
 				continue;

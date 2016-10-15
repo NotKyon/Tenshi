@@ -45,8 +45,8 @@ namespace Tenshi { namespace Compiler {
 		}
 
 		auto R = m_ProjectDirs.AddTail();
-		AX_EXPECT_MSG( R != m_ProjectDirs.end(), "Out of memory" );
-		AX_EXPECT_MSG( R->Assign( szPath ), "Out of memory" );
+		AX_EXPECT_MEMORY( R != m_ProjectDirs.end() );
+		AX_EXPECT_MEMORY( R->Assign( szPath ) );
 
 		return true;
 	}
@@ -63,7 +63,7 @@ namespace Tenshi { namespace Compiler {
 	CProject *MProjects::Add()
 	{
 		auto R = m_Projects.AddTail();
-		AX_EXPECT_MSG( R != m_Projects.end(), "Out of memory" );
+		AX_EXPECT_MEMORY( R != m_Projects.end() );
 
 		return R.Get();
 	}
@@ -72,7 +72,7 @@ namespace Tenshi { namespace Compiler {
 		AX_ASSERT_NOT_NULL( pszProjFile );
 
 		auto R = m_Projects.AddTail();
-		AX_EXPECT_MSG( R != m_Projects.end(), "Out of memory" );
+		AX_EXPECT_MEMORY( R != m_Projects.end() );
 
 		if( !R->LoadFromFile( pszProjFile ) ) {
 			m_Projects.Remove( R );
@@ -530,7 +530,7 @@ namespace Tenshi { namespace Compiler {
 				return false;
 			}
 
-			AX_EXPECT_MSG( Tokens[ uArg + 0 ].Unquote( m_Name ), "Out of memory" );
+			AX_EXPECT_MEMORY( Tokens[ uArg + 0 ].Unquote( m_Name ) );
 			return true;
 		}
 
@@ -583,14 +583,14 @@ namespace Tenshi { namespace Compiler {
 			const SProjToken &Arg = Tokens[ uArg + 0 ];
 
 			Ax::String Target;
-			AX_EXPECT_MSG( Arg.Unquote( Target ), "Out of memory" );
+			AX_EXPECT_MEMORY( Arg.Unquote( Target ) );
 
 			char szAbsPath[ MAX_PATH + 1 ];
 			if( Ax::GetAbsolutePath( szAbsPath, Target ) != nullptr ) {
-				AX_EXPECT_MSG( Target.Assign( szAbsPath ), "Out of memory" );
+				AX_EXPECT_MEMORY( Target.Assign( szAbsPath ) );
 			}
 
-			AX_EXPECT_MSG( m_TargetPath.Assign( Target.ExtractDirectory() ), "Out of memory" );
+			AX_EXPECT_MEMORY( m_TargetPath.Assign( Target.ExtractDirectory() ) );
 
 			const char *pszPrefix = "";
 			if( m_bTargetPrefix ) {
@@ -613,9 +613,9 @@ namespace Tenshi { namespace Compiler {
 				}
 			}
 
-			AX_EXPECT_MSG( m_TargetPath.AppendPath( pszPrefix ), "Out of memory" );
-			AX_EXPECT_MSG( m_TargetPath.Append( Target.ExtractFilename() ), "Out of memory" );
-			AX_EXPECT_MSG( m_TargetPath.Append( pszSuffix ), "Out of memory" );
+			AX_EXPECT_MEMORY( m_TargetPath.AppendPath( pszPrefix ) );
+			AX_EXPECT_MEMORY( m_TargetPath.Append( Target.ExtractFilename() ) );
+			AX_EXPECT_MEMORY( m_TargetPath.Append( pszSuffix ) );
 
 			Ax::g_DebugLog( Diag.pszFilename, Diag.uLine ) += "Target path set: " + m_TargetPath;
 
@@ -725,41 +725,41 @@ namespace Tenshi { namespace Compiler {
 			}
 
 			SCompilation::Iter iter = m_Compilations.AddTail();
-			AX_EXPECT_MSG( iter != m_Compilations.end(), "Out of memory" );
+			AX_EXPECT_MEMORY( iter != m_Compilations.end() );
 
 			iter->Settings = m_Settings;
 
 			char szTemp[ PATH_MAX + 1 ];
 
 			const SProjToken &SrcArg = Tokens[ uArg + 0 ];
-			AX_EXPECT_MSG( SrcArg.Unquote( iter->SourceFilename ), "Out of memory" );
+			AX_EXPECT_MEMORY( SrcArg.Unquote( iter->SourceFilename ) );
 
 			if( Ax::GetAbsolutePath( szTemp, iter->SourceFilename ) != nullptr ) {
-				AX_EXPECT_MSG( iter->SourceFilename.Assign( szTemp ), "Out of memory" );
+				AX_EXPECT_MEMORY( iter->SourceFilename.Assign( szTemp ) );
 			}
 
 			if( uArg + 1 < cTokens ) {
 				const SProjToken &ObjArg = Tokens[ uArg + 1 ];
-				AX_EXPECT_MSG( ObjArg.Unquote( iter->ObjectFilename ), "Out of memory" );
+				AX_EXPECT_MEMORY( ObjArg.Unquote( iter->ObjectFilename ) );
 
 				if( Ax::GetAbsolutePath( szTemp, iter->ObjectFilename ) != nullptr ) {
-					AX_EXPECT_MSG( iter->ObjectFilename.Assign( szTemp ), "Out of memory" );
+					AX_EXPECT_MEMORY( iter->ObjectFilename.Assign( szTemp ) );
 				}
 			} else {
 				Ax::String &Obj = iter->ObjectFilename;
 
-				AX_EXPECT_MSG( Obj.Assign( iter->SourceFilename ), "Out of memory" );
-				AX_EXPECT_MSG( Obj.ReplaceExtension( ".o" ), "Out of memory" );
+				AX_EXPECT_MEMORY( Obj.Assign( iter->SourceFilename ) );
+				AX_EXPECT_MEMORY( Obj.ReplaceExtension( ".o" ) );
 			}
 
 			if( m_bASMList ) {
-				AX_EXPECT_MSG( iter->ASListFilename.Assign( iter->ObjectFilename ), "Out of memory" );
-				AX_EXPECT_MSG( iter->ASListFilename.ReplaceExtension( ".s" ), "Out of memory" );
+				AX_EXPECT_MEMORY( iter->ASListFilename.Assign( iter->ObjectFilename ) );
+				AX_EXPECT_MEMORY( iter->ASListFilename.ReplaceExtension( ".s" ) );
 			}
 
 			if( m_bIRList ) {
-				AX_EXPECT_MSG( iter->IRListFilename.Assign( iter->ObjectFilename ), "Out of memory" );
-				AX_EXPECT_MSG( iter->IRListFilename.ReplaceExtension( ".ll" ), "Out of memory" );
+				AX_EXPECT_MEMORY( iter->IRListFilename.Assign( iter->ObjectFilename ) );
+				AX_EXPECT_MEMORY( iter->IRListFilename.ReplaceExtension( ".ll" ) );
 			}
 			
 			return true;
@@ -924,7 +924,7 @@ namespace Tenshi { namespace Compiler {
 		unsigned cFailures = 0;
 		for( SCompilation &Unit : m_Compilations ) {
 			if( !Unit.ObjectFilename.IsEmpty() ) {
-				AX_EXPECT_MSG( Objects.Append( Unit.ObjectFilename ), "Out of memory" );
+				AX_EXPECT_MEMORY( Objects.Append( Unit.ObjectFilename ) );
 			}
 
 			if( Unit.Build() ) {

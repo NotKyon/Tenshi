@@ -170,29 +170,29 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String Result;
 
-		AX_EXPECT_MSG( Result.Append( "Function <" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "Function <" ) );
 		if( m_pNameTok != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( m_pNameTok->GetString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( m_pNameTok->GetString() ) );
 		} else {
-			AX_EXPECT_MSG( Result.Append( "(null)" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "(null)" ) );
 		}
-		AX_EXPECT_MSG( Result.Append( ">" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( ">" ) );
 
 		if( m_pReturnType != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( " returns:" ), "Out of memory" );
-			AX_EXPECT_MSG( Result.Append( m_pReturnType->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( " returns:" ) );
+			AX_EXPECT_MEMORY( Result.Append( m_pReturnType->ToString() ) );
 		}
 
 		for( const CParameterDecl *const pParm : m_Parms ) {
 			AX_ASSERT_NOT_NULL( pParm );
 			const CParameterDecl &Parm = *pParm;
 
-			AX_EXPECT_MSG( Result.Append( "\n\t" ), "Out of memory" );
-			AX_EXPECT_MSG( Result.Append( Parm.ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "\n\t" ) );
+			AX_EXPECT_MEMORY( Result.Append( Parm.ToString() ) );
 		}
 
-		AX_EXPECT_MSG( Result.Append( "\n" ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( m_Stmts.ToString() ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "\n" ) );
+		AX_EXPECT_MEMORY( Result.Append( m_Stmts.ToString() ) );
 
 		return Result;
 	}
@@ -213,10 +213,10 @@ namespace Tenshi { namespace Compiler {
 		AX_EXPECT_MEMORY( m_Semanted.pSym->pFunc );
 
 		m_Semanted.pSym->pFunc->Name = m_pNameTok->GetString();
-		AX_EXPECT_MSG( m_Semanted.pSym->pFunc->Name.Len() == m_pNameTok->cLength, "Out of memory" );
+		AX_EXPECT_MEMORY( m_Semanted.pSym->pFunc->Name.Len() == m_pNameTok->cLength );
 
 		auto Iter = m_Semanted.pSym->pFunc->Overloads.AddTail();
-		AX_EXPECT_MSG( Iter != m_Semanted.pSym->pFunc->Overloads.end(), "Out of memory" );
+		AX_EXPECT_MEMORY( Iter != m_Semanted.pSym->pFunc->Overloads.end() );
 
 		// Create the scope for this function overload
 		m_Semanted.pOverload = Iter.Get();
@@ -225,14 +225,14 @@ namespace Tenshi { namespace Compiler {
 		SFunctionOverload &Fn = *m_Semanted.pOverload;
 
 		Fn.pModule = nullptr;
-		AX_EXPECT_MSG( Fn.RealName.Assign( "_" ), "Out of memory" );
-		AX_EXPECT_MSG( Fn.RealName.Append( m_pNameTok->GetPointer(), ( Ax::intptr )m_pNameTok->cLength ), "Out of memory" );
+		AX_EXPECT_MEMORY( Fn.RealName.Assign( "_" ) );
+		AX_EXPECT_MEMORY( Fn.RealName.Append( m_pNameTok->GetPointer(), ( Ax::intptr )m_pNameTok->cLength ) );
 
 		{
 			Ax::String Prefix;
 
-			AX_EXPECT_MSG( Prefix.Assign( Fn.RealName ), "Out of memory" );
-			AX_EXPECT_MSG( Prefix.Append( "#" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Prefix.Assign( Fn.RealName ) );
+			AX_EXPECT_MEMORY( Prefix.Append( "#" ) );
 
 			AX_ASSERT_NOT_NULL( m_Semanted.pSym->pDeclScope );
 			m_Semanted.pScope = m_Semanted.pSym->pDeclScope->AddScope( Prefix );
@@ -256,10 +256,10 @@ namespace Tenshi { namespace Compiler {
 
 			pParm->m_Semanted.pSym->pDeclToken = pParm->m_pNameTok;
 
-			AX_EXPECT_MSG( Fn.Parameters.Append(), "Out of memory" );
+			AX_EXPECT_MEMORY( Fn.Parameters.Append() );
 			SMemberInfo &Parm = Fn.Parameters.Last();
 
-			AX_EXPECT_MSG( Parm.Name.Assign( pParm->m_pNameTok->GetPointer(), ( Ax::intptr )pParm->m_pNameTok->cLength ), "Out of memory" );
+			AX_EXPECT_MEMORY( Parm.Name.Assign( pParm->m_pNameTok->GetPointer(), ( Ax::intptr )pParm->m_pNameTok->cLength ) );
 			if( !STypeRef::Semant( Parm.Type, *pParm->m_pNameTok, pParm->m_pType ) ) {
 				return false;
 			}
@@ -434,7 +434,7 @@ namespace Tenshi { namespace Compiler {
 		CParameterDecl *const pParm = new CParameterDecl();
 		AX_EXPECT_MEMORY( pParm );
 
-		AX_EXPECT_MSG( m_Parms.Append( pParm ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_Parms.Append( pParm ) );
 
 		return *pParm;
 	}
@@ -458,22 +458,22 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String Result;
 
-		AX_EXPECT_MSG( Result.Append( "Parm <" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "Parm <" ) );
 		if( m_pNameTok != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( m_pNameTok->GetString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( m_pNameTok->GetString() ) );
 		} else {
-			AX_EXPECT_MSG( Result.Append( "(null)" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "(null)" ) );
 		}
-		AX_EXPECT_MSG( Result.Append( ">" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( ">" ) );
 
 		if( m_pType != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( ":" ), "Out of memory" );
-			AX_EXPECT_MSG( Result.Append( m_pType->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( ":" ) );
+			AX_EXPECT_MEMORY( Result.Append( m_pType->ToString() ) );
 		}
 
 		if( m_pDefault != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( " = " ), "Out of memory" );
-			AX_EXPECT_MSG( Result.Append( m_pDefault->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( " = " ) );
+			AX_EXPECT_MEMORY( Result.Append( m_pDefault->ToString() ) );
 		}
 
 		return Result;

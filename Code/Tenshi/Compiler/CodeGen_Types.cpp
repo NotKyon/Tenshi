@@ -390,7 +390,7 @@ namespace Tenshi { namespace Compiler {
 
 	void MCodeGen::RegisterUDT( STypeInfo &UDT )
 	{
-		AX_EXPECT_MSG( m_UserTypes.Append( &UDT ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_UserTypes.Append( &UDT ) );
 	}
 
 	void MCodeGen::EmitReflectionData()
@@ -451,16 +451,16 @@ namespace Tenshi { namespace Compiler {
 				continue;
 			}
 
-			AX_EXPECT_MSG( StringOffs.Append( StringData.Num() ), "Out of memory" );
-			AX_EXPECT_MSG( StringData.Append( UDT.Name.Num(), ( const uint8_t * )UDT.Name.CString() ), "Out of memory" );
-			AX_EXPECT_MSG( StringData.Append( '\0' ), "Out of memory" );
+			AX_EXPECT_MEMORY( StringOffs.Append( StringData.Num() ) );
+			AX_EXPECT_MEMORY( StringData.Append( UDT.Name.Num(), ( const uint8_t * )UDT.Name.CString() ) );
+			AX_EXPECT_MEMORY( StringData.Append( '\0' ) );
 
 			Pattern = GetTypePattern( UDT.Members );
-			AX_EXPECT_MSG( Pattern.Len() > 0, "Out of memory" );
+			AX_EXPECT_MEMORY( Pattern.Len() > 0 );
 
-			AX_EXPECT_MSG( StringOffs.Append( StringData.Num() ), "Out of memory" );
-			AX_EXPECT_MSG( StringData.Append( Pattern.Num(), ( const uint8_t * )Pattern.CString() ), "Out of memory" );
-			AX_EXPECT_MSG( StringData.Append( '\0' ), "Out of memory" );
+			AX_EXPECT_MEMORY( StringOffs.Append( StringData.Num() ) );
+			AX_EXPECT_MEMORY( StringData.Append( Pattern.Num(), ( const uint8_t * )Pattern.CString() ) );
+			AX_EXPECT_MEMORY( StringData.Append( '\0' ) );
 		}
 
 		llvm::Constant *const pStringBufferInit =
@@ -486,7 +486,7 @@ namespace Tenshi { namespace Compiler {
 		llvm::Constant *const pNullMoveFn = llvm::Constant::getNullValue( GetObjFiniFnTy()->getPointerTo() );
 
 		Ax::TArray< llvm::Constant * > RTTIData;
-		AX_EXPECT_MSG( RTTIData.Reserve( cTypes ), "Out of memory" );
+		AX_EXPECT_MEMORY( RTTIData.Reserve( cTypes ) );
 
 		uintptr uIndex = 0;
 		for( STypeInfo *pUDT : m_UserTypes ) {
@@ -522,7 +522,7 @@ namespace Tenshi { namespace Compiler {
 			llvm::Constant *const pTyPtrn = llvm::ConstantExpr::getGetElementPtr( pUInt8PtrTy, pStringBuffer, pIndexes2 );
 #else
 			Pattern = GetTypePattern( UDT.Members );
-			AX_EXPECT_MSG( Pattern.Len() > 0, "Out of memory" );
+			AX_EXPECT_MEMORY( Pattern.Len() > 0 );
 
 			llvm::Constant *const pTyNameConst =
 				llvm::ConstantDataArray::getString( m_Context, LLVMStr( UDT.Name ), true );
@@ -585,7 +585,7 @@ namespace Tenshi { namespace Compiler {
 					llvm::ArrayRef< llvm::Constant * >( Members )
 				);
 
-			AX_EXPECT_MSG( RTTIData.Append( pStructVal ), "Out of memory" );
+			AX_EXPECT_MEMORY( RTTIData.Append( pStructVal ) );
 		}
 
 		llvm::ArrayType *const pArrTy = llvm::ArrayType::get( pRTTITy, ( uint64_t )RTTIData.Num() );

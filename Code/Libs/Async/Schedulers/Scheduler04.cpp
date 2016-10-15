@@ -11,7 +11,7 @@ namespace Ax { namespace Async {
 	namespace Detail
 	{
 
-		AX_THREADLOCAL uint32		g_uWorkerId;
+		__thread uint32		g_uWorkerId;
 
 	}
 #endif

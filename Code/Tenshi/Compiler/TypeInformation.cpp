@@ -39,27 +39,27 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String Result;
 
-		AX_EXPECT_MSG( Result.Append( Name ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( " as " ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( Name ) );
+		AX_EXPECT_MEMORY( Result.Append( " as " ) );
 
-		AX_EXPECT_MSG( Result.Append( Type.ToString() ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( Type.ToString() ) );
 
-		AX_EXPECT_MSG( Result.Append( "[" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "[" ) );
 
-		AX_EXPECT_MSG( Result.Append( "PassBy=" ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( PassByToString( PassBy ) ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( ";" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "PassBy=" ) );
+		AX_EXPECT_MEMORY( Result.Append( PassByToString( PassBy ) ) );
+		AX_EXPECT_MEMORY( Result.Append( ";" ) );
 
-		AX_EXPECT_MSG( Result.Append( "PassMod=" ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( PassModToString( PassMod ) ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( ";" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "PassMod=" ) );
+		AX_EXPECT_MEMORY( Result.Append( PassModToString( PassMod ) ) );
+		AX_EXPECT_MEMORY( Result.Append( ";" ) );
 
-		AX_EXPECT_MSG( Result.Append( "]" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "]" ) );
 
-		AX_EXPECT_MSG( Result.Append( "@" ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( Ax::String::FromUnsignedInteger( uOffset ) ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( "x" ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( Ax::String::FromUnsignedInteger( Type.cBytes ) ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "@" ) );
+		AX_EXPECT_MEMORY( Result.Append( Ax::String::FromUnsignedInteger( uOffset ) ) );
+		AX_EXPECT_MEMORY( Result.Append( "x" ) );
+		AX_EXPECT_MEMORY( Result.Append( Ax::String::FromUnsignedInteger( Type.cBytes ) ) );
 
 		return Result;
 	}
@@ -67,38 +67,38 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String Result;
 
-		AX_EXPECT_MSG( Result.Append( "Type " ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( Name ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( " (" ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( Ax::String::FromUnsignedInteger( Members.Num() ) ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( ")" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "Type " ) );
+		AX_EXPECT_MEMORY( Result.Append( Name ) );
+		AX_EXPECT_MEMORY( Result.Append( " (" ) );
+		AX_EXPECT_MEMORY( Result.Append( Ax::String::FromUnsignedInteger( Members.Num() ) ) );
+		AX_EXPECT_MEMORY( Result.Append( ")" ) );
 
-		AX_EXPECT_MSG( Result.Append( " @" ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( Ax::String::FromUnsignedInteger( uAlignment ) ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( "x" ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( Ax::String::FromUnsignedInteger( cBytes ) ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( " @" ) );
+		AX_EXPECT_MEMORY( Result.Append( Ax::String::FromUnsignedInteger( uAlignment ) ) );
+		AX_EXPECT_MEMORY( Result.Append( "x" ) );
+		AX_EXPECT_MEMORY( Result.Append( Ax::String::FromUnsignedInteger( cBytes ) ) );
 
 		if( bIsInitTrivial ) {
-			AX_EXPECT_MSG( Result.Append( " +trivinit" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( " +trivinit" ) );
 		}
 		if( bIsFiniTrivial ) {
-			AX_EXPECT_MSG( Result.Append( " +trivfini" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( " +trivfini" ) );
 		}
 		if( bIsCopyTrivial ) {
-			AX_EXPECT_MSG( Result.Append( " +trivcopy" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( " +trivcopy" ) );
 		}
 		if( bIsMoveTrivial ) {
-			AX_EXPECT_MSG( Result.Append( " +trivmove" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( " +trivmove" ) );
 		}
 
-		AX_EXPECT_MSG( Result.Append( "\n{\n" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "\n{\n" ) );
 
 		for( const SMemberInfo &Info : Members ) {
-			AX_EXPECT_MSG( Result.Append( "\t" ), "Out of memory" );
-			AX_EXPECT_MSG( Result.Append( Info.ToString() ), "Out of memory" );
-			AX_EXPECT_MSG( Result.Append( "\n" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "\t" ) );
+			AX_EXPECT_MEMORY( Result.Append( Info.ToString() ) );
+			AX_EXPECT_MEMORY( Result.Append( "\n" ) );
 		}
-		AX_EXPECT_MSG( Result.Append( "}" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "}" ) );
 
 		return Result;
 	}
@@ -109,7 +109,7 @@ namespace Tenshi { namespace Compiler {
 			return true;
 		}
 
-		AX_EXPECT_MSG( LLVMTypes.Reserve( Parameters.Num() ), "Out of memory" );
+		AX_EXPECT_MEMORY( LLVMTypes.Reserve( Parameters.Num() ) );
 
 		for( SMemberInfo &Parm : Parameters ) {
 #if 1
@@ -197,7 +197,7 @@ namespace Tenshi { namespace Compiler {
 
 		AX_EXPECT_MSG( Subexpressions.Num() < kMaxArgs, "Too many arguments" );
 
-		AX_EXPECT_MSG( OutCasts.Resize( Subexpressions.Num() ), "Out of memory" );
+		AX_EXPECT_MEMORY( OutCasts.Resize( Subexpressions.Num() ) );
 
 		// Find all overloads with the same number of parameters
 		for( SFunctionOverload &Overload : Overloads ) {
@@ -280,7 +280,7 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String TypePattern;
 
-		AX_EXPECT_MSG( TypePattern.Reserve( InMembers.Num()*4 ), "Out of memory" );
+		AX_EXPECT_MEMORY( TypePattern.Reserve( InMembers.Num()*4 ) );
 		for( const SMemberInfo &Member : InMembers ) {
 			char szBuf[ 8 ];
 			uintptr i = 0;
@@ -352,12 +352,12 @@ namespace Tenshi { namespace Compiler {
 					Ax::String Subpattern;
 
 					AX_ASSERT_NOT_NULL( Member.Type.pCustomType );
-					AX_EXPECT_MSG( Subpattern.Assign( GetTypePattern( Member.Type.pCustomType->Members ) ), "Out of memory" );
+					AX_EXPECT_MEMORY( Subpattern.Assign( GetTypePattern( Member.Type.pCustomType->Members ) ) );
 
-					AX_EXPECT_MSG( TypePattern.Reserve( TypePattern.NumAllocated() + Subpattern.Len() + 3 ), "Out of memory" );
-					AX_EXPECT_MSG( TypePattern.Append( "X(" ), "Out of memory" );
-					AX_EXPECT_MSG( TypePattern.Append( Subpattern ), "Out of memory" );
-					AX_EXPECT_MSG( TypePattern.Append( ")" ), "Out of memory" );
+					AX_EXPECT_MEMORY( TypePattern.Reserve( TypePattern.NumAllocated() + Subpattern.Len() + 3 ) );
+					AX_EXPECT_MEMORY( TypePattern.Append( "X(" ) );
+					AX_EXPECT_MEMORY( TypePattern.Append( Subpattern ) );
+					AX_EXPECT_MEMORY( TypePattern.Append( ")" ) );
 				}
 				break;
 			case EBuiltinType::Void:					W1('0');
@@ -383,7 +383,7 @@ namespace Tenshi { namespace Compiler {
 			AX_ASSERT( i < sizeof( szBuf ) );
 			szBuf[ i ] = '\0';
 
-			AX_EXPECT_MSG( TypePattern.Append( szBuf ), "Out of memory" );
+			AX_EXPECT_MEMORY( TypePattern.Append( szBuf ) );
 
 #undef W4
 #undef W3
@@ -644,7 +644,7 @@ namespace Tenshi { namespace Compiler {
 			return true;
 		}
 
-		AX_EXPECT_MSG( OutMembers.Reserve( strlen( pszPattern ) ), "Out of memory" );
+		AX_EXPECT_MEMORY( OutMembers.Reserve( strlen( pszPattern ) ) );
 
 		Ax::uint32 uOffset = 0;
 
@@ -665,7 +665,7 @@ namespace Tenshi { namespace Compiler {
 				uOffset -= uOffset%Platform.TypeMemberAlignment;
 			}
 
-			AX_EXPECT_MSG( OutMembers.Append( Info ), "Out of memory" );
+			AX_EXPECT_MEMORY( OutMembers.Append( Info ) );
 		}
 
 		return true;

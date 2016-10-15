@@ -82,34 +82,34 @@ namespace Tenshi { namespace Compiler {
 		switch( m_ListType )
 		{
 		case EExprListType::FunctionCall:
-			AX_EXPECT_MSG( Result.Append( "(" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "(" ) );
 			for( const CExpression *pExpr : m_Subexpressions ) {
 				AX_ASSERT_NOT_NULL( pExpr );
 
 				if( bNeedSpace ) {
-					AX_EXPECT_MSG( Result.Append( " " ), "Out of memory" );
+					AX_EXPECT_MEMORY( Result.Append( " " ) );
 				} else {
 					bNeedSpace = true;
 				}
 
-				AX_EXPECT_MSG( Result.Append( pExpr->ToString() ), "Out of memory" );
+				AX_EXPECT_MEMORY( Result.Append( pExpr->ToString() ) );
 			}
-			AX_EXPECT_MSG( Result.Append( ")" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( ")" ) );
 			break;
 		case EExprListType::ArraySubscript:
-			AX_EXPECT_MSG( Result.Append( "[" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "[" ) );
 			for( const CExpression *pExpr : m_Subexpressions ) {
 				AX_ASSERT_NOT_NULL( pExpr );
 
 				if( bNeedSpace ) {
-					AX_EXPECT_MSG( Result.Append( ", " ), "Out of memory" );
+					AX_EXPECT_MEMORY( Result.Append( ", " ) );
 				} else {
 					bNeedSpace = true;
 				}
 
-				AX_EXPECT_MSG( Result.Append( pExpr->ToString() ), "Out of memory" );
+				AX_EXPECT_MEMORY( Result.Append( pExpr->ToString() ) );
 			}
-			AX_EXPECT_MSG( Result.Append( "]" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "]" ) );
 			break;
 		}
 
@@ -160,7 +160,7 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String Result;
 
-		AX_EXPECT_MSG( Result.Append( Token().GetString() ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( Token().GetString() ) );
 
 		return Result;
 	}
@@ -465,11 +465,11 @@ namespace Tenshi { namespace Compiler {
 		Ax::String Result;
 
 		if( m_pLHS != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( m_pLHS->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( m_pLHS->ToString() ) );
 		}
 
-		AX_EXPECT_MSG( Result.Append( "." ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( Token().GetString() ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "." ) );
+		AX_EXPECT_MEMORY( Result.Append( Token().GetString() ) );
 
 		return Result;
 	}
@@ -652,14 +652,14 @@ namespace Tenshi { namespace Compiler {
 		Ax::String Result;
 
 		if( m_pLHS != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( m_pLHS->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( m_pLHS->ToString() ) );
 		}
 
-		AX_EXPECT_MSG( Result.Append( "[" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "[" ) );
 		if( m_pList != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( m_pList->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( m_pList->ToString() ) );
 		}
-		AX_EXPECT_MSG( Result.Append( "]" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "]" ) );
 
 		return Result;
 	}
@@ -843,14 +843,14 @@ namespace Tenshi { namespace Compiler {
 		Ax::String Result;
 
 		if( m_pLHS != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( m_pLHS->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( m_pLHS->ToString() ) );
 		}
 
-		AX_EXPECT_MSG( Result.Append( "(" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "(" ) );
 		if( m_pList != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( m_pList->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( m_pList->ToString() ) );
 		}
-		AX_EXPECT_MSG( Result.Append( ")" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( ")" ) );
 
 		return Result;
 	}
@@ -1010,24 +1010,24 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String Result;
 
-		AX_EXPECT_MSG( Result.Append( "(" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "(" ) );
 
 		if( !m_bIsPostfix ) {
-			AX_EXPECT_MSG( Result.Append( BuiltinOpToString( m_Operator ) ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( BuiltinOpToString( m_Operator ) ) );
 		}
 		if( m_pSubexpr != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( m_pSubexpr->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( m_pSubexpr->ToString() ) );
 		} else {
-			AX_EXPECT_MSG( Result.Append( "(Expr:null)" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "(Expr:null)" ) );
 		}
 		if( m_bIsPostfix ) {
-			AX_EXPECT_MSG( Result.Append( BuiltinOpToString( m_Operator ) ), "Out of memory" );
-			AX_EXPECT_MSG( Result.Append( " [[postfix]]" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( BuiltinOpToString( m_Operator ) ) );
+			AX_EXPECT_MEMORY( Result.Append( " [[postfix]]" ) );
 		} else {
-			AX_EXPECT_MSG( Result.Append( " [[prefix]]" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( " [[prefix]]" ) );
 		}
 
-		AX_EXPECT_MSG( Result.Append( ")" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( ")" ) );
 
 		return Result;
 	}
@@ -1215,24 +1215,24 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String Result;
 
-		AX_EXPECT_MSG( Result.Append( "(" ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( BuiltinOpToString( m_Operator ) ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "(" ) );
+		AX_EXPECT_MEMORY( Result.Append( BuiltinOpToString( m_Operator ) ) );
 
-		AX_EXPECT_MSG( Result.Append( " " ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( " " ) );
 		if( m_pLHS != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( m_pLHS->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( m_pLHS->ToString() ) );
 		} else {
-			AX_EXPECT_MSG( Result.Append( "(LHSExpr:null)" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "(LHSExpr:null)" ) );
 		}
 
-		AX_EXPECT_MSG( Result.Append( " " ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( " " ) );
 		if( m_pRHS != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( m_pRHS->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( m_pRHS->ToString() ) );
 		} else {
-			AX_EXPECT_MSG( Result.Append( "(RHSExpr:null)" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "(RHSExpr:null)" ) );
 		}
 
-		AX_EXPECT_MSG( Result.Append( ")" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( ")" ) );
 
 		return Result;
 	}

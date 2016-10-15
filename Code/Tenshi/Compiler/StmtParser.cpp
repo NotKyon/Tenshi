@@ -59,10 +59,10 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String Result;
 		
-		AX_EXPECT_MSG( Result.Append( "CallFunction <" ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( Token().GetString() ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( "> parms:" ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( m_pExpr != nullptr ? m_pExpr->ToString() : " (null)" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "CallFunction <" ) );
+		AX_EXPECT_MEMORY( Result.Append( Token().GetString() ) );
+		AX_EXPECT_MEMORY( Result.Append( "> parms:" ) );
+		AX_EXPECT_MEMORY( Result.Append( m_pExpr != nullptr ? m_pExpr->ToString() : " (null)" ) );
 
 		return Result;
 	}
@@ -121,9 +121,9 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String Result;
 
-		AX_EXPECT_MSG( Result.Append( "LabelDecl <" ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( Token().GetString() ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( ">" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "LabelDecl <" ) );
+		AX_EXPECT_MEMORY( Result.Append( Token().GetString() ) );
+		AX_EXPECT_MEMORY( Result.Append( ">" ) );
 
 		return Result;
 	}
@@ -197,9 +197,9 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String Result;
 
-		AX_EXPECT_MSG( Result.Append( m_bIsGosub ? "Call <" : "Jump <" ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( m_pLabelTok != nullptr ? m_pLabelTok->GetString() : "(null)" ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( ">" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( m_bIsGosub ? "Call <" : "Jump <" ) );
+		AX_EXPECT_MEMORY( Result.Append( m_pLabelTok != nullptr ? m_pLabelTok->GetString() : "(null)" ) );
+		AX_EXPECT_MEMORY( Result.Append( ">" ) );
 
 		return Result;
 	}
@@ -258,7 +258,7 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String Result;
 
-		AX_EXPECT_MSG( Result.Append( "ReturnFromGosub" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "ReturnFromGosub" ) );
 
 		return Result;
 	}
@@ -319,11 +319,11 @@ namespace Tenshi { namespace Compiler {
 		switch( m_Type )
 		{
 		case ELoopFlow::Break:
-			AX_EXPECT_MSG( Result.Append( "BreakFromLoop" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "BreakFromLoop" ) );
 			break;
 
 		case ELoopFlow::Continue:
-			AX_EXPECT_MSG( Result.Append( "ContinueLoop" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "ContinueLoop" ) );
 			break;
 		}
 
@@ -384,15 +384,15 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String Result;
 
-		AX_EXPECT_MSG( Result.Append( "DoLoop" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "DoLoop" ) );
 		
 		if( m_Stmts.begin() != m_Stmts.end() ) {
-			AX_EXPECT_MSG( Result.Append( "\n" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "\n" ) );
 
 			Ax::String TempResult = m_Stmts.ToString();
-			AX_EXPECT_MSG( TempResult.TabSelf(), "Out of memory" );
+			AX_EXPECT_MEMORY( TempResult.TabSelf() );
 
-			AX_EXPECT_MSG( Result.Append( TempResult ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( TempResult ) );
 		}
 
 		return Result;
@@ -477,21 +477,21 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String Result;
 
-		AX_EXPECT_MSG( Result.Append( "WhileLoop expr:" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "WhileLoop expr:" ) );
 
 		if( m_pCondition != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( m_pCondition->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( m_pCondition->ToString() ) );
 		} else {
-			AX_EXPECT_MSG( Result.Append( " (null)" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( " (null)" ) );
 		}
 
 		if( m_Stmts.begin() != m_Stmts.end() ) {
-			AX_EXPECT_MSG( Result.Append( "\n" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "\n" ) );
 
 			Ax::String TempResult = m_Stmts.ToString();
-			AX_EXPECT_MSG( TempResult.TabSelf(), "Out of memory" );
+			AX_EXPECT_MEMORY( TempResult.TabSelf() );
 
-			AX_EXPECT_MSG( Result.Append( TempResult ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( TempResult ) );
 		}
 
 		return Result;
@@ -592,21 +592,21 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String Result;
 
-		AX_EXPECT_MSG( Result.Append( "RepeatLoop expr:" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "RepeatLoop expr:" ) );
 
 		if( m_pCondition != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( m_pCondition->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( m_pCondition->ToString() ) );
 		} else {
-			AX_EXPECT_MSG( Result.Append( " (null)" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( " (null)" ) );
 		}
 
 		if( m_Stmts.begin() != m_Stmts.end() ) {
-			AX_EXPECT_MSG( Result.Append( "\n" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "\n" ) );
 
 			Ax::String TempResult = m_Stmts.ToString();
-			AX_EXPECT_MSG( TempResult.TabSelf(), "Out of memory" );
+			AX_EXPECT_MEMORY( TempResult.TabSelf() );
 
-			AX_EXPECT_MSG( Result.Append( TempResult ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( TempResult ) );
 		}
 
 		return Result;
@@ -790,41 +790,41 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String Result;
 
-		AX_EXPECT_MSG( Result.Append( "ForLoop var:" ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( m_pVarToken != nullptr ? m_pVarToken->GetString() : "(null)" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "ForLoop var:" ) );
+		AX_EXPECT_MEMORY( Result.Append( m_pVarToken != nullptr ? m_pVarToken->GetString() : "(null)" ) );
 		if( m_pInitExpr != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( "="), "Out of memory" );
-			AX_EXPECT_MSG( Result.Append( m_pInitExpr->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "=") );
+			AX_EXPECT_MEMORY( Result.Append( m_pInitExpr->ToString() ) );
 		}
 		if( m_pToUntilToken != nullptr ) {
 			if( m_pToUntilToken->IsKeyword( kKeyword_To ) ) {
-				AX_EXPECT_MSG( Result.Append( " <= " ), "Out of memory" );
+				AX_EXPECT_MEMORY( Result.Append( " <= " ) );
 			} else if( m_pToUntilToken->IsKeyword( kKeyword_Until ) ) {
-				AX_EXPECT_MSG( Result.Append( " < " ), "Out of memory" );
+				AX_EXPECT_MEMORY( Result.Append( " < " ) );
 			} else {
 				AX_ASSERT_MSG( false, "Unreachable" );
 			}
 		}
 		if( m_pCondExpr != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( "expr:" ), "Out of memory" );
-			AX_EXPECT_MSG( Result.Append( m_pCondExpr->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "expr:" ) );
+			AX_EXPECT_MEMORY( Result.Append( m_pCondExpr->ToString() ) );
 		} else {
 			if( m_pToUntilToken != nullptr ) {
-				AX_EXPECT_MSG( Result.Append( "expr:(null)" ), "Out of memory" );
+				AX_EXPECT_MEMORY( Result.Append( "expr:(null)" ) );
 			}
 		}
 		if( m_pStepExpr != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( " step:" ), "Out of memory" );
-			AX_EXPECT_MSG( Result.Append( m_pStepExpr->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( " step:" ) );
+			AX_EXPECT_MEMORY( Result.Append( m_pStepExpr->ToString() ) );
 		}
 
 		if( m_Stmts.begin() != m_Stmts.end() ) {
-			AX_EXPECT_MSG( Result.Append( "\n" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "\n" ) );
 
 			Ax::String TempResult = m_Stmts.ToString();
-			AX_EXPECT_MSG( TempResult.TabSelf(), "Out of memory" );
+			AX_EXPECT_MEMORY( TempResult.TabSelf() );
 
-			AX_EXPECT_MSG( Result.Append( TempResult ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( TempResult ) );
 		}
 
 		return Result;
@@ -841,7 +841,7 @@ namespace Tenshi { namespace Compiler {
 		SSymbol *pVarSym = nullptr;
 		Ax::String VarName;
 
-		AX_EXPECT_MSG( VarName.Assign( m_pVarToken->GetString() ), "Out of memory" );
+		AX_EXPECT_MEMORY( VarName.Assign( m_pVarToken->GetString() ) );
 
 		m_Semant.bOwnsVar = false;
 		pVarSym = const_cast< SSymbol * >( g_Prog->FindSymbol( VarName ) );
@@ -1158,20 +1158,20 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String Result;
 
-		AX_EXPECT_MSG( Result.Append( "Switch expr:" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "Switch expr:" ) );
 		if( m_pSelectExpr != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( m_pSelectExpr->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( m_pSelectExpr->ToString() ) );
 		} else {
-			AX_EXPECT_MSG( Result.Append( "(null)" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "(null)" ) );
 		}
 
 		if( m_Stmts.begin() != m_Stmts.end() ) {
-			AX_EXPECT_MSG( Result.Append( "\n" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "\n" ) );
 
 			Ax::String TempResult = m_Stmts.ToString();
-			AX_EXPECT_MSG( TempResult.TabSelf(), "Out of memory" );
+			AX_EXPECT_MEMORY( TempResult.TabSelf() );
 
-			AX_EXPECT_MSG( Result.Append( TempResult ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( TempResult ) );
 		}
 
 		return Result;
@@ -1272,22 +1272,22 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String Result;
 
-		AX_EXPECT_MSG( Result.Append( "Case expr:" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "Case expr:" ) );
 		if( m_pExpr != nullptr ) {
 			AX_ASSERT( m_bIsDefault == false );
-			AX_EXPECT_MSG( Result.Append( m_pExpr->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( m_pExpr->ToString() ) );
 		} else {
 			AX_ASSERT( m_bIsDefault == true );
-			AX_EXPECT_MSG( Result.Append( "default" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "default" ) );
 		}
 
 		if( m_Stmts.begin() != m_Stmts.end() ) {
-			AX_EXPECT_MSG( Result.Append( "\n" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "\n" ) );
 
 			Ax::String TempResult = m_Stmts.ToString();
-			AX_EXPECT_MSG( TempResult.TabSelf(), "Out of memory" );
+			AX_EXPECT_MEMORY( TempResult.TabSelf() );
 
-			AX_EXPECT_MSG( Result.Append( TempResult ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( TempResult ) );
 		}
 
 		return Result;
@@ -1353,7 +1353,7 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String Result;
 
-		AX_EXPECT_MSG( Result.Append( "CaseFallthrough" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "CaseFallthrough" ) );
 
 		return Result;
 	}
@@ -1411,7 +1411,7 @@ namespace Tenshi { namespace Compiler {
 				CIfStmt *const pElseIfNode = new CIfStmt( CheckTok, Parser() );
 				AX_EXPECT_MEMORY( pElseIfNode );
 				pElseIfNode->SetSequence( m_Stmts );
-				AX_EXPECT_MSG( m_ElseStmts.Append( pElseIfNode ), "Out of memory" );
+				AX_EXPECT_MEMORY( m_ElseStmts.Append( pElseIfNode ) );
 
 				CIfStmt &ElseIfNode = *pElseIfNode;
 
@@ -1422,7 +1422,7 @@ namespace Tenshi { namespace Compiler {
 					return false;
 				}
 
-				AX_EXPECT_MSG( m_ElseStmts.Append( &ElseIfNode ), "Out of memory" );
+				AX_EXPECT_MEMORY( m_ElseStmts.Append( &ElseIfNode ) );
 				pCurrentStmts = &ElseIfNode.m_Stmts;
 				continue;
 			}
@@ -1439,7 +1439,7 @@ namespace Tenshi { namespace Compiler {
 				CIfStmt *const pElseNode = new CIfStmt( CheckTok, Parser() );
 				AX_EXPECT_MEMORY( pElseNode );
 				pElseNode->SetSequence( m_Stmts );
-				AX_EXPECT_MSG( m_ElseStmts.Append( pElseNode ), "Out of memory" );
+				AX_EXPECT_MEMORY( m_ElseStmts.Append( pElseNode ) );
 
 				CIfStmt &ElseNode = *pElseNode;
 
@@ -1469,40 +1469,40 @@ namespace Tenshi { namespace Compiler {
 
 		if( m_bIsElse ) {
 			if( m_pCondition != nullptr ) {
-				AX_EXPECT_MSG( Result.Append( "ElseIf expr:" ), "Out of memory" );
+				AX_EXPECT_MEMORY( Result.Append( "ElseIf expr:" ) );
 			} else {
-				AX_EXPECT_MSG( Result.Append( "Else" ), "Out of memory" );
+				AX_EXPECT_MEMORY( Result.Append( "Else" ) );
 			}
 		} else {
-			AX_EXPECT_MSG( Result.Append( "If expr:" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "If expr:" ) );
 		}
 		if( m_pCondition != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( m_pCondition->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( m_pCondition->ToString() ) );
 		} else {
 			if( !m_bIsElse ) {
-				AX_EXPECT_MSG( Result.Append( "(null)" ), "Out of memory" );
+				AX_EXPECT_MEMORY( Result.Append( "(null)" ) );
 			}
 		}
 
 		if( m_Stmts.begin() != m_Stmts.end() ) {
-			AX_EXPECT_MSG( Result.Append( "\n" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "\n" ) );
 
 			Ax::String TempResult = m_Stmts.ToString();
-			AX_EXPECT_MSG( TempResult.TabSelf(), "Out of memory" );
+			AX_EXPECT_MEMORY( TempResult.TabSelf() );
 
-			AX_EXPECT_MSG( Result.Append( TempResult ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( TempResult ) );
 		}
 
 		for( const CIfStmt *pElseStmt : m_ElseStmts ) {
-			AX_EXPECT_MSG( Result.Append( "\n" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "\n" ) );
 
 			AX_ASSERT_NOT_NULL( pElseStmt );
 			const CIfStmt &Stmt = *pElseStmt;
 
 			Ax::String TempResult = Stmt.ToString();
-			AX_EXPECT_MSG( TempResult.TabSelf(), "Out of memory" );
+			AX_EXPECT_MEMORY( TempResult.TabSelf() );
 
-			AX_EXPECT_MSG( Result.Append( TempResult ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( TempResult ) );
 		}
 
 		return Result;
@@ -1842,28 +1842,28 @@ namespace Tenshi { namespace Compiler {
 		switch( m_DeclScope )
 		{
 		case EVarScope::Local:
-			AX_EXPECT_MSG( Result.Append( "LocalVarDecl <" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "LocalVarDecl <" ) );
 			break;
 		case EVarScope::Global:
-			AX_EXPECT_MSG( Result.Append( "GlobalVarDecl <" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "GlobalVarDecl <" ) );
 			break;
 		}
 
 		if( m_pVarTok != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( m_pVarTok->GetString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( m_pVarTok->GetString() ) );
 		} else {
-			AX_EXPECT_MSG( Result.Append( "(null)" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "(null)" ) );
 		}
-		AX_EXPECT_MSG( Result.Append( ">" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( ">" ) );
 
 		if( m_pType != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( " as:" ), "Out of memory" );
-			AX_EXPECT_MSG( Result.Append( m_pType->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( " as:" ) );
+			AX_EXPECT_MEMORY( Result.Append( m_pType->ToString() ) );
 		}
 
 		if( m_pDefExpr != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( " value:" ), "Out of memory" );
-			AX_EXPECT_MSG( Result.Append( m_pDefExpr->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( " value:" ) );
+			AX_EXPECT_MEMORY( Result.Append( m_pDefExpr->ToString() ) );
 		}
 
 		return Result;
@@ -2249,7 +2249,7 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String Result;
 
-		AX_EXPECT_MSG( Result.Append( "VarAssign " ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "VarAssign " ) );
 
 		const char *pszCompoundOp = "(unknown-op)";
 		switch( m_CompoundOp )
@@ -2298,20 +2298,20 @@ namespace Tenshi { namespace Compiler {
 			break;
 		}
 
-		AX_EXPECT_MSG( Result.Append( pszCompoundOp ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( pszCompoundOp ) );
 
-		AX_EXPECT_MSG( Result.Append( " var:" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( " var:" ) );
 		if( m_pVarExpr != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( m_pVarExpr->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( m_pVarExpr->ToString() ) );
 		} else {
-			AX_EXPECT_MSG( Result.Append( "(null)" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "(null)" ) );
 		}
-		AX_EXPECT_MSG( Result.Append( " value:" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( " value:" ) );
 
 		if( m_pValueExpr != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( m_pValueExpr->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( m_pValueExpr->ToString() ) );
 		} else {
-			AX_EXPECT_MSG( Result.Append( "(null)" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "(null)" ) );
 		}
 
 		return Result;
@@ -2438,11 +2438,11 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String Result;
 
-		AX_EXPECT_MSG( Result.Append( "ReturnFromFunction" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "ReturnFromFunction" ) );
 		
 		if( m_pExpr != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( " value:" ), "Out of memory" );
-			AX_EXPECT_MSG( Result.Append( m_pExpr->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( " value:" ) );
+			AX_EXPECT_MEMORY( Result.Append( m_pExpr->ToString() ) );
 		}
 
 		return Result;

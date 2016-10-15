@@ -46,10 +46,10 @@ namespace Tenshi { namespace Compiler {
 				continue;
 			}
 
-			AX_EXPECT_MSG( DataOffsets.Append( ModNameData.Num() ), "Out of memory" );
+			AX_EXPECT_MEMORY( DataOffsets.Append( ModNameData.Num() ) );
 
-			AX_EXPECT_MSG( ModNameData.Append( pMod->Name.Num(), ( const uint8 * )pMod->Name.CString() ), "Out of memory" );
-			AX_EXPECT_MSG( ModNameData.Append( '\0' ), "Out of memory" );
+			AX_EXPECT_MEMORY( ModNameData.Append( pMod->Name.Num(), ( const uint8 * )pMod->Name.CString() ) );
+			AX_EXPECT_MEMORY( ModNameData.Append( '\0' ) );
 		}
 
 		llvm::Constant *const pModNameBufferInit =
@@ -74,9 +74,9 @@ namespace Tenshi { namespace Compiler {
 				continue;
 			}
 
-			AX_EXPECT_MSG( ModNames.Append(), "Out of memory" );
-			AX_EXPECT_MSG( ModInits.Append(), "Out of memory" );
-			AX_EXPECT_MSG( ModFinis.Append(), "Out of memory" );
+			AX_EXPECT_MEMORY( ModNames.Append() );
+			AX_EXPECT_MEMORY( ModInits.Append() );
+			AX_EXPECT_MEMORY( ModFinis.Append() );
 			
 			llvm::Constant *const pModNameConst =
 				llvm::ConstantDataArray::getString( m_Context, LLVMStr( pMod->Name ), true );

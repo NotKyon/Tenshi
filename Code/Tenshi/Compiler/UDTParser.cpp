@@ -140,20 +140,20 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String Result;
 
-		AX_EXPECT_MSG( Result.Append( "UDT <" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "UDT <" ) );
 		if( m_pNameTok != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( m_pNameTok->GetString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( m_pNameTok->GetString() ) );
 		} else {
-			AX_EXPECT_MSG( Result.Append( "(null)" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "(null)" ) );
 		}
-		AX_EXPECT_MSG( Result.Append( ">" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( ">" ) );
 
 		for( const CUDTField *const pField : m_Fields ) {
 			AX_ASSERT_NOT_NULL( pField );
 			const CUDTField &Field = *pField;
 
-			AX_EXPECT_MSG( Result.Append( "\n\t" ), "Out of memory" );
-			AX_EXPECT_MSG( Result.Append( Field.ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "\n\t" ) );
+			AX_EXPECT_MEMORY( Result.Append( Field.ToString() ) );
 		}
 
 		return Result;
@@ -236,7 +236,7 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::TArray< llvm::Type * > Elements;
 
-		AX_EXPECT_MSG( Elements.Reserve( m_Fields.Num() ), "Out of memory" );
+		AX_EXPECT_MEMORY( Elements.Reserve( m_Fields.Num() ) );
 		for( CUDTField *const pField : m_Fields ) {
 			AX_ASSERT_NOT_NULL( pField );
 			AX_ASSERT_NOT_NULL( pField->m_pSym );
@@ -336,7 +336,7 @@ namespace Tenshi { namespace Compiler {
 		CUDTField *const pField = new CUDTField( Tok, m_Parser );
 		AX_EXPECT_MEMORY( pField );
 
-		AX_EXPECT_MSG( m_Fields.Append( pField ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_Fields.Append( pField ) );
 
 		return *pField;
 	}
@@ -357,17 +357,17 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String Result;
 
-		AX_EXPECT_MSG( Result.Append( "Field <" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "Field <" ) );
 		if( m_pNameTok != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( m_pNameTok->GetString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( m_pNameTok->GetString() ) );
 		} else {
-			AX_EXPECT_MSG( Result.Append( "(null)" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "(null)" ) );
 		}
-		AX_EXPECT_MSG( Result.Append( ">" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( ">" ) );
 
 		if( m_pType != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( ":" ), "Out of memory" );
-			AX_EXPECT_MSG( Result.Append( m_pType->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( ":" ) );
+			AX_EXPECT_MEMORY( Result.Append( m_pType->ToString() ) );
 		}
 
 		return Result;
@@ -377,7 +377,7 @@ namespace Tenshi { namespace Compiler {
 	{
 		AX_ASSERT_NOT_NULL( m_pNameTok );
 
-		AX_EXPECT_MSG( DstInfo.Members.Resize( DstInfo.Members.Num() + 1 ), "Out of memory" );
+		AX_EXPECT_MEMORY( DstInfo.Members.Resize( DstInfo.Members.Num() + 1 ) );
 
 		SMemberInfo &Info = DstInfo.Members.Last();
 

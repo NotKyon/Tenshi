@@ -21,7 +21,7 @@ namespace Ax { namespace Window {
 	struct SInstance
 	{
 #if AX_OS(Windows)
-		ATOM						WindowClass			= NULL;
+		ATOM						WindowClass			= (ATOM)NULL;
 #endif
 
 		static SInstance &GetInstance()
@@ -639,7 +639,7 @@ namespace Ax { namespace Window {
 				// paint
 				case WM_PAINT:
 					{
-						const bool bSysDevCtx = wParm != NULL;
+						const bool bSysDevCtx = wParm != 0;
 						const HDC hDevCtx = bSysDevCtx ? HDC( wParm ) : GetDC( hWindow );
 
 						RECT Area;
@@ -693,13 +693,13 @@ namespace Ax { namespace Window {
 		wc.hIconSm = ( HICON )LoadImageW( wc.hInstance, MAKEINTRESOURCEW( AX_WINDOWS_ICON_RESOURCE ), IMAGE_ICON, 16, 16, LR_CREATEDIBSECTION );
 
 		WindowClass = RegisterClassExW( &wc );
-		AX_EXPECT_NOT_NULL( WindowClass );
+		AX_EXPECT_NOT_NULL( ((void*)(size_t)WindowClass) );
 #endif
 	}
 	SInstance::~SInstance()
 	{
 #if AX_OS(Windows)
-		UnregisterClassW( ( LPCWSTR )WindowClass, GetModuleHandleW( NULL ) );
+		UnregisterClassW( ( LPCWSTR )(size_t)WindowClass, GetModuleHandleW( NULL ) );
 #endif
 	}
 
@@ -788,7 +788,7 @@ namespace Ax { namespace Window {
 		HWND hWindow = CreateWindowExW
 		(
 			Exstyle,
-			( LPCWSTR )WM->WindowClass,
+			( LPCWSTR )(size_t)WM->WindowClass,
 			String( Info.pszTitle ).ToWStr( wszBuf ),
 			Style,
 			Area.left,

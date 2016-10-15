@@ -157,7 +157,7 @@ namespace Tenshi { namespace Compiler {
 	
 	CStatement &CStatementSequence::AddStmt( CStatement &NewStmt )
 	{
-		AX_EXPECT_MSG( m_Statements.Append( &NewStmt ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_Statements.Append( &NewStmt ) );
 		NewStmt.SetSequence( *this );
 		return NewStmt;
 	}
@@ -168,25 +168,25 @@ namespace Tenshi { namespace Compiler {
 
 		Result.Reserve( m_Statements.Num()*128 );
 		
-		AX_EXPECT_MSG( Result.Append( "{\n" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "{\n" ) );
 
 		bool bIsFirst = true;
 		for( const CStatement *const &pStmt : m_Statements ) {
 			if( !pStmt ) {
-				AX_EXPECT_MSG( Result.Append( "\t(null-statement)\n" ), "Out of memory" );
+				AX_EXPECT_MEMORY( Result.Append( "\t(null-statement)\n" ) );
 				continue;
 			}
 
 			const CStatement &Stmt = *pStmt;
 
 			Ax::String TempResult = Stmt.ToString();
-			AX_EXPECT_MSG( TempResult.TabSelf(), "Out of memory" );
+			AX_EXPECT_MEMORY( TempResult.TabSelf() );
 
-			AX_EXPECT_MSG( Result.Append( TempResult ), "Out of memory" );
-			AX_EXPECT_MSG( Result.Append( "\n" ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( TempResult ) );
+			AX_EXPECT_MEMORY( Result.Append( "\n" ) );
 		}
 
-		AX_EXPECT_MSG( Result.Append( "}" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "}" ) );
 
 		return Result;
 	}
@@ -382,9 +382,9 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String Result;
 
-		AX_EXPECT_MSG( Result.Append( "(Expr:" ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( ExprTypeToString( m_Type ) ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( ")" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "(Expr:" ) );
+		AX_EXPECT_MEMORY( Result.Append( ExprTypeToString( m_Type ) ) );
+		AX_EXPECT_MEMORY( Result.Append( ")" ) );
 
 		return Result;
 	}
@@ -525,48 +525,48 @@ namespace Tenshi { namespace Compiler {
 	{
 		Ax::String Result;
 
-		AX_EXPECT_MSG( Result.Append( "TypeDecl<" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( "TypeDecl<" ) );
 
 		for( const STypeParticle &Particle : m_Chain ) {
 			switch( Particle.GetType() )
 			{
 			case STypeParticle::kTypeName:
 				AX_ASSERT_NOT_NULL( Particle.pToken );
-				AX_EXPECT_MSG( Result.Append( Particle.pToken->GetString() ), "Out of memory" );
+				AX_EXPECT_MEMORY( Result.Append( Particle.pToken->GetString() ) );
 				break;
 
 			case STypeParticle::kPointer:
-				AX_EXPECT_MSG( Result.Append( "*" ), "Out of memory" );
+				AX_EXPECT_MEMORY( Result.Append( "*" ) );
 				break;
 			case STypeParticle::kReference:
-				AX_EXPECT_MSG( Result.Append( "&" ), "Out of memory" );
+				AX_EXPECT_MEMORY( Result.Append( "&" ) );
 				break;
 			case STypeParticle::kArray:
-				AX_EXPECT_MSG( Result.Append( "[[array]]" ), "Out of memory" );
+				AX_EXPECT_MEMORY( Result.Append( "[[array]]" ) );
 				break;
 			case STypeParticle::kLinkedList:
-				AX_EXPECT_MSG( Result.Append( "[[linked-list]]" ), "Out of memory" );
+				AX_EXPECT_MEMORY( Result.Append( "[[linked-list]]" ) );
 				break;
 			case STypeParticle::kBinaryTree:
-				AX_EXPECT_MSG( Result.Append( "[[binary-tree]]" ), "Out of memory" );
+				AX_EXPECT_MEMORY( Result.Append( "[[binary-tree]]" ) );
 				break;
 			case STypeParticle::kConstQualifier:
-				AX_EXPECT_MSG( Result.Append( "[[const]]" ), "Out of memory" );
+				AX_EXPECT_MEMORY( Result.Append( "[[const]]" ) );
 				break;
 			case STypeParticle::kMutableQualifier:
-				AX_EXPECT_MSG( Result.Append( "[[mutable]]" ), "Out of memory" );
+				AX_EXPECT_MEMORY( Result.Append( "[[mutable]]" ) );
 				break;
 			case STypeParticle::kVolatileQualifier:
-				AX_EXPECT_MSG( Result.Append( "[[volatile]]" ), "Out of memory" );
+				AX_EXPECT_MEMORY( Result.Append( "[[volatile]]" ) );
 				break;
 
 			default:
-				AX_EXPECT_MSG( Result.Append( "(unknown)" ), "Out of memory" );
+				AX_EXPECT_MEMORY( Result.Append( "(unknown)" ) );
 				break;
 			}
 		}
 
-		AX_EXPECT_MSG( Result.Append( ">" ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( ">" ) );
 		return Result;
 	}
 	
@@ -811,21 +811,21 @@ namespace Tenshi { namespace Compiler {
 				bCanReorderMemAccesses ? "" :
 				"volatile ";
 
-		AX_EXPECT_MSG( Result.Append( pszAccessor ), "Out of memory" );
-		AX_EXPECT_MSG( Result.Append( pszVolatile ), "Out of memory" );
+		AX_EXPECT_MEMORY( Result.Append( pszAccessor ) );
+		AX_EXPECT_MEMORY( Result.Append( pszVolatile ) );
 
 		if( BuiltinType == EBuiltinType::UserDefined ) {
 			AX_ASSERT_NOT_NULL( pCustomType );
 
-			AX_EXPECT_MSG( Result.Append( "UDT:" ), "Out of memory" );
-			AX_EXPECT_MSG( Result.Append( pCustomType->Name ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "UDT:" ) );
+			AX_EXPECT_MEMORY( Result.Append( pCustomType->Name ) );
 		} else {
-			AX_EXPECT_MSG( Result.Append( BuiltinTypeToString( BuiltinType ) ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( BuiltinTypeToString( BuiltinType ) ) );
 		}
 
 		if( pRef != nullptr ) {
-			AX_EXPECT_MSG( Result.Append( "::" ), "Out of memory" );
-			AX_EXPECT_MSG( Result.Append( pRef->ToString() ), "Out of memory" );
+			AX_EXPECT_MEMORY( Result.Append( "::" ) );
+			AX_EXPECT_MEMORY( Result.Append( pRef->ToString() ) );
 		}
 
 		return Result;

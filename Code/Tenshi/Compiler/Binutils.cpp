@@ -92,41 +92,41 @@ namespace Tenshi { namespace Compiler {
 			return false;
 		}
 
-		AX_EXPECT_MSG( m_SysRoot.Assign( szBuff ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_SysRoot.Assign( szBuff ) );
 		AX_DEBUG_LOG += "sysroot: " + m_SysRoot;
 
 		// Find LD
-		AX_EXPECT_MSG( m_LD.Assign( m_SysRoot ), "Out of memory" );
-		AX_EXPECT_MSG( m_LD.AppendPath( "bin" AX_DIRSEP "ld" ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_LD.Assign( m_SysRoot ) );
+		AX_EXPECT_MEMORY( m_LD.AppendPath( "bin" AX_DIRSEP "ld" ) );
 
 		// Append '.exe' to all programs if we're in Windows
 #ifdef _WIN32
-		AX_EXPECT_MSG( m_LD.Append( ".exe" ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_LD.Append( ".exe" ) );
 #endif
 
 		// Find the lib directories
-		AX_EXPECT_MSG( m_LibDir.Assign( m_SysRoot ), "Out of memory" );
-		AX_EXPECT_MSG( m_LibDir.AppendPath( "lib" ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_LibDir.Assign( m_SysRoot ) );
+		AX_EXPECT_MEMORY( m_LibDir.AppendPath( "lib" ) );
 
-		AX_EXPECT_MSG( m_IntLibDir.Assign( m_LibDir ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_IntLibDir.Assign( m_LibDir ) );
 
 		// Find the objects that we need to link against
-		AX_EXPECT_MSG( m_Obj_CRT2.Assign( m_LibDir ), "Out of memory" );
-		AX_EXPECT_MSG( m_Obj_CRT2.AppendPath( "crt2.o" ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_Obj_CRT2.Assign( m_LibDir ) );
+		AX_EXPECT_MEMORY( m_Obj_CRT2.AppendPath( "crt2.o" ) );
 
-		AX_EXPECT_MSG( m_Obj_CRTBegin.Assign( m_IntLibDir ), "Out of memory" );
-		AX_EXPECT_MSG( m_Obj_CRTBegin.AppendPath( "crtbegin.o" ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_Obj_CRTBegin.Assign( m_IntLibDir ) );
+		AX_EXPECT_MEMORY( m_Obj_CRTBegin.AppendPath( "crtbegin.o" ) );
 
-		AX_EXPECT_MSG( m_Obj_CRTEnd.Assign( m_IntLibDir ), "Out of memory" );
-		AX_EXPECT_MSG( m_Obj_CRTEnd.AppendPath( "crtend.o" ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_Obj_CRTEnd.Assign( m_IntLibDir ) );
+		AX_EXPECT_MEMORY( m_Obj_CRTEnd.AppendPath( "crtend.o" ) );
 
 		// Find TenshiRuntime.o
 		if( !GetPath( szBuff, TENSHIRUNTIME_O ) ) {
-			Ax::BasicErrorf( "Could not obtain path to TenshiRuntime.o" );
+			Ax::BasicErrorf( "Could not obtain path to \"" TENSHIRUNTIME_O "\"" );
 			return false;
 		}
 
-		AX_EXPECT_MSG( m_Obj_TenshiRuntime.Assign( szBuff ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_Obj_TenshiRuntime.Assign( szBuff ) );
 
 		AX_DEBUG_LOG += TENSHIRUNTIME_O ": " + m_Obj_TenshiRuntime;
 
@@ -140,31 +140,31 @@ namespace Tenshi { namespace Compiler {
 		Ax::TArray< Ax::String > CommandLine;
 
 		Ax::String OutDir;
-		AX_EXPECT_MSG( OutDir.Assign( Output.ExtractDirectory() ), "Out of memory" );
+		AX_EXPECT_MEMORY( OutDir.Assign( Output.ExtractDirectory() ) );
 		if( OutDir.IsEmpty() ) {
-			AX_EXPECT_MSG( OutDir.Assign( Ax::System::GetDir() ), "Out of memory" );
+			AX_EXPECT_MEMORY( OutDir.Assign( Ax::System::GetDir() ) );
 		}
 
-		AX_EXPECT_MSG( CommandLine.Reserve( InObjects.Num() + kExtraReserved ), "Out of memory" );
+		AX_EXPECT_MEMORY( CommandLine.Reserve( InObjects.Num() + kExtraReserved ) );
 
-		AX_EXPECT_MSG( CommandLine.Append( m_LD ), "Out of memory" );
-		AX_EXPECT_MSG( CommandLine.Append( "-o" ), "Out of memory" );
-		AX_EXPECT_MSG( CommandLine.Append( Output ), "Out of memory" );
-		AX_EXPECT_MSG( CommandLine.Append( m_Obj_CRT2 ), "Out of memory" );
-		AX_EXPECT_MSG( CommandLine.Append( m_Obj_CRTBegin ), "Out of memory" );
-		AX_EXPECT_MSG( CommandLine.Append( "-L" ), "Out of memory" );
-		AX_EXPECT_MSG( CommandLine.Append( m_LibDir ), "Out of memory" );
+		AX_EXPECT_MEMORY( CommandLine.Append( m_LD ) );
+		AX_EXPECT_MEMORY( CommandLine.Append( "-o" ) );
+		AX_EXPECT_MEMORY( CommandLine.Append( Output ) );
+		AX_EXPECT_MEMORY( CommandLine.Append( m_Obj_CRT2 ) );
+		AX_EXPECT_MEMORY( CommandLine.Append( m_Obj_CRTBegin ) );
+		AX_EXPECT_MEMORY( CommandLine.Append( "-L" ) );
+		AX_EXPECT_MEMORY( CommandLine.Append( m_LibDir ) );
 		if( m_IntLibDir != m_LibDir ) {
-			AX_EXPECT_MSG( CommandLine.Append( "-L" ), "Out of memory" );
-			AX_EXPECT_MSG( CommandLine.Append( m_IntLibDir ), "Out of memory" );
+			AX_EXPECT_MEMORY( CommandLine.Append( "-L" ) );
+			AX_EXPECT_MEMORY( CommandLine.Append( m_IntLibDir ) );
 		}
-		AX_EXPECT_MSG( CommandLine.Append( InObjects ), "Out of memory" );
-		AX_EXPECT_MSG( CommandLine.Append( m_Obj_TenshiRuntime ), "Out of memory" );
-		AX_EXPECT_MSG( CommandLine.Append( "-lmingw32" ), "Out of memory" );
-		AX_EXPECT_MSG( CommandLine.Append( "-lgcc" ), "Out of memory" ); //only needed for stack checks
-		AX_EXPECT_MSG( CommandLine.Append( "-lmingwex" ), "Out of memory" );
-		AX_EXPECT_MSG( CommandLine.Append( "-lmsvcrt" ), "Out of memory" );
-		AX_EXPECT_MSG( CommandLine.Append( "-lkernel32" ), "Out of memory" );
+		AX_EXPECT_MEMORY( CommandLine.Append( InObjects ) );
+		AX_EXPECT_MEMORY( CommandLine.Append( m_Obj_TenshiRuntime ) );
+		AX_EXPECT_MEMORY( CommandLine.Append( "-lmingw32" ) );
+		AX_EXPECT_MEMORY( CommandLine.Append( "-lgcc" ) ); //only needed for stack checks
+		AX_EXPECT_MEMORY( CommandLine.Append( "-lmingwex" ) );
+		AX_EXPECT_MEMORY( CommandLine.Append( "-lmsvcrt" ) );
+		AX_EXPECT_MEMORY( CommandLine.Append( "-lkernel32" ) );
 
 		// Add modules
 		for( const SModule::IntrLink *pModLink = InMods.HeadLink(); pModLink != nullptr; pModLink = pModLink->NextLink() ) {
@@ -208,9 +208,9 @@ namespace Tenshi { namespace Compiler {
 #endif
 			}
 
-			AX_EXPECT_MSG( CommandLine.Append( ModFilename ), "Out of memory" );
+			AX_EXPECT_MEMORY( CommandLine.Append( ModFilename ) );
 		}
-		AX_EXPECT_MSG( CommandLine.Append( m_Obj_CRTEnd ), "Out of memory" );
+		AX_EXPECT_MEMORY( CommandLine.Append( m_Obj_CRTEnd ) );
 
 		return Shell->Run( CommandLine );
 	}

@@ -579,7 +579,7 @@ namespace Tenshi { namespace Compiler {
 					AX_ASSERT_NOT_NULL( pSym );
 					AX_ASSERT_NOT_NULL( pSym->pDeclToken );
 					const auto *const pTok = pSym->pNameToken != nullptr ? pSym->pNameToken : pSym->pDeclToken;
-					AX_EXPECT_MSG( SymsStr.Append( pTok->GetString() + "\n" ), "Out of memory" );
+					AX_EXPECT_MEMORY( SymsStr.Append( pTok->GetString() + "\n" ) );
 				}
 
 				printf( "%s", SymsStr.CString() );
@@ -596,15 +596,15 @@ namespace Tenshi { namespace Compiler {
 
 #if 0
 					AX_ASSERT_NOT_NULL( pSym );
-					AX_EXPECT_MSG( TypeStr.Append( pSym->DeclToken().GetString() + "\n" ), "Out of memory" );
+					AX_EXPECT_MEMORY( TypeStr.Append( pSym->DeclToken().GetString() + "\n" ) );
 #endif
 
 					if( !pSym || !pSym->pUDT ) {
 						continue;
 					}
 
-					AX_EXPECT_MSG( TypeStr.Append( pSym->pUDT->ToString() ), "Out of memory" );
-					AX_EXPECT_MSG( TypeStr.Append( "\n" ), "Out of memory" );
+					AX_EXPECT_MEMORY( TypeStr.Append( pSym->pUDT->ToString() ) );
+					AX_EXPECT_MEMORY( TypeStr.Append( "\n" ) );
 				}
 
 				printf( "%s", TypeStr.CString() );

@@ -94,7 +94,7 @@ namespace Tenshi { namespace Compiler {
 		pEntry->pData->pDeclScope = this;
 		pEntry->pData->pEntry = pEntry;
 
-		AX_EXPECT_MSG( m_Symbols.Append( pEntry->pData ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_Symbols.Append( pEntry->pData ) );
 
 		return pEntry->pData;
 	}
@@ -150,7 +150,7 @@ namespace Tenshi { namespace Compiler {
 	void CScope::SetDictionary( SymbolDictionary &Dict, const Ax::String &NamePrefix )
 	{
 		m_pDictionary = &Dict;
-		AX_EXPECT_MSG( m_NamePrefix.Assign( NamePrefix ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_NamePrefix.Assign( NamePrefix ) );
 
 		if( !NamePrefix.IsEmpty() ) {
 			m_pSearchFrom = Dict.Lookup( NamePrefix );
@@ -167,7 +167,7 @@ namespace Tenshi { namespace Compiler {
 		CScope *const pScope = new CScope();
 		AX_EXPECT_MEMORY( pScope );
 
-		AX_EXPECT_MSG( m_Subscopes.Append( pScope ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_Subscopes.Append( pScope ) );
 		pScope->m_pParent = this;
 
 		return pScope;
@@ -177,10 +177,10 @@ namespace Tenshi { namespace Compiler {
 		CScope *const pScope = new CScope();
 		AX_EXPECT_MEMORY( pScope );
 
-		AX_EXPECT_MSG( m_Subscopes.Append( pScope ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_Subscopes.Append( pScope ) );
 
 		pScope->m_pDictionary = m_pDictionary;
-		AX_EXPECT_MSG( pScope->m_NamePrefix.Assign( NamePrefix ), "Out of memory" );
+		AX_EXPECT_MEMORY( pScope->m_NamePrefix.Assign( NamePrefix ) );
 
 		pScope->m_pParent = this;
 

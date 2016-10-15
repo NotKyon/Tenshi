@@ -19,11 +19,11 @@ namespace Tenshi { namespace Compiler {
 	, m_IntPtrRTy()
 	, m_UIntPtrRTy()
 	{
-		AX_EXPECT_MSG( m_Dictionary.Init( TENSHI_PARSER_DICTIONARY_ALLOWED, SourceCasing ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_Dictionary.Init( TENSHI_PARSER_DICTIONARY_ALLOWED, SourceCasing ) );
 
-		AX_EXPECT_MSG( m_BuildInfo.Platform.OSName.Assign( "Windows" ), "Out of memory" );
-		AX_EXPECT_MSG( m_BuildInfo.Platform.ExeExt.Assign( ".exe" ), "Out of memory" );
-		AX_EXPECT_MSG( m_BuildInfo.Platform.DLLExt.Assign( ".dll" ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_BuildInfo.Platform.OSName.Assign( "Windows" ) );
+		AX_EXPECT_MEMORY( m_BuildInfo.Platform.ExeExt.Assign( ".exe" ) );
+		AX_EXPECT_MEMORY( m_BuildInfo.Platform.DLLExt.Assign( ".dll" ) );
 		m_BuildInfo.Platform.Subsystem = ESubsystem::Text;
 		m_BuildInfo.Platform.PointerSize = EPointerSize::kPointer64;
 		m_BuildInfo.Platform.Endianness = EEndianMode::Little;
@@ -127,7 +127,7 @@ namespace Tenshi { namespace Compiler {
 	SModule &CEnvironment::AllocModule()
 	{
 		ModuleIter Mod = m_Modules.AddTail();
-		AX_EXPECT_MSG( Mod != m_Modules.end(), "Out of memory" );
+		AX_EXPECT_MEMORY( Mod != m_Modules.end() );
 
 		return *Mod.Get();
 	}

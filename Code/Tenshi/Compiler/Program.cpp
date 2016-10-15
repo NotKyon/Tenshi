@@ -85,7 +85,7 @@ namespace Tenshi { namespace Compiler {
 
 	void CProgram::PushScope( CScope &Scope )
 	{
-		AX_EXPECT_MSG( m_ScopeStack.Append( &Scope ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_ScopeStack.Append( &Scope ) );
 	}
 	void CProgram::PopScope()
 	{

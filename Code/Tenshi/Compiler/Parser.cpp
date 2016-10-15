@@ -72,7 +72,7 @@ namespace Tenshi { namespace Compiler {
 			{ ".", 255, EAssoc::Left, EOpType::Binary, EBuiltinOp::FieldRef, false }
 		};
 
-		AX_EXPECT_MSG( m_Operators.Append( operators ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_Operators.Append( operators ) );
 		m_Stmts.SetType( EStmtSeqType::Program );
 	}
 	CParser::~CParser()
@@ -90,7 +90,7 @@ namespace Tenshi { namespace Compiler {
 
 	void CParser::PushErrorToken( const SToken &Token )
 	{
-		AX_EXPECT_MSG( m_ErrorTokenStack.Append( &Token ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_ErrorTokenStack.Append( &Token ) );
 	}
 	void CParser::PopErrorToken()
 	{
@@ -458,7 +458,7 @@ namespace Tenshi { namespace Compiler {
 		CUserDefinedType *const pUDT = new CUserDefinedType( Tok, *this );
 		AX_EXPECT_MEMORY( pUDT );
 
-		AX_EXPECT_MSG( m_Types.Append( pUDT ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_Types.Append( pUDT ) );
 
 		return pUDT->Parse();
 	}
@@ -472,7 +472,7 @@ namespace Tenshi { namespace Compiler {
 		CFunctionDecl *const pFunc = new CFunctionDecl( Tok, *this );
 		AX_EXPECT_MEMORY( pFunc );
 
-		AX_EXPECT_MSG( m_FuncDecls.Append( pFunc ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_FuncDecls.Append( pFunc ) );
 
 		return pFunc->Parse();
 	}
@@ -776,7 +776,7 @@ namespace Tenshi { namespace Compiler {
 				return nullptr;
 			}
 
-			AX_EXPECT_MSG( pListNode->m_Subexpressions.Append( pExprNode ), "Out of memory" );
+			AX_EXPECT_MEMORY( pListNode->m_Subexpressions.Append( pExprNode ) );
 		} while( m_Lexer.Check( Ax::Parser::ETokenType::Punctuation, "," ) );
 
 		if( bDoCheck && !m_Lexer.Expect( ETokenType::Punctuation, pszCheck ) ) {
@@ -795,8 +795,8 @@ namespace Tenshi { namespace Compiler {
 			AX_ASSERT_NOT_NULL( pType );
 			const CUserDefinedType &Type = *pType;
 
-			AX_EXPECT_MSG( TypeAST.Append( Type.ToString() ), "Out of memory" );
-			AX_EXPECT_MSG( TypeAST.Append( "\n" ), "Out of memory" );
+			AX_EXPECT_MEMORY( TypeAST.Append( Type.ToString() ) );
+			AX_EXPECT_MEMORY( TypeAST.Append( "\n" ) );
 		}
 
 		Ax::String FuncAST;
@@ -805,8 +805,8 @@ namespace Tenshi { namespace Compiler {
 			AX_ASSERT_NOT_NULL( pFunc );
 			const CFunctionDecl &Func = *pFunc;
 
-			AX_EXPECT_MSG( FuncAST.Append( Func.ToString() ), "Out of memory" );
-			AX_EXPECT_MSG( FuncAST.Append( "\n" ), "Out of memory" );
+			AX_EXPECT_MEMORY( FuncAST.Append( Func.ToString() ) );
+			AX_EXPECT_MEMORY( FuncAST.Append( "\n" ) );
 		}
 
 		Ax::String MainAST = ProgramStatements().ToString();
@@ -816,7 +816,7 @@ namespace Tenshi { namespace Compiler {
 		FuncAST.Replace( "\t", pszTab );
 		MainAST.Replace( "\t", pszTab );
 
-		AX_EXPECT_MSG( MainAST.Append( "\n" ), "Out of memory" );
+		AX_EXPECT_MEMORY( MainAST.Append( "\n" ) );
 
 		printf( "%s%s%s", TypeAST.CString(), FuncAST.CString(), MainAST.CString() );
 	}

@@ -127,7 +127,7 @@ namespace Tenshi { namespace Compiler {
 		template< typename tType >
 		inline tType &AddExpr( const SToken &Token )
 		{
-			AX_EXPECT_MSG( m_Subexpressions.Append( nullptr ), "Out of memory" );
+			AX_EXPECT_MEMORY( m_Subexpressions.Append( nullptr ) );
 
 			tType *const pSubexpr = new tType( Token, Parser() );
 			AX_EXPECT_MEMORY( pSubexpr );

@@ -43,7 +43,7 @@ namespace Tenshi { namespace Compiler {
 
 	bool MCodeGen::EnterScope()
 	{
-		AX_EXPECT_MSG( m_CleanScopes.Append(), "Out of memory" );
+		AX_EXPECT_MEMORY( m_CleanScopes.Append() );
 		return m_CleanScopes.Num() == 1;
 	}
 	void MCodeGen::LeaveScope()
@@ -69,7 +69,7 @@ namespace Tenshi { namespace Compiler {
 		AX_ASSERT( !m_CleanScopes.IsEmpty() );
 
 		SCleanupScope &Scope = m_CleanScopes.Last();
-		AX_EXPECT_MSG( Scope.Funcs.Append(), "Out of memory" );
+		AX_EXPECT_MEMORY( Scope.Funcs.Append() );
 	
 		SCleanupFunction &CleanFunc = Scope.Funcs.Last();
 		CleanFunc.pFunction = pFunc;

@@ -65,5 +65,5 @@ namespace Ax { namespace Detail {
 #define AX_VERIFY_IS_NULL( var ) AX_VERIFY_MSG( ( var ) == NULL, #var " is not NULL" )
 #define AX_EXPECT_IS_NULL( var ) AX_EXPECT_MSG( ( var ) == NULL, #var " is not NULL" )
 
-#define AX_VERIFY_MEMORY( var ) AX_VERIFY_MSG( ( var ) != NULL, "Out of memory (non-fatal)" )
-#define AX_EXPECT_MEMORY( var ) AX_EXPECT_MSG( ( var ) != NULL, "Out of memory (!!FATAL!!)" )
+#define AX_VERIFY_MEMORY( var ) AX_VERIFY_MSG( !!( var ), "Out of memory (non-fatal)" )
+#define AX_EXPECT_MEMORY( var ) AX_EXPECT_MSG( !!( var ), "Out of memory (!!FATAL!!)" )

@@ -36,7 +36,7 @@ namespace Tenshi { namespace Compiler {
 			m_pShortOpts[ uShortIndex ] = &Opt;
 		}
 
-		AX_EXPECT_MSG( m_pOptions.Append( &Opt ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_pOptions.Append( &Opt ) );
 		return *this;
 	}
 
@@ -61,7 +61,7 @@ namespace Tenshi { namespace Compiler {
 			const char *arg = basearg;
 
 			if( *arg != '-' || bOnlyInputs ) {
-				AX_EXPECT_MSG( m_Inputs.Append( arg ), "Out of memory" );
+				AX_EXPECT_MEMORY( m_Inputs.Append( arg ) );
 				++cSuccesses;
 				continue;
 			}

@@ -15,7 +15,7 @@ namespace Tenshi { namespace Compiler {
 	, m_Commands()
 	, m_CommandMap()
 	{
-		AX_EXPECT_MSG( m_CommandMap.Init( TENSHI_SHELLCOMMAND_ALLOWED, Ax::ECase::Insensitive ), "Out of memory" );
+		AX_EXPECT_MEMORY( m_CommandMap.Init( TENSHI_SHELLCOMMAND_ALLOWED, Ax::ECase::Insensitive ) );
 
 		if( GetConsoleOutputCP() != CP_UTF8 ) {
 			SetConsoleOutputCP( CP_UTF8 );
@@ -162,16 +162,16 @@ namespace Tenshi { namespace Compiler {
 		for( const Ax::String &Arg : Args ) {
 			cReserveBytes += Arg.Len() + 8;
 		}
-		AX_EXPECT_MSG( CommandLine.Reserve( cReserveBytes ), "Out of memory" );
+		AX_EXPECT_MEMORY( CommandLine.Reserve( cReserveBytes ) );
 		for( const Ax::String &Arg : Args ) {
 			if( CommandLine.IsEmpty() ) {
-				AX_EXPECT_MSG( CommandLine.Append( ' ' ), "Out of memory" );
+				AX_EXPECT_MEMORY( CommandLine.Append( ' ' ) );
 			}
 
 			if( Arg.Find( ' ' ) >= 0 || Arg.Find( '\t' ) >= 0 || Arg.Find( '\"' ) >= 0 || Arg.Find( '\\' ) >= 0 ) {
-				AX_EXPECT_MSG( CommandLine.Append( Arg.Escape().Quote() ), "Out of memory" );
+				AX_EXPECT_MEMORY( CommandLine.Append( Arg.Escape().Quote() ) );
 			} else {
-				AX_EXPECT_MSG( CommandLine.Append( Arg ), "Out of memory" );
+				AX_EXPECT_MEMORY( CommandLine.Append( Arg ) );
 			}
 		}
 

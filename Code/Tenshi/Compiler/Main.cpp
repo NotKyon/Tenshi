@@ -319,7 +319,7 @@ namespace Tenshi { namespace Compiler {
 			}
 
 			m_bSpecified = true;
-			AX_EXPECT_MSG( m_OutputFile.Assign( Arg.pszValue ), "Out of memory" );
+			AX_EXPECT_MEMORY( m_OutputFile.Assign( Arg.pszValue ) );
 
 			return true;
 		}
