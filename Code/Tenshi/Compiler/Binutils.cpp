@@ -3,6 +3,8 @@
 #include "Shell.hpp"
 #include <sys/stat.h>
 
+// TODO: Select between the debug and release version based on build mode
+
 #ifndef TENSHIRUNTIME_O
 # if 0
 #  if AX_DEBUG_ENABLED
@@ -11,7 +13,11 @@
 #   define TENSHIRUNTIME_O "TenshiRuntime.o"
 #  endif
 # else
-#  define TENSHIRUNTIME_O "libTenshiRuntime.a"
+#  if AX_DEBUG_ENABLED
+#   define TENSHIRUNTIME_O "libTenshiRuntimeDbg.a"
+#  else
+#   define TENSHIRUNTIME_O "libTenshiRuntime.a"
+#  endif
 # endif
 #endif
 #ifndef GNU_SYSROOT_DIR

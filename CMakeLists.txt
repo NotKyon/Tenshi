@@ -2,7 +2,7 @@
 project(Tenshi)
 
 set_property(GLOBAL PROPERTY CXX_STANDARD 14)
-set_property(GLOBAL PROPERTY DEBUG_SUFFIX Dbg)
+set(CMAKE_DEBUG_POSTFIX Dbg)
 
 find_package(LLVM REQUIRED CONFIG)
 
@@ -40,6 +40,8 @@ function(add_tenshi_api moduleName)
 	set_target_properties("${moduleName}" PROPERTIES RUNTIME_OUTPUT_DIRECTORY "plugins-core")
 	set_target_properties("${moduleName}" PROPERTIES PREFIX "")
 	set_target_properties("${moduleName}" PROPERTIES DEBUG_SUFFIX "Dbg")
+	set_target_properties("${moduleName}" PROPERTIES CMAKE_SHARED_LIBRARY_PREFIX "")
+	set_target_properties("${moduleName}" PROPERTIES CMAKE_STATIC_LIBRARY_PREFIX "")
 
 	file(COPY "${AXMODS_DIR}/${moduleName}/${moduleName}.commands" DESTINATION "plugins-core")
 
