@@ -58,6 +58,30 @@ namespace Tenshi { namespace Compiler {
 			"STR$[%GD%teCastUInt32ToStr"							NL
 			"STR$[%GQ%teCastUInt64ToStr"							NL
 			""														NL
+			"ASC[%LS%teStr_Asc"										NL
+			"CHR$[%GD%teStr_Chr"									NL
+			""														NL
+			"BIN$[%GD%teStr_Bin"									NL
+			"HEX$[%GD%teStr_Hex"									NL
+			"OCT$[%GD%teStr_Oct"									NL
+			""														NL
+			"LOWER$[%GS%teStr_Lower"								NL
+			"UPPER$[%GS%teStr_Upper"								NL
+			""														NL
+			"LEN[%UPS%teStr_Len"									NL
+			"STRCMP[%LSS%teStr_SortCmp"								NL
+			"STRCMPCASE[%LSS%teStr_SortCmpCase"						NL
+			""														NL
+			"LEFT$[%GSIP%teStr_Left"								NL
+			"MID$[%GSIP%teStr_Mid"									NL
+			"MID$[%GSIPUP%teStr_MidLen"								NL
+			"RIGHT$[%GSIP%teStr_Right"								NL
+			"SKIP$[%GSUP%teStr_Skip"								NL
+			"DROP$[%GSUP%teStr_Drop"								NL
+			"HAS PREFIX$[%BSS%teStr_HasPrefix"						NL
+			"HAS SUFFIX$[%BSS%teStr_HasSuffix"						NL
+			"CONTAINS$[%BSS%teStr_Contains"							NL
+			""														NL
 			"MAKE MEMBLOCK[%LUP%teAllocMemblock"					NL
 			"MAKE MEMBLOCK%LUP%teMakeMemblock"						NL
 			"DELETE MEMBLOCK[%LL%teDeleteMemblock"					NL

@@ -809,6 +809,32 @@ TENSHI_FUNC void TENSHI_CALL teStrInstance_Fini_f( TenshiType_t *pType, void *pI
 TENSHI_FUNC void TENSHI_CALL teStrInstance_Copy_f( TenshiType_t *pType, void *pDstInstance, const void *pSrcInstance );
 TENSHI_FUNC void TENSHI_CALL teStrInstance_Move_f( TenshiType_t *pType, void *pDstInstance, void *pSrcInstance );
 
+TENSHI_FUNC int TENSHI_CALL teStr_Asc( const char *s );
+TENSHI_FUNC char *TENSHI_CALL teStr_Chr( TenshiUInt32_t utf32cp );
+
+TENSHI_FUNC char *TENSHI_CALL teStr_Bin( TenshiUInt32_t x );
+TENSHI_FUNC char *TENSHI_CALL teStr_Hex( TenshiUInt32_t x );
+TENSHI_FUNC char *TENSHI_CALL teStr_Oct( TenshiUInt32_t x );
+
+TENSHI_FUNC char *TENSHI_CALL teStr_Lower( const char *s );
+TENSHI_FUNC char *TENSHI_CALL teStr_Upper( const char *s );
+
+TENSHI_FUNC TenshiUIntPtr_t TENSHI_CALL teStr_Len( const char *s );
+TENSHI_FUNC int TENSHI_CALL teStr_SortCmp( const char *a, const char *b );
+TENSHI_FUNC int TENSHI_CALL teStr_SortCmpCase( const char *a, const char *b );
+TENSHI_FUNC TenshiBoolean_t TENSHI_CALL teStrEq( const char *a, const char *b );
+TENSHI_FUNC TenshiBoolean_t TENSHI_CALL teStrEqCase( const char *a, const char *b );
+
+TENSHI_FUNC char *TENSHI_CALL teStr_Left( const char *s, TenshiIntPtr_t n );
+TENSHI_FUNC char *TENSHI_CALL teStr_Mid( const char *s, TenshiIntPtr_t pos );
+TENSHI_FUNC char *TENSHI_CALL teStr_MidLen( const char *s, TenshiIntPtr_t pos, TenshiUIntPtr_t len );
+TENSHI_FUNC char *TENSHI_CALL teStr_Right( const char *s, TenshiIntPtr_t n );
+TENSHI_FUNC char *TENSHI_CALL teStr_Skip( const char *s, TenshiUIntPtr_t n );
+TENSHI_FUNC char *TENSHI_CALL teStr_Drop( const char *s, TenshiUIntPtr_t n );
+TENSHI_FUNC TenshiBoolean_t TENSHI_CALL teStr_HasPrefix( const char *s, const char *prefix );
+TENSHI_FUNC TenshiBoolean_t TENSHI_CALL teStr_HasSuffix( const char *s, const char *suffix );
+TENSHI_FUNC TenshiBoolean_t TENSHI_CALL teStr_Contains( const char *s, const char *search );
+
 
 /*
  *	TYPE FUNCTIONS

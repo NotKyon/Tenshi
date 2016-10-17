@@ -1402,6 +1402,325 @@ TENSHI_FUNC void TENSHI_CALL teStrInstance_Move_f( TenshiType_t *pType, void *pD
 	*( char ** )pSrcInstance = ( char * )0;
 }
 
+/* -------------------------------------------------------------------------- */
+
+TENSHI_FUNC int TENSHI_CALL teStr_Asc( const char *s )
+{
+	if( !s ) {
+		return 0;
+	}
+
+	return +*s;
+}
+TENSHI_FUNC char *TENSHI_CALL teStr_Chr( TenshiUInt32_t utf32cp )
+{
+	TenshiUIntPtr_t n;
+	char *dst;
+	char buf[ 5 ];
+
+	dst = &buf[ 0 ];
+
+	if( utf32cp > 0x10000 ) {
+		*dst++ = ( TenshiUInt8_t )( 0xF0 | ( ( utf32cp>>18 ) & 0x07 ) );
+		*dst++ = ( TenshiUInt8_t )( 0x80 | ( ( utf32cp>>12 ) & 0x3F ) );
+		*dst++ = ( TenshiUInt8_t )( 0x80 | ( ( utf32cp>> 6 ) & 0x3F ) );
+		*dst++ = ( TenshiUInt8_t )( 0x80 | ( ( utf32cp>> 0 ) & 0x3F ) );
+	} else if( utf32cp > 0x7FF ) {
+		*dst++ = ( TenshiUInt8_t )( 0xE0 | ( ( utf32cp>>12 ) & 0x0F ) );
+		*dst++ = ( TenshiUInt8_t )( 0x80 | ( ( utf32cp>> 6 ) & 0x3F ) );
+		*dst++ = ( TenshiUInt8_t )( 0x80 | ( ( utf32cp>> 0 ) & 0x3F ) );
+	} else if( utf32cp > 0x7F ) {
+		*dst++ = ( TenshiUInt8_t )( 0xC0 | ( ( utf32cp>> 6 ) & 0x1F ) );
+		*dst++ = ( TenshiUInt8_t )( 0x80 | ( ( utf32cp>> 0 ) & 0x3F ) );
+	} else {
+		*dst++ = ( TenshiUInt8_t )utf32cp;
+	}
+	*dst = '\0';
+
+	return teStrDup( buf );
+}
+
+TENSHI_FUNC char *TENSHI_CALL teStr_Bin( TenshiUInt32_t x )
+{
+	char buf[ 33 ];
+	char *dst;
+
+	dst = &buf[ 32 ];
+	*dst = '\0';
+
+	do {
+		*--dst = '0' + ( char )( unsigned char )( x%2 );
+		x /= 2;
+	} while( x != 0 );
+
+	return teStrDup( dst );
+}
+TENSHI_FUNC char *TENSHI_CALL teStr_Hex( TenshiUInt32_t x )
+{
+	static const char *const digits = "0123456789ABCDEF";
+	char buf[ 9 ];
+	char *dst;
+
+	dst = &buf[ 8 ];
+	*dst = '\0';
+
+	do {
+		*--dst = digits[ x%16 ];
+		x /= 16;
+	} while( x != 0 );
+
+	return teStrDup( dst );
+}
+TENSHI_FUNC char *TENSHI_CALL teStr_Oct( TenshiUInt32_t x )
+{
+	char buf[ 12 ];
+	char *dst;
+
+	dst = &buf[ 11 ];
+	*dst = '\0';
+
+	do {
+		*--dst = '0' + ( char )( unsigned char )( x%8 );
+		x /= 8;
+	} while( x != 0 );
+
+	return teStrDup( dst );
+}
+
+TENSHI_FUNC char *TENSHI_CALL teStr_Lower( const char *s )
+{
+	char *p, *q;
+
+	if( !s || !( p = teStrDup( s ) ) ) {
+		return ( char * )0;
+	}
+
+	for( q = p; *q != '\0'; ++q ) {
+		if( *q >= 'A' && *q <= 'Z' ) {
+			*q = *q - 'A' + 'a';
+		}
+	}
+
+	return p;
+}
+TENSHI_FUNC char *TENSHI_CALL teStr_Upper( const char *s )
+{
+	char *p, *q;
+
+	if( !s || !( p = teStrDup( s ) ) ) {
+		return ( char * )0;
+	}
+
+	for( q = p; *q != '\0'; ++q ) {
+		if( *q >= 'a' && *q <= 'z' ) {
+			*q = *q - 'a' + 'A';
+		}
+	}
+
+	return p;
+}
+
+TENSHI_FUNC TenshiUIntPtr_t TENSHI_CALL teStr_Len( const char *s )
+{
+	if( !s ) {
+		return 0;
+	}
+
+	return strlen( s );
+}
+TENSHI_FUNC int TENSHI_CALL teStr_SortCmp( const char *a, const char *b )
+{
+	if( !a || !b ) {
+		return a > b ? 1 : b > a ? -1 : 0;
+	}
+
+	return strcmp( a, b );
+}
+TENSHI_FUNC int TENSHI_CALL teStr_SortCmpCase( const char *a, const char *b )
+{
+	if( !a || !b ) {
+		return a > b ? 1 : b > a ? -1 : 0;
+	}
+
+#ifdef _WIN32
+	return _stricmp( a, b );
+#else
+	return strcasecmp( a, b );
+#endif
+}
+TENSHI_FUNC TenshiBoolean_t TENSHI_CALL teStrEq( const char *a, const char *b )
+{
+	return a == b ? 1 : !a || !b ? 0 : strcmp( a, b ) == 0;
+}
+TENSHI_FUNC TenshiBoolean_t TENSHI_CALL teStrEqCase( const char *a, const char *b )
+{
+	return
+		a == b ? 1 : !a || !b ? 0 :
+#ifdef _WIN32
+			_stricmp( a, b ) == 0
+#else
+			strcasecmp( a, b ) == 0
+#endif
+			;
+}
+
+TENSHI_FUNC char *TENSHI_CALL teStr_Left( const char *s, TenshiIntPtr_t n )
+{
+	TenshiUIntPtr_t slen;
+	TenshiUIntPtr_t rlen;
+	char *p;
+
+	if( !s ) {
+		return ( char * )0;
+	}
+
+	slen = teStr_Len( s );
+	rlen = ( TenshiUIntPtr_t )( n < 0 ? slen - n : n );
+
+	if( rlen >= slen ) {
+		return teStrDup( s );
+	}
+
+	if( !( p = teStrAlloc( NULL, rlen ) ) ) {
+		return ( char * )0;
+	}
+
+	memcpy( ( void * )p, ( const void * )s, rlen );
+	return p;
+}
+TENSHI_FUNC char *TENSHI_CALL teStr_Mid( const char *s, TenshiIntPtr_t pos )
+{
+	return teStr_MidLen( s, pos, 1 );
+}
+TENSHI_FUNC char *TENSHI_CALL teStr_MidLen( const char *s, TenshiIntPtr_t pos, TenshiUIntPtr_t len )
+{
+	TenshiUIntPtr_t slen, off;
+	char *p;
+
+	if( !s || !len ) {
+		return ( char * )0;
+	}
+
+	slen = teStr_Len( s );
+	off = ( TenshiUIntPtr_t )( pos >= 0 ? ( pos < slen ? pos : slen ) : slen + pos );
+
+	if( off + len > slen ) {
+		len = slen - off;
+	}
+
+	if( !len ) {
+		return ( char * )0;
+	}
+
+	if( !( p = teStrAlloc( NULL, len ) ) ) {
+		return ( char * )0;
+	}
+
+	memcpy( ( void * )p, ( const void * )( s + off ), len );
+	return p;
+}
+TENSHI_FUNC char *TENSHI_CALL teStr_Right( const char *s, TenshiIntPtr_t n )
+{
+	TenshiUIntPtr_t slen, len;
+
+	if( !s || !n ) {
+		return ( char * )0;
+	}
+
+	slen = teStr_Len( s );
+	len = ( TenshiUIntPtr_t )( n >= 0 ? ( n <= slen ? n : slen ) : slen + n );
+
+	if( !len ) {
+		return ( char * )0;
+	}
+
+	return teStrDup( s + ( slen - len ) );
+}
+TENSHI_FUNC char *TENSHI_CALL teStr_Skip( const char *s, TenshiUIntPtr_t n )
+{
+	if( !s ) {
+		return ( char * )0;
+	}
+
+	while( n > 0 ) {
+		if( *s == '\0' ) {
+			break;
+		}
+
+		++s;
+		--n;
+	}
+
+	return teStrDup( s );
+}
+TENSHI_FUNC char *TENSHI_CALL teStr_Drop( const char *s, TenshiUIntPtr_t n )
+{
+	TenshiUIntPtr_t slen;
+	char *p;
+
+	if( !s ) {
+		return ( char * )0;
+	}
+
+	if( !n ) {
+		return teStrDup( s );
+	}
+
+	slen = teStr_Len( s );
+	if( n >= slen ) {
+		return ( char * )0;
+	}
+
+	if( !( p = teStrAlloc( NULL, slen - n ) ) ) {
+		return ( char * )0;
+	}
+
+	memcpy( ( void * )p, ( const void * )s, slen - n );
+	return p;
+}
+TENSHI_FUNC TenshiBoolean_t TENSHI_CALL teStr_HasPrefix( const char *s, const char *prefix )
+{
+	if( !prefix || *prefix == '\0' ) {
+		return 1;
+	}
+	if( !s || *s == '\0' ) {
+		return 0;
+	}
+
+	return strncmp( s, prefix, strlen( prefix ) ) == 0;
+}
+TENSHI_FUNC TenshiBoolean_t TENSHI_CALL teStr_HasSuffix( const char *s, const char *suffix )
+{
+	TenshiUIntPtr_t alen, blen;
+
+	if( !suffix || *suffix == '\0' ) {
+		return 1;
+	}
+	if( !s || *s == '\0' ) {
+		return 0;
+	}
+
+	alen = teStr_Len( s );
+	blen = teStr_Len( suffix );
+
+	if( blen > alen ) {
+		return 0;
+	}
+
+	return strcmp( s + ( alen - blen ), suffix ) == 0;
+}
+TENSHI_FUNC TenshiBoolean_t TENSHI_CALL teStr_Contains( const char *s, const char *search )
+{
+	if( !search || *search == '\0' ) {
+		return 1;
+	}
+	if( !s || *s == '\0' ) {
+		return 0;
+	}
+
+	return strstr( s, search ) != ( const char * )0;
+}
+
 
 /*
 ===============================================================================
