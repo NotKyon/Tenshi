@@ -1419,10 +1419,11 @@ namespace Tenshi { namespace Compiler {
 			return pPHI;
 		}
 
-		const bool bIsInt = IsIntNumber( LHSType );
-		const bool bIsFloat = IsRealNumber( LHSType );
+		const bool bIsString = IsString( LHSType ) || IsString( RHSType );
+		const bool bIsInt = !bIsString && IsIntNumber( LHSType );
+		const bool bIsFloat = !bIsString && IsRealNumber( LHSType );
 
-		const bool bIsSigned = IsSigned( LHSType );
+		const bool bIsSigned = !bIsString && IsSigned( LHSType );
 
 		switch( m_Operator )
 		{
@@ -1512,16 +1513,18 @@ namespace Tenshi { namespace Compiler {
 				pResultVal = CG->Builder().CreateICmpEQ( pLHSVal, pRHSVal, "icmpeqtmp" );
 			} else if( bIsFloat ) {
 				pResultVal = CG->Builder().CreateFCmpOEQ( pLHSVal, pRHSVal, "fcmpeqtmp" );
+			} else if( bIsString ) {
+				pResultVal = CG->Builder().CreateCall( CG->InternalFuncs().pStrEq, pArgs, "streqtmp" );
 			}
-			// TODO: String
 			break;
 		case EBuiltinOp::CmpNe:
 			if( bIsInt ) {
 				pResultVal = CG->Builder().CreateICmpNE( pLHSVal, pRHSVal, "icmpnetmp" );
 			} else if( bIsFloat ) {
 				pResultVal = CG->Builder().CreateFCmpONE( pLHSVal, pRHSVal, "fcmpnetmp" );
+			} else if( bIsString ) {
+				pResultVal = CG->Builder().CreateNot( CG->Builder().CreateCall( CG->InternalFuncs().pStrEq, pArgs, "strnetmp" ) );
 			}
-			// TODO: String
 			break;
 		case EBuiltinOp::CmpLt:
 			if( bIsInt ) {
@@ -1532,8 +1535,14 @@ namespace Tenshi { namespace Compiler {
 				}
 			} else if( bIsFloat ) {
 				pResultVal = CG->Builder().CreateFCmpOLT( pLHSVal, pRHSVal, "fcmplttmp" );
+			} else if( bIsString ) {
+				pResultVal =
+					CG->Builder().CreateICmpSLT
+					(
+						CG->Builder().CreateCall( CG->InternalFuncs().pStrCmp, pArgs, "strcmptmp" ),
+						llvm::ConstantInt::get( llvm::Type::getInt32Ty( CG->Context() ), uint64_t(0) )
+					);
 			}
-			// TODO: String
 			break;
 		case EBuiltinOp::CmpLe:
 			if( bIsInt ) {
@@ -1544,8 +1553,14 @@ namespace Tenshi { namespace Compiler {
 				}
 			} else if( bIsFloat ) {
 				pResultVal = CG->Builder().CreateFCmpOLE( pLHSVal, pRHSVal, "fcmpletmp" );
+			} else if( bIsString ) {
+				pResultVal =
+					CG->Builder().CreateICmpSLE
+					(
+						CG->Builder().CreateCall( CG->InternalFuncs().pStrCmp, pArgs, "strcmptmp" ),
+						llvm::ConstantInt::get( llvm::Type::getInt32Ty( CG->Context() ), uint64_t(0) )
+					);
 			}
-			// TODO: String
 			break;
 		case EBuiltinOp::CmpGt:
 			if( bIsInt ) {
@@ -1556,8 +1571,14 @@ namespace Tenshi { namespace Compiler {
 				}
 			} else if( bIsFloat ) {
 				pResultVal = CG->Builder().CreateFCmpOGT( pLHSVal, pRHSVal, "fcmpgttmp" );
+			} else if( bIsString ) {
+				pResultVal =
+					CG->Builder().CreateICmpSGT
+					(
+						CG->Builder().CreateCall( CG->InternalFuncs().pStrCmp, pArgs, "strcmptmp" ),
+						llvm::ConstantInt::get( llvm::Type::getInt32Ty( CG->Context() ), uint64_t(0) )
+					);
 			}
-			// TODO: String
 			break;
 		case EBuiltinOp::CmpGe:
 			if( bIsInt ) {
@@ -1568,8 +1589,14 @@ namespace Tenshi { namespace Compiler {
 				}
 			} else if( bIsFloat ) {
 				pResultVal = CG->Builder().CreateFCmpOGE( pLHSVal, pRHSVal, "fcmpgetmp" );
+			} else if( bIsString ) {
+				pResultVal =
+					CG->Builder().CreateICmpSGE
+					(
+						CG->Builder().CreateCall( CG->InternalFuncs().pStrCmp, pArgs, "strcmptmp" ),
+						llvm::ConstantInt::get( llvm::Type::getInt32Ty( CG->Context() ), uint64_t(0) )
+					);
 			}
-			// TODO: String
 			break;
 		}
 

@@ -71,6 +71,8 @@ namespace Tenshi { namespace Compiler {
 			"LEN[%UPS%teStr_Len"									NL
 			"STRCMP[%LSS%teStr_SortCmp"								NL
 			"STRCMPCASE[%LSS%teStr_SortCmpCase"						NL
+			"COMPARE$[%BGG%teStrEq"									NL
+			"CASE COMPARE$[%BGG%teStrEqCase"						NL
 			""														NL
 			"LEFT$[%GSIP%teStr_Left"								NL
 			"MID$[%GSIP%teStr_Mid"									NL

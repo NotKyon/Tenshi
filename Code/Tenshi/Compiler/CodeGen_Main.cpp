@@ -163,6 +163,8 @@ namespace Tenshi { namespace Compiler {
 		m_IntFuncs.pStrRepeat			= MakeIntFunc( "teStrRepeat"        , 'S', "SU" );
 		m_IntFuncs.pStrCatDir			= MakeIntFunc( "teStrCatDir"        , 'S', "SS" );
 		m_IntFuncs.pStrReclaim			= MakeIntFunc( "teStrReclaim"       , '0', "S"  );
+		m_IntFuncs.pStrEq				= MakeIntFunc( "teStrEq"			, 'B', "SS" );
+		m_IntFuncs.pStrCmp				= MakeIntFunc( "teStrCmp"			, 'D', "SS" );
 		m_IntFuncs.pCastInt8ToStr		= MakeIntFunc( "teCastInt8ToStr"    , 'S', "Y"  );
 		m_IntFuncs.pCastInt16ToStr		= MakeIntFunc( "teCastInt16ToStr"   , 'S', "W"  );
 		m_IntFuncs.pCastInt32ToStr		= MakeIntFunc( "teCastInt32ToStr"   , 'S', "D"  );

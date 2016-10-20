@@ -49,6 +49,8 @@ namespace Tenshi { namespace Compiler {
 		llvm::Function *			pStrRepeat;
 		llvm::Function *			pStrCatDir;
 		llvm::Function *			pStrReclaim;
+		llvm::Function *			pStrEq;
+		llvm::Function *			pStrCmp;
 		llvm::Function *			pCastInt8ToStr;
 		llvm::Function *			pCastInt16ToStr;
 		llvm::Function *			pCastInt32ToStr;
