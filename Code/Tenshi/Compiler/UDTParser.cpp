@@ -232,6 +232,26 @@ namespace Tenshi { namespace Compiler {
 		m_pTypeInfo->Name.Swap( Name );
 		return true;
 	}
+
+	static llvm::Function *BeginFunc( llvm::IRBuilder<> &IRBuilder, llvm::FunctionType *pFTy, llvm::StringRef Name )
+	{
+		llvm::Function *const pFunc =
+			llvm::Function::Create
+			(
+				pFTy,
+				llvm::GlobalValue::PrivateLinkage,
+				Name,
+				&CG->Module()
+			);
+		
+		llvm::BasicBlock *const pEntryBlock =
+			llvm::BasicBlock::Create( CG->Context(), "begin", pFunc );
+
+		IRBuilder.SetInsertPoint( pEntryBlock );
+
+		return pFunc;
+	}
+
 	bool CUserDefinedType::CodeGen()
 	{
 		Ax::TArray< llvm::Type * > Elements;
@@ -268,53 +288,59 @@ namespace Tenshi { namespace Compiler {
 				llvm::APInt( 32, ( uint64_t )uElementIndex, false )
 			);
 
-#if 0 // FIXME: Actually generate the functions
+		llvm::IRBuilder<> Builder( CG->Context() );
+
+		Ax::String InitName, FiniName, CopyName, MoveName;
+		Ax::String *Names[] = { &InitName, &FiniName, &CopyName, &MoveName };
+
+		for( Ax::String *Name : Names ) {
+			AX_EXPECT_MEMORY( Name->Assign( m_pNameTok->GetString() ) );
+			AX_EXPECT_MEMORY( Name->Append( '.' ) );
+		}
+		AX_EXPECT_MEMORY( InitName.Append( "Init" ) );
+		AX_EXPECT_MEMORY( FiniName.Append( "Fini" ) );
+		AX_EXPECT_MEMORY( CopyName.Append( "Copy" ) );
+		AX_EXPECT_MEMORY( MoveName.Append( "Move" ) );
 
 		// Constructor
 		if( !m_pTypeInfo->bIsInitTrivial ) {
-			m_pTypeInfo->pLLVMInitFn = llvm::Function::Create
+			m_pTypeInfo->pLLVMInitFn =
+				BeginFunc( Builder, CG->GetObjInitFnTy(), LLVMStr( InitName ) );
+
+			llvm::ConstantInt *const pRetVal =
+				llvm::ConstantInt::get
 				(
-					CG->GetObjInitFnTy(),
-					llvm::GlobalValue::PrivateLinkage,
-					"",
-					&CG->Module()
+					llvm::Type::getInt1Ty( CG->Context() ),
+					uint64_t( 1 ),
+					true
 				);
+
+			Builder.CreateRet( pRetVal );
 		}
 
 		// Destructor
 		if( !m_pTypeInfo->bIsFiniTrivial ) {
-			m_pTypeInfo->pLLVMFiniFn = llvm::Function::Create
-				(
-					CG->GetObjFiniFnTy(),
-					llvm::GlobalValue::PrivateLinkage,
-					"",
-					&CG->Module()
-				);
+			m_pTypeInfo->pLLVMFiniFn =
+				BeginFunc( Builder, CG->GetObjFiniFnTy(), LLVMStr( FiniName ) );
+
+			Builder.CreateRetVoid();
 		}
 
 		// Copy operation
 		if( !m_pTypeInfo->bIsCopyTrivial ) {
-			m_pTypeInfo->pLLVMCopyFn = llvm::Function::Create
-				(
-					CG->GetObjCopyFnTy(),
-					llvm::GlobalValue::PrivateLinkage,
-					"",
-					&CG->Module()
-				);
+			m_pTypeInfo->pLLVMCopyFn =
+				BeginFunc( Builder, CG->GetObjCopyFnTy(), LLVMStr( CopyName ) );
+
+			Builder.CreateRetVoid();
 		}
 
 		// Move operation
 		if( !m_pTypeInfo->bIsMoveTrivial ) {
-			m_pTypeInfo->pLLVMMoveFn = llvm::Function::Create
-				(
-					CG->GetObjMoveFnTy(),
-					llvm::GlobalValue::PrivateLinkage,
-					"",
-					&CG->Module()
-				);
-		}
+			m_pTypeInfo->pLLVMMoveFn =
+				BeginFunc( Builder, CG->GetObjMoveFnTy(), LLVMStr( MoveName ) );
 
-#endif
+			Builder.CreateRetVoid();
+		}
 
 		CG->RegisterUDT( *m_pTypeInfo );
 

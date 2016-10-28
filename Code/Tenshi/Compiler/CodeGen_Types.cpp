@@ -395,8 +395,8 @@ namespace Tenshi { namespace Compiler {
 
 	void MCodeGen::EmitReflectionData()
 	{
-#define TENSHI_RTTI_COUNT_SYM "__tenshi_rtti__count"
-#define TENSHI_RTTI_ARRAY_SYM "__tenshi_rtti__array"
+#define TENSHI_RTTI_COUNT_SYM "tenshi__numTypes__"
+#define TENSHI_RTTI_ARRAY_SYM "tenshi__types__"
 
 		llvm::Type *const pUInt8PtrTy = llvm::Type::getInt8PtrTy( m_Context );
 		llvm::Type *const pUInt32Ty = llvm::Type::getInt32Ty( m_Context );
@@ -418,7 +418,7 @@ namespace Tenshi { namespace Compiler {
 				*m_pModule,
 				pUInt32Ty,
 				false,
-				llvm::GlobalValue::LinkageTypes::AvailableExternallyLinkage,
+				llvm::GlobalValue::ExternalLinkage,
 				llvm::ConstantInt::get( pUInt32Ty, ( uint64_t )cTypes, false ),
 				TENSHI_RTTI_COUNT_SYM
 			);
@@ -430,7 +430,7 @@ namespace Tenshi { namespace Compiler {
 					*m_pModule,
 					pRTTIPtrTy,
 					false,
-					llvm::GlobalValue::LinkageTypes::AvailableExternallyLinkage,
+					llvm::GlobalValue::ExternalLinkage,
 					llvm::Constant::getNullValue( pRTTIPtrTy ),
 					TENSHI_RTTI_ARRAY_SYM
 				);
@@ -470,11 +470,13 @@ namespace Tenshi { namespace Compiler {
 				llvm::ArrayRef<uint8_t>( StringData.Pointer(), StringData.Num() )
 			);
 
+		llvm::Type *const pStringBufferInitTy = pStringBufferInit->getType();
+
 		llvm::GlobalVariable *const pStringBuffer =
 			new llvm::GlobalVariable
 			(
 				*m_pModule,
-				pStringBufferInit->getType(),
+				pStringBufferInitTy,
 				true,
 				llvm::GlobalValue::LinkageTypes::InternalLinkage,
 				pStringBufferInit
@@ -497,16 +499,12 @@ namespace Tenshi { namespace Compiler {
 				continue;
 			}
 
-#define ORIGINAL_MODE 0
-
-#if ORIGINAL_MODE
 			llvm::Constant *const pOff1 = llvm::ConstantInt::get( pUIntPtrTy, ( uint64_t )StringOffs[ uIndex + 0 ], false );
 			llvm::Constant *const pOff2 = llvm::ConstantInt::get( pUIntPtrTy, ( uint64_t )StringOffs[ uIndex + 1 ], false );
 			uIndex += 2;
 
 			llvm::Constant *const pIndexes1[] = { pZero, pOff1 };
 			llvm::Constant *const pIndexes2[] = { pZero, pOff2 };
-#endif
 
 			unsigned uFlags = 0;
 			if( UDT.bIsInitTrivial ) { uFlags |= 0x01; }
@@ -517,48 +515,32 @@ namespace Tenshi { namespace Compiler {
 			llvm::Constant *const pTyFlag = llvm::ConstantInt::get( pUInt32Ty, ( uint64_t )uFlags, false );
 			llvm::Constant *const pTySize = llvm::ConstantInt::get( pUInt32Ty, ( uint64_t )UDT.cBytes, false );
 			
-#if ORIGINAL_MODE
-			llvm::Constant *const pTyName = llvm::ConstantExpr::getGetElementPtr( pUInt8PtrTy, pStringBuffer, pIndexes1 );
-			llvm::Constant *const pTyPtrn = llvm::ConstantExpr::getGetElementPtr( pUInt8PtrTy, pStringBuffer, pIndexes2 );
-#else
-			Pattern = GetTypePattern( UDT.Members );
-			AX_EXPECT_MEMORY( Pattern.Len() > 0 );
-
-			llvm::Constant *const pTyNameConst =
-				llvm::ConstantDataArray::getString( m_Context, LLVMStr( UDT.Name ), true );
-			llvm::Constant *const pTyPtrnConst =
-				llvm::ConstantDataArray::getString( m_Context, LLVMStr( Pattern ), true );
-#endif
-
-			llvm::Constant *const pZero = llvm::Constant::getNullValue( pUIntPtrTy );
-#if ORIGINAL_MODE
-			llvm::Constant *const pOffs = llvm::ConstantInt::get( pUIntPtrTy, ( uint64_t )DataOffsets[ uOffsetIndex++ ], false );
-			llvm::Constant *const pIndexes[] = { pZero, pOffs };
-#else
-			llvm::Constant *const pIndexes[] = { pZero, pZero };
-#endif
-
-#if !ORIGINAL_MODE
 			llvm::Constant *const pTyName =
 				llvm::ConstantExpr::getInBoundsGetElementPtr
 				(
-					pUInt8PtrTy,
-					pTyNameConst,
-					llvm::makeArrayRef( pIndexes )
+					pStringBufferInitTy,
+					pStringBuffer,
+					pIndexes1
 				);
 			llvm::Constant *const pTyPtrn =
 				llvm::ConstantExpr::getInBoundsGetElementPtr
 				(
-					pUInt8PtrTy,
-					pTyPtrnConst,
-					llvm::makeArrayRef( pIndexes )
+					pStringBufferInitTy,
+					pStringBuffer,
+					pIndexes2
 				);
-#endif
+
+			llvm::Constant *const pZero = llvm::Constant::getNullValue( pUIntPtrTy );
 
 			llvm::Constant *const pTyInit = UDT.bIsInitTrivial ? pNullInitFn : UDT.pLLVMInitFn;
 			llvm::Constant *const pTyFini = UDT.bIsFiniTrivial ? pNullFiniFn : UDT.pLLVMFiniFn;
 			llvm::Constant *const pTyCopy = UDT.bIsCopyTrivial ? pNullCopyFn : UDT.pLLVMCopyFn;
 			llvm::Constant *const pTyMove = UDT.bIsMoveTrivial ? pNullMoveFn : UDT.pLLVMMoveFn;
+
+			AX_ASSERT_NOT_NULL( pTyInit );
+			AX_ASSERT_NOT_NULL( pTyFini );
+			AX_ASSERT_NOT_NULL( pTyCopy );
+			AX_ASSERT_NOT_NULL( pTyMove );
 
 			llvm::Constant *const Members[] = {
 				pTyFlag,
@@ -572,11 +554,6 @@ namespace Tenshi { namespace Compiler {
 				pTyCopy,
 				pTyMove
 			};
-
-			pRTTITy->dump();
-			for( auto &x : Members ) {
-				x->dump();
-			}
 
 			llvm::Constant *const pStructVal =
 				llvm::ConstantStruct::get
@@ -597,7 +574,7 @@ namespace Tenshi { namespace Compiler {
 				*m_pModule,
 				pArrTy,
 				false,
-				llvm::GlobalValue::LinkageTypes::AvailableExternallyLinkage,
+				llvm::GlobalValue::ExternalLinkage,
 				pArrInit,
 				TENSHI_RTTI_ARRAY_SYM
 			);

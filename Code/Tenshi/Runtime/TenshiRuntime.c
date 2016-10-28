@@ -13,6 +13,7 @@
 
 #define TENSHI_STATIC_LINK_ENABLED	1
 
+#include <math.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <stddef.h>
@@ -34,6 +35,13 @@
 # else
 #  define TRACE_ENABLED				0
 # endif
+#endif
+
+#ifndef MEMTRACE_ENABLED
+# define MEMTRACE_ENABLED			0
+#endif
+#ifndef STRTRACE_ENABLED
+# define STRTRACE_ENABLED			0
 #endif
 
 #ifndef SAFE_HANDLES_ENABLED
@@ -80,6 +88,7 @@ static TenshiRuntimeGlob_t			g_RTGlob;
 static struct TenshiEngineTypes_s	g_EngineTypes;
 static struct TenshiMemblockAPI_s	g_MemblockAPI;
 static struct TenshiLoggingAPI_s	g_LoggingAPI;
+static TenshiObjectPool_t *			g_RNGPool;
 
 
 /*
@@ -597,15 +606,22 @@ static void FiniModules( void )
 
 static const TenshiUIntPtr_t kNumAgesPerIndex = sizeof( TenshiUIntPtr_t )*8/4;
 
+extern TenshiUInt32_t				tenshi__numTypes__;
+extern TenshiType_t					tenshi__types__[];
+
 CTOR( teInitGlob )
 {
+	static struct TenshiRTTypeInfo_s ti;
+
+	ti.cTypes = (TenshiUIntPtr_t)tenshi__numTypes__;
+	ti.pTypes = &tenshi__types__[0];
+
 	memset( &g_RTGlob, 0, sizeof( g_RTGlob ) );
 	memset( &g_EngineTypes, 0, sizeof( g_EngineTypes ) );
 
 	g_RTGlob.uRuntimeVersion = TENSHI_RTGLOB_VERSION;
 
-	/* TODO: Have the compiler generate this, then reference it as an extern var */
-	g_RTGlob.pTypeInfo = NULL;
+	g_RTGlob.pTypeInfo = &ti;
 	g_RTGlob.pEngineTypes = &g_EngineTypes;
 
 	g_RTGlob.pfnAlloc = &teAlloc;
@@ -651,6 +667,8 @@ CTOR( teInitGlob )
 	g_MemblockAPI.pfnGetMemblockPtr = &teGetMemblockPtr;
 	g_MemblockAPI.pfnGetMemblockSize = &teGetMemblockSize;
 
+	g_RNGPool = teAllocEnginePool( &teRNGAlloc_f, &teRNGDealloc_f );
+
 	InitModules();
 }
 static void __cdecl teFini( void )
@@ -686,19 +704,23 @@ TENSHI_FUNC void *TENSHI_CALL teAlloc( TenshiUIntPtr_t cBytes, int Memtag )
 
 	cAllocBytes = cBytes + ( cBytes%16 != 0 ? cBytes + 16 - ( cBytes%16 ) : 0 );
 	p = malloc( cAllocBytes );
+#if MEMTRACE_ENABLED
 	TRACE( "p=%p :: +%u byte%s",
 		p, ( unsigned int )cBytes, cBytes == 1 ? "" : "s" );
+#endif
 	return p;
 }
 TENSHI_FUNC void TENSHI_CALL teDealloc( void *pData )
 {
-#if TRACE_ENABLED
+#if MEMTRACE_ENABLED
 	if( !!pData ) {
 		TRACE( "p=%p", pData );
 	}
 #endif
 	free( pData );
+#if MEMTRACE_ENABLED
 	TRACE( "-" );
+#endif
 }
 
 TENSHI_FUNC void TENSHI_CALL teAutoprint( const char *pszText )
@@ -978,7 +1000,9 @@ TENSHI_FUNC char *TENSHI_CALL teStrAlloc( char *p, TenshiUIntPtr_t n )
 {
 	char *q;
 
+#if STRTRACE_ENABLED
 	TRACE( "p=%p; n=%u", ( void * )p, ( unsigned int )n );
+#endif
 
 	q = n > 0 ? teAlloc( n + 1, TENSHI_MEMTAG_STRING ) : NULL;
 
@@ -1012,7 +1036,9 @@ TENSHI_FUNC char *TENSHI_CALL teStrDup( const char *s )
 	size_t n;
 	char *p;
 
+#if STRTRACE_ENABLED
 	TRACE( "s=%p", ( const void * )s );
+#endif
 
 	if( !s ) {
 		return NULL;
@@ -1031,7 +1057,9 @@ TENSHI_FUNC char *TENSHI_CALL teStrConcat( const char *a, const char *b )
 	size_t len;
 	char *p;
 
+#if STRTRACE_ENABLED
 	TRACE( "a=%p, b=%p", ( const void * )a, ( const void * )b );
+#endif
 
 	if( !a || !b ) {
 		if( a != NULL ) {
@@ -1049,7 +1077,9 @@ TENSHI_FUNC char *TENSHI_CALL teStrConcat( const char *a, const char *b )
 	blen = strlen( b );
 	len = alen + blen;
 
+#if STRTRACE_ENABLED
 	TRACE( "a.len=%u, b.len=%u", ( unsigned int )alen, ( unsigned int )blen );
+#endif
 
 	p = teStrAlloc( NULL, len );
 
@@ -1075,7 +1105,9 @@ TENSHI_FUNC char *TENSHI_CALL teStrFindRm( const char *a, const char *b )
 	char *p;
 	char *q;
 
+#if STRTRACE_ENABLED
 	TRACE( "a=%p, b=%p", ( const void * )a, ( const void * )b );
+#endif
 
 	if( !a || !b ) {
 		return ( char * )a;
@@ -1090,7 +1122,9 @@ TENSHI_FUNC char *TENSHI_CALL teStrFindRm( const char *a, const char *b )
 	p = NULL;
 	q = NULL;
 
+#if STRTRACE_ENABLED
 	TRACE( "a.len=%u, b.len=%u", ( unsigned int )alen, ( unsigned int )blen );
+#endif
 
 	len = alen;
 	s = a;
@@ -1105,6 +1139,7 @@ TENSHI_FUNC char *TENSHI_CALL teStrFindRm( const char *a, const char *b )
 				break;
 			}
 
+#if STRTRACE_ENABLED
 			TRACE
 			(
 				"#%.2u@%p (len{%u}-=(t{%p}-s{%p}){%u}){%u}",
@@ -1114,6 +1149,7 @@ TENSHI_FUNC char *TENSHI_CALL teStrFindRm( const char *a, const char *b )
 				( unsigned int )( size_t )( t - s ),
 				( unsigned int )( len - ( size_t )( t - s ) )
 			);
+#endif
 
 			occurrences[ c_occurrences++ ] = t;
 			len -= blen;
@@ -1127,13 +1163,16 @@ TENSHI_FUNC char *TENSHI_CALL teStrFindRm( const char *a, const char *b )
 		q -= ( size_t )p;
 		p = teStrAlloc( p, len );
 		q += ( size_t )p;
+#if STRTRACE_ENABLED
 		TRACE( "cp(p=%p,len=%u)x%u",
 			( const void * )p, ( unsigned int )len,
 			( unsigned int )c_occurrences );
+#endif
 
 		for( i = 0; i < c_occurrences; ++i ) {
 			t = occurrences[ i ];
 
+#if STRTRACE_ENABLED
 			TRACE
 			(
 				"~%.2u dst=q{%p} src=base{%p}, cnt=(t{%p} - base{%p}){%u}",
@@ -1142,6 +1181,7 @@ TENSHI_FUNC char *TENSHI_CALL teStrFindRm( const char *a, const char *b )
 				( const void * )t, ( const void * )base,
 				( unsigned int )( size_t )( t - base )
 			);
+#endif
 
 			memcpy( q, base, t - base );
 			q += ( size_t )( t - base );
@@ -1152,7 +1192,9 @@ TENSHI_FUNC char *TENSHI_CALL teStrFindRm( const char *a, const char *b )
 	if( q != NULL ) {
 		*q = '\0';
 	}
+#if STRTRACE_ENABLED
 	TRACE( "ret=%p, ret.num=%u", ( const void * )p, ( unsigned int )( size_t )( q - p ) );
+#endif
 
 	return p;
 }
@@ -1162,7 +1204,9 @@ TENSHI_FUNC char *TENSHI_CALL teStrRepeat( const char *s, TenshiUIntPtr_t n )
 	size_t slen;
 	char *p;
 
+#if STRTRACE_ENABLED
 	TRACE( "s=%p, n=%u", ( const void * )s, n );
+#endif
 
 	slen = s != NULL && n > 0 ? strlen( s ) : 0;
 	if( !slen ) {
@@ -1184,7 +1228,9 @@ TENSHI_FUNC char *TENSHI_CALL teStrCatDir( const char *a, const char *b )
 	char *p;
 	char chinsert;
 
+#if STRTRACE_ENABLED
 	TRACE( "a=%p, b=%p", ( const void * )a, ( const void * )b );
+#endif
 
 	if( !a || !b ) {
 		if( a != NULL ) {
@@ -1201,7 +1247,9 @@ TENSHI_FUNC char *TENSHI_CALL teStrCatDir( const char *a, const char *b )
 	alen = strlen( a );
 	blen = strlen( b );
 
+#if STRTRACE_ENABLED
 	TRACE( "a.len=%u, b.len=%u", ( unsigned int )alen, ( unsigned int )blen );
+#endif
 
 	len = alen + blen;
 	chinsert = '\0';
@@ -3647,6 +3695,584 @@ TENSHI_FUNC void TENSHI_CALL teCopyMemblock( TenshiIndex_t MemblockFrom, TenshiI
 	} else {
 		memmove( pTo, pFrom, cBytes );
 	}
+}
+
+
+/*
+===============================================================================
+
+	BASIC MATH
+
+===============================================================================
+*/
+
+#define TENSHI_PI   3.1415926535897932384626433832795028841971693993751058209
+#define TENSHI_PI_F 3.1415926535897932384626433832795028841971693993751058209f
+
+typedef union {
+	TenshiInt32_t  i;
+	TenshiUInt32_t u;
+	float          f;
+} TenshiFloatInt32_t;
+
+TENSHI_FUNC float TENSHI_CALL teUintBitsToFloat( TenshiUInt32_t x )
+{
+	TenshiFloatInt32_t v;
+
+	v.u = x;
+	return v.f;
+}
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teFloatToUintBits( float x )
+{
+	TenshiFloatInt32_t v;
+
+	v.f = x;
+	return v.u;
+}
+
+TENSHI_FUNC TenshiBoolean_t TENSHI_CALL teIsNAN( float x )
+{
+	TenshiUInt32_t v;
+
+	v = teFloatToUintBits( x );
+	return ( v & 0x7F800000 ) == 0x7F800000 && ( v & 0x7FFFFF ) != 0;
+}
+TENSHI_FUNC TenshiBoolean_t TENSHI_CALL teIsInf( float x )
+{
+	return ( teFloatToUintBits( x ) & 0x7FFFFFFF ) == 0x7F800000;
+}
+TENSHI_FUNC TenshiBoolean_t TENSHI_CALL teIsZero( float x )
+{
+	return x >= -1e-8f && x <= 1e-8f;
+}
+
+TENSHI_FUNC float TENSHI_CALL teDegrees( float radians )
+{
+	return radians*180/TENSHI_PI_F;
+}
+TENSHI_FUNC float TENSHI_CALL teRadians( float degrees )
+{
+	return degrees/180*TENSHI_PI_F;
+}
+
+TENSHI_FUNC float TENSHI_CALL teCos( float degrees )
+{
+	return cosf( teRadians( degrees ) );
+}
+TENSHI_FUNC float TENSHI_CALL teSin( float degrees )
+{
+	return sinf( teRadians( degrees ) );
+}
+TENSHI_FUNC float TENSHI_CALL teTan( float degrees )
+{
+	return tanf( teRadians( degrees ) );
+}
+TENSHI_FUNC float TENSHI_CALL teAsin( float x )
+{
+	return teDegrees( asinf( x ) );
+}
+TENSHI_FUNC float TENSHI_CALL teAcos( float x )
+{
+	return teDegrees( acosf( x ) );
+}
+TENSHI_FUNC float TENSHI_CALL teAtan( float x )
+{
+	return teDegrees( atanf( x ) );
+}
+TENSHI_FUNC float TENSHI_CALL teAtanfull( float y, float x )
+{
+	return teDegrees( atan2f( y, x ) );
+}
+TENSHI_FUNC float TENSHI_CALL teHcos( float degrees )
+{
+	return coshf( teRadians( degrees ) );
+}
+TENSHI_FUNC float TENSHI_CALL teHsin( float degrees )
+{
+	return sinhf( teRadians( degrees ) );
+}
+TENSHI_FUNC float TENSHI_CALL teHtan( float degrees )
+{
+	return tanhf( teRadians( degrees) );
+}
+TENSHI_FUNC float TENSHI_CALL teSq( float x )
+{
+	return x*x;
+}
+TENSHI_FUNC float TENSHI_CALL teSqrt( float x )
+{
+	return sqrtf( x );
+}
+TENSHI_FUNC float TENSHI_CALL teAbs( float x )
+{
+	return fabsf( x );
+}
+TENSHI_FUNC float TENSHI_CALL teExp( float x )
+{
+	return expf( x );
+}
+TENSHI_FUNC float TENSHI_CALL teFloor( float x )
+{
+#if 0
+	return floorf( x );
+#else
+	if( ( teFloatToUintBits( x ) & 0x801FFFFF ) > 0x80000000 ) {
+		return ( float )( ( TenshiInt32_t )x - 1 );
+	}
+
+	return ( float )( TenshiInt32_t )x;
+#endif
+}
+TENSHI_FUNC float TENSHI_CALL teCeil( float x )
+{
+	return ceilf( x );
+}
+TENSHI_FUNC float TENSHI_CALL teRound( float x )
+{
+	return roundf( x );
+}
+TENSHI_FUNC float TENSHI_CALL teFrac( float x )
+{
+	return x - teFloor( x );
+}
+TENSHI_FUNC float teSign( float x )
+{
+	return x < -1e-8f ? -1.0f : ( x > 1e-8f ? 1.0f : 0.0f );
+}
+TENSHI_FUNC float TENSHI_CALL teMinF( float a, float b )
+{
+#if TENSHI_SSE_ENABLED
+	float r = 0.0f;
+	_mm_store_ss( &r, _mm_min_ss( _mm_set_ss( a ), _mm_set_ss( b ) ) );
+	return r;
+#else
+	return a < b ? a : b;
+#endif
+}
+TENSHI_FUNC TenshiInt32_t TENSHI_CALL teMinI( TenshiInt32_t a, TenshiInt32_t b )
+{
+	return a < b ? a : b;
+}
+TENSHI_FUNC float TENSHI_CALL teMaxF( float a, float b )
+{
+#if TENSHI_SSE_ENABLED
+	float r = 0.0f;
+	_mm_store_ss( &r, _mm_max_ss( _mm_set_ss( a ), _mm_set_ss( b ) ) );
+	return r;
+#else
+	return a > b ? a : b;
+#endif
+}
+TENSHI_FUNC TenshiInt32_t TENSHI_CALL teMaxI( TenshiInt32_t a, TenshiInt32_t b )
+{
+	return a > b ? a : b;
+}
+TENSHI_FUNC float TENSHI_CALL teClamp( float x, float l, float h )
+{
+#if TENSHI_SSE_ENABLED
+	float r = 0.0f;
+	_mm_store_ss
+	(
+		&r,
+		_mm_min_ss
+		(
+			_mm_max_ss( _mm_set_ss( x ), _mm_set_ss( l ) ),
+			_mm_set_ss( h )
+		)
+	);
+	return r;
+#else
+	float r;
+
+	r = x;
+
+	r = ( r + h - teAbs( r - h ) )*0.5f;
+	r = ( r + l - teAbs( r - l ) )*0.5f;
+
+	return r;
+#endif
+}
+TENSHI_FUNC float TENSHI_CALL teSaturate( float x )
+{
+	return teClamp( x, 0.0f, 1.0f );
+}
+TENSHI_FUNC float TENSHI_CALL teSaturateSigned( float x )
+{
+	return teClamp( x, -1.0f, 1.0f );
+}
+TENSHI_FUNC float TENSHI_CALL teLerp( float x, float y, float t )
+{
+	return x + ( y - x )*t;
+}
+TENSHI_FUNC float TENSHI_CALL teCerp( float x, float y, float z, float w, float t )
+{
+	float a, b, c;
+
+	a = ( w - z ) - ( x - y );
+	b = ( x - y ) - a;
+	c = z - x;
+	return t*( t*( t*a + b ) + c ) + y;
+}
+TENSHI_FUNC float TENSHI_CALL teSlerp( float a, float b, float t )
+{
+	float cosom, sinom, omega, scale[ 2 ];
+
+	if( t <= 0.0f ) {
+		return a;
+	}
+	if( t >= 1.0f ) {
+		return b;
+	}
+
+	cosom = fmodf( ( a*b )*( a*b ), 1.0f );
+
+	if( ( 1.0f - cosom ) > 1e-8f ) {
+		omega = acosf( cosom );
+		sinom = sinf( omega );
+		scale[ 0 ] = sinf( ( 1.0f - t )*omega )/sinom;
+		scale[ 1 ] = sinf( t*omega )/sinom;
+	} else {
+		scale[ 0 ] = 1.0f - t;
+		scale[ 1 ] = t;
+	}
+
+	return a*scale[ 0 ] + b*scale[ 1 ];
+}
+TENSHI_FUNC float TENSHI_CALL teWrap360( float angle )
+{
+	/*
+		This simultaneously checks whether angle is above 360 or below 0
+		0x43B40000 is the integer bits representation 360.0f
+	*/
+	if( teFloatToUintBits( angle ) >= 0x43B40000 ) {
+		angle -= teFloor( angle/360.0f )*360.0f;
+	}
+	
+	return angle;
+}
+TENSHI_FUNC float TENSHI_CALL teWrap180( float angle )
+{
+	angle = teWrap360( angle );
+	return angle > 180.0f ? angle - 360.0f : angle;
+}
+TENSHI_FUNC float TENSHI_CALL teAngleDelta( float a, float b )
+{
+	return teWrap180( a - b );
+}
+TENSHI_FUNC float TENSHI_CALL teCurveValue( float a, float da, float sp )
+{
+	return da + ( a - da )/( sp < 1.0f ? 1.0f : sp );
+}
+TENSHI_FUNC float TENSHI_CALL teWrapValue( float da )
+{
+	return teWrap360( da );
+}
+TENSHI_FUNC float TENSHI_CALL teNewXValue( float x, float a, float b )
+{
+	return x + sinf( teRadians( a ) )*b;
+}
+TENSHI_FUNC float TENSHI_CALL teNewYValue( float y, float a, float b )
+{
+	return y - sinf( teRadians( a ) )*b;
+}
+TENSHI_FUNC float TENSHI_CALL teNewZValue( float z, float a, float b )
+{
+	return z + cosf( teRadians( a ) )*b;
+}
+TENSHI_FUNC float TENSHI_CALL teCurveAngle( float a, float da, float sp )
+{
+	float diff;
+
+	a = teWrap360( a );
+	da = teWrap360( da );
+
+	if( diff < -180.0f ) {
+		diff = a + 360.0f - da;
+	} else if( diff > 180.0f ) {
+		diff = a - ( da + 360.0f );
+	}
+
+	return teWrap360( da + diff/( sp < 1.0f ? 1.0f : sp ) );
+}
+TENSHI_FUNC float TENSHI_CALL teDot2D( float x1, float y1, float x2, float y2 )
+{
+	return x1*x2 + y1*y2;
+}
+TENSHI_FUNC float TENSHI_CALL teDot3D( float x1, float y1, float z1, float x2, float y2, float z2 )
+{
+	return x1*x2 + y1*y2 + z1*z2;
+}
+TENSHI_FUNC float TENSHI_CALL teLengthSq2D( float x, float y )
+{
+	return teDot2D( x, y, x, y );
+}
+TENSHI_FUNC float TENSHI_CALL teLengthSq3D( float x, float y, float z )
+{
+	return teDot3D( x, y, z, x, y, z );
+}
+TENSHI_FUNC float TENSHI_CALL teLength2D( float x, float y )
+{
+	return sqrtf( teLengthSq2D( x, y ) );
+}
+TENSHI_FUNC float TENSHI_CALL teLength3D( float x, float y, float z )
+{
+	return sqrtf( teLengthSq3D( x, y, z ) );
+}
+TENSHI_FUNC float TENSHI_CALL teDistance2D( float x1, float y1, float x2, float y2 )
+{
+	return teLength2D( x1 - x2, y1 - y2 );
+}
+TENSHI_FUNC float TENSHI_CALL teDistance3D( float x1, float y1, float z1, float x2, float y2, float z2 )
+{
+	return teLength3D( x1 - x2, y1 - y2, z1 - z2 );
+}
+TENSHI_FUNC float TENSHI_CALL tePercentF( float numerator, float denominator )
+{
+	return numerator/denominator*100.0f;
+}
+TENSHI_FUNC TenshiInt32_t TENSHI_CALL tePercentI( TenshiInt32_t numerator, TenshiInt32_t denominator )
+{
+	return numerator*100/denominator;
+}
+
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teArgb( TenshiUInt32_t r, TenshiUInt32_t g, TenshiUInt32_t b, TenshiUInt32_t a )
+{
+	return
+		( ( a&0xFF )<<24 ) |
+		( ( r&0xFF )<<16 ) |
+		( ( g&0xFF )<< 8 ) |
+		( ( b&0xFF )<< 0 );
+}
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teRgb( TenshiUInt32_t r, TenshiUInt32_t g, TenshiUInt32_t b )
+{
+	return teArgb( r, g, b, 0xFF );
+}
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teRgbA( TenshiUInt32_t argb )
+{
+	return ( argb>>24 ) & 0xFF;
+}
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teRgbR( TenshiUInt32_t argb )
+{
+	return ( argb>>16 ) & 0xFF;
+}
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teRgbG( TenshiUInt32_t argb )
+{
+	return ( argb>>8 ) & 0xFF;
+}
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teRgbB( TenshiUInt32_t argb )
+{
+	return argb & 0xFF;
+}
+static TenshiUInt32_t teFloatToChannel( float x )
+{
+	return ( TenshiUInt32_t )( teSaturate( x )*255.0f );
+}
+static float teChannelToFloat( TenshiUInt32_t x )
+{
+	return ( ( float )x )/255.0f;
+}
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teArgbF( float r, float g, float b, float a )
+{
+	return teArgb( teFloatToChannel( r ), teFloatToChannel( g ), teFloatToChannel( b ), teFloatToChannel( a ) );
+}
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teRgbF( float r, float g, float b )
+{
+	return teArgb( teFloatToChannel( r ), teFloatToChannel( g ), teFloatToChannel( b ), 255 );
+}
+TENSHI_FUNC float TENSHI_CALL teRgbAF( TenshiUInt32_t argb )
+{
+	return teChannelToFloat( teRgbA( argb ) );
+}
+TENSHI_FUNC float TENSHI_CALL teRgbRF( TenshiUInt32_t argb )
+{
+	return teChannelToFloat( teRgbR( argb ) );
+}
+TENSHI_FUNC float TENSHI_CALL teRgbGF( TenshiUInt32_t argb )
+{
+	return teChannelToFloat( teRgbG( argb ) );
+}
+TENSHI_FUNC float TENSHI_CALL teRgbBF( TenshiUInt32_t argb )
+{
+	return teChannelToFloat( teRgbB( argb ) );
+}
+
+
+/*
+===============================================================================
+
+	RANDOM NUMBER
+
+	(Using PCG32)
+
+===============================================================================
+*/
+
+TENSHI_FUNC void TENSHI_CALL tePCGSeed( TenshiPCGState_t *r, TenshiUInt64_t state, TenshiUInt64_t seq )
+{
+	r->state  = 0;
+	r->inc    = ( seq << 1 ) | 1;
+	(void)tePCGRnd( r );
+	r->state += state;
+	(void)tePCGRnd( r );
+}
+TENSHI_FUNC void TENSHI_CALL tePCGRandomize( TenshiPCGState_t *r, TenshiUInt32_t seedval )
+{
+	TenshiUInt64_t state, seq;
+
+	state = ( ( TenshiUInt64_t )seedval )<<32 | ~( ( seedval>>16 ) | ( seedval<<16 ) );
+	seq   = state - seedval*seedval*seedval + state*state - seedval;
+
+	tePCGSeed( r, state, seq );
+}
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL tePCGRnd( TenshiPCGState_t *r )
+{
+	TenshiUInt64_t oldstate;
+	TenshiUInt32_t xorshifted, rot;
+
+	oldstate = r->state;
+	r->state = oldstate*6364136223846793005ULL + r->inc;
+
+	xorshifted = ( ( oldstate >> 18 ) ^ oldstate ) >> 27;
+
+	rot = oldstate >> 59;
+	return ( xorshifted >> rot ) | ( xorshifted << ( ( -rot ) & 31 ) );
+}
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL tePCGBoundedRnd( TenshiPCGState_t *r, TenshiUInt32_t bound )
+{
+	TenshiUInt32_t threshold;
+	TenshiUInt32_t remainingIters;
+	TenshiUInt32_t value;
+
+	threshold = -bound % bound;
+
+	remainingIters = 32;
+	do {
+		value = tePCGRnd( r );
+		if( value >= threshold ) {
+			break;
+		}
+	} while( --remainingIters != 0 );
+
+	return value%bound;
+}
+TENSHI_FUNC TenshiInt32_t TENSHI_CALL tePCGRangedRnd( TenshiPCGState_t *r, TenshiInt32_t lowBound, TenshiInt32_t highBound )
+{
+	return lowBound + tePCGBoundedRnd( r, highBound - lowBound );
+}
+
+#undef TENSHI_FACILITY
+#define TENSHI_FACILITY				kTenshiLog_CoreRT
+
+#define TENSHI_PCG_STATE_INIT		0x853c49e6748fea9bULL
+#define TENSHI_PCG_INC_INIT			0xda3e39cb94b95bdbULL
+
+TENSHI_FUNC void *TENSHI_CALL teRNGAlloc_f( void *pParm )
+{
+	union {
+		TenshiPCGState_t *r;
+		void *p;
+	} p;
+
+	((void)pParm);
+
+	p.p = teAlloc( sizeof( TenshiPCGState_t ), TENSHI_MEMTAG_RNG );
+	if( !p.p ) {
+		return ( void *)0;
+	}
+
+	p.r->state = TENSHI_PCG_STATE_INIT;
+	p.r->inc   = TENSHI_PCG_INC_INIT;
+
+	return p.p;
+}
+TENSHI_FUNC void TENSHI_CALL teRNGDealloc_f( void *p )
+{
+	teDealloc( p );
+}
+
+static TENSHI_FORCEINLINE TenshiPCGState_t *teRNG( TenshiIndex_t uIndex )
+{
+	return ( TenshiPCGState_t * )teUnwrapEngineObject( g_RNGPool, uIndex );
+}
+
+TENSHI_FUNC TenshiIndex_t TENSHI_CALL teAllocRNG( void )
+{
+	return teAllocEngineObject( g_RNGPool, 0, ( void * )0 );
+}
+TENSHI_FUNC void TENSHI_CALL teMakeRNG( TenshiIndex_t RNGNumber )
+{
+	teAllocEngineObject( g_RNGPool, RNGNumber, ( void * )0 );
+}
+TENSHI_FUNC TenshiIndex_t TENSHI_CALL teDeleteRNG( TenshiIndex_t RNGNumber )
+{
+	teDeallocEngineObject( g_RNGPool, RNGNumber );
+	return 0;
+}
+TENSHI_FUNC TenshiBoolean_t TENSHI_CALL teRNGExist( TenshiIndex_t RNGNumber )
+{
+	return teEngineObjectExists( g_RNGPool, RNGNumber );
+}
+
+TENSHI_FUNC void TENSHI_CALL teRandomizeRNG( TenshiIndex_t RNGNumber, TenshiUInt32_t seedval )
+{
+	TenshiPCGState_t *r;
+
+	if( !( r = teRNG( RNGNumber ) ) ) {
+		return;
+	}
+
+	tePCGRandomize( r, seedval );
+}
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teRNGGenerate( TenshiIndex_t RNGNumber )
+{
+	TenshiPCGState_t *r;
+
+	if( !( r = teRNG( RNGNumber ) ) ) {
+		return 0;
+	}
+
+	return tePCGRnd( r );
+}
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teRNGBoundedGenerate( TenshiIndex_t RNGNumber, TenshiUInt32_t bound )
+{
+	TenshiPCGState_t *r;
+
+	if( !( r = teRNG( RNGNumber ) ) ) {
+		return 0;
+	}
+
+	return tePCGBoundedRnd( r, bound );
+}
+TENSHI_FUNC TenshiInt32_t TENSHI_CALL teRNGRangedGenerate( TenshiIndex_t RNGNumber, TenshiInt32_t lowBound, TenshiInt32_t highBound )
+{
+	TenshiPCGState_t *r;
+
+	if( !( r = teRNG( RNGNumber ) ) ) {
+		return 0;
+	}
+
+	return tePCGRangedRnd( r, lowBound, highBound );
+}
+
+static TenshiPCGState_t g_RNG = {
+	TENSHI_PCG_STATE_INIT,
+	TENSHI_PCG_INC_INIT
+};
+TENSHI_FUNC void TENSHI_CALL teRandomize( TenshiUInt32_t seedval )
+{
+	tePCGRandomize( &g_RNG, seedval );
+}
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teRnd( void )
+{
+	return tePCGRnd( &g_RNG );
+}
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teRndBounded( TenshiUInt32_t bound )
+{
+	return tePCGBoundedRnd( &g_RNG, bound );
+}
+TENSHI_FUNC TenshiInt32_t TENSHI_CALL teRndRanged( TenshiInt32_t lowBound, TenshiInt32_t highBound )
+{
+	return tePCGRangedRnd( &g_RNG, lowBound, highBound );
 }
 
 

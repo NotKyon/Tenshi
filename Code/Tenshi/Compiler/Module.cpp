@@ -104,6 +104,87 @@ namespace Tenshi { namespace Compiler {
 			"WRITE MEMBLOCK FLOAT64%LUPO%teWriteMemblockFloat64"	NL
 			"COPY MEMBLOCK%LLUPUPUP%teCopyMemblock"					NL
 			""														NL
+			"UINT BITS TO FLOAT[%FD%teUintBitsToFloat"				NL
+			"FLOAT TO UINT BITS[%DF%teFloatToUintBits"				NL
+			"IS NAN?[%BF%teIsNAN"									NL
+			"IS INF?[%BF%teIsInf"									NL
+			"IS ZERO?[%BF%teIsZero"									NL
+			"RADIANS TO DEGREES[%FF%teDegrees"						NL
+			"DEGREES TO RADIANS[%FF%teRadians"						NL
+			"COS[%FF%teCos"											NL
+			"SIN[%FF%teSin"											NL
+			"TAN[%FF%teTan"											NL
+			"ASIN[%FF%teAsin"										NL
+			"ACOS[%FF%teAcos"										NL
+			"ATAN[%FF%teAtan"										NL
+			"ATANFULL[%FFF%teAtanfull"								NL
+			"HCOS[%FF%teHcos"										NL
+			"HSIN[%FF%teHsin"										NL
+			"HTAN[%FF%teHtan"										NL
+			"SQRT[%FF%teSqrt"										NL
+			"ABS[%FF%teAbs"											NL
+			"EXP[%FF%teExp"											NL
+			"FLOOR[%FF%teFloor"										NL
+			"CEIL[%FF%teCeil"										NL
+			"ROUND[%FF%teRound"										NL
+			"FRAC[%FF%teFrac"										NL
+			"SIGN[%FF%teSign"										NL
+			"MIN[%FFF%teMinF"										NL
+			"MIN[%LLL%teMinI"										NL
+			"MAX[%FFF%teMaxF"										NL
+			"MAX[%LLL%teMaxI"										NL
+			"CLAMP[%FFFF%teClamp"									NL
+			"SATURATE[%FF%teSaturate"								NL
+			"SATURATE SIGNED[%FF%teSaturateSigned"					NL
+			"LERP[%FFFF%teLerp"										NL
+			"CERP[%FFFFFF%teCerp"									NL
+			"SLERP[%FFFF%teSlerp"									NL
+			"WRAP360[%FF%teWrap360"									NL
+			"WRAP180[%FF%teWrap180"									NL
+			"ANGLE DELTA[%FFF%teAngleDelta"							NL
+			"CURVEVALUE[%FFFF%teCurveValue"							NL
+			"WRAPVALUE[%FF%teWrap360"								NL
+			"NEWXVALUE[%FFFF%teNewXValue"							NL
+			"NEWYVALUE[%FFFF%teNewYValue"							NL
+			"NEWZVALUE[%FFFF%teNewZValue"							NL
+			"CURVEANGLE[%FFFF%teCurveAngle"							NL
+			"DOT[%FFFFF%teDot2D"									NL
+			"DOT[%FFFFFFF%teDot3D"									NL
+			"LENGTH SQUARED[%FFF%teLengthSq2D"						NL
+			"LENGTH SQUARED[%FFFF%teLengthSq3D"						NL
+			"LENGTH[%FFF%teLength2D"								NL
+			"LENGTH[%FFFF%teLength3D"								NL
+			"DISTANCE[%FFFFF%teDistance2D"							NL
+			"DISTANCE[%FFFFFFF%teDistance3D"						NL
+			"PERCENT[%FFF%tePercentF"								NL
+			"PERCENT[%LLL%tePercentI"								NL
+			""														NL
+			"RGB[%DDDDD%teArgb"										NL
+			"RGB[%DDDD%teRgb"										NL
+			"RGBA[%DD%teRgbA"										NL
+			"RGBR[%DD%teRgbR"										NL
+			"RGBG[%DD%teRgbG"										NL
+			"RGBB[%DD%teRgbB"										NL
+			"RGB#[%DFFFF%teArgbF"									NL
+			"RGB#[%DFFF%teRgbF"										NL
+			"RGBA#[%FD%teRgbAF"										NL
+			"RGBR#[%FD%teRgbRF"										NL
+			"RGBG#[%FD%teRgbGF"										NL
+			"RGBB#[%FD%teRgbBF"										NL
+			""														NL
+			"MAKE RNG[%L%teAllocRNG"								NL
+			"MAKE RNG%L%teMakeRNG"									NL
+			"DELETE RNG[%LL%teDeleteRNG"							NL
+			"RNG EXIST[%BL%teRNGExist"								NL
+			"RANDOMIZE RNG%LD%teRandomizeRNG"						NL
+			"RNG GENERATE[%DL%teRNGGenerate"						NL
+			"RNG GENERATE[%DLD%teRNGBoundedGenerate"				NL
+			"RNG GENERATE[%LLLL%teRNGRangedGenerate"				NL
+			"RANDOMIZE%D%teRandomize"								NL
+			"RND[%D%teRnd"											NL
+			"RND[%DD%teRndBounded"									NL
+			"RND[%LLL%teRndRanged"									NL
+			""														NL
 		);
 #undef NL
 

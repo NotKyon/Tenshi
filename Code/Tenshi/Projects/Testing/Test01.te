@@ -138,6 +138,8 @@ else
 	"a != a, KO"
 endif
 
+"Random number between 1 and 100: " + rnd( 1, 100 )
+
 open to read 1, "this really doesn't exist..."
 
 type exampletype

@@ -131,7 +131,7 @@ TE_FUNC const char *TE_CALL FS_AppDataDir()
 	if( !bDidInit ) {
 #ifdef _WIN32
 		wchar_t wszAppDataDir[ PATH_MAX + 1 ] = { L'\0' };
-		SHGetFolderPathW( NULL, CSIDL_APPDATA, NULL, 0, wszAppDataDir );
+		SHGetFolderPathW( NULL, CSIDL_LOCAL_APPDATA, NULL, 0, wszAppDataDir );
 		bDidInit |= AppDataDir.AssignUTF16( wszAppDataDir );
 #else
 		bDidInit |= AppDataDir.Assign( FS_HomeDir() );

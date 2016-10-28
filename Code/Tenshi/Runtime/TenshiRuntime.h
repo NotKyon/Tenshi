@@ -12,6 +12,7 @@
 #define TENSHI_MEMTAG_DEFAULT		0
 #define TENSHI_MEMTAG_STRING		1
 #define TENSHI_MEMTAG_MEMBLOCK		2
+#define TENSHI_MEMTAG_RNG			3
 
 #ifndef TENSHI_MEMTAG
 # define TENSHI_MEMTAG				TENSHI_MEMTAG_DEFAULT
@@ -480,7 +481,7 @@ struct TenshiInt128Struct_s
 struct TenshiRTTypeInfo_s
 {
 	TenshiUIntPtr_t					cTypes;
-	TenshiType_t *const *			ppTypes;
+	const TenshiType_t *			pTypes;
 };
 
 struct TenshiObjectPool_s
@@ -1033,6 +1034,110 @@ TENSHI_FUNC void TENSHI_CALL teWriteMemblockFloat64( TenshiIndex_t MemblockNumbe
 
 TENSHI_FUNC void TENSHI_CALL teCopyMemblock( TenshiIndex_t MemblockFrom, TenshiIndex_t MemblockTo, TenshiUIntPtr_t uPosFrom, TenshiUIntPtr_t uPosTo, TenshiUIntPtr_t cBytes );
 
+/*
+ *	MATH FUNCTIONS
+ */
+
+TENSHI_FUNC float TENSHI_CALL teUintBitsToFloat( TenshiUInt32_t x );
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teFloatToUintBits( float x );
+TENSHI_FUNC TenshiBoolean_t TENSHI_CALL teIsNAN( float x );
+TENSHI_FUNC TenshiBoolean_t TENSHI_CALL teIsInf( float x );
+TENSHI_FUNC TenshiBoolean_t TENSHI_CALL teIsZero( float x );
+TENSHI_FUNC float TENSHI_CALL teDegrees( float radians );
+TENSHI_FUNC float TENSHI_CALL teRadians( float degrees );
+TENSHI_FUNC float TENSHI_CALL teCos( float degrees );
+TENSHI_FUNC float TENSHI_CALL teSin( float degrees );
+TENSHI_FUNC float TENSHI_CALL teTan( float degrees );
+TENSHI_FUNC float TENSHI_CALL teAsin( float x );
+TENSHI_FUNC float TENSHI_CALL teAcos( float x );
+TENSHI_FUNC float TENSHI_CALL teAtan( float x );
+TENSHI_FUNC float TENSHI_CALL teAtanfull( float y, float x );
+TENSHI_FUNC float TENSHI_CALL teHcos( float degrees );
+TENSHI_FUNC float TENSHI_CALL teHsin( float degrees );
+TENSHI_FUNC float TENSHI_CALL teHtan( float degrees );
+TENSHI_FUNC float TENSHI_CALL teSq( float x );
+TENSHI_FUNC float TENSHI_CALL teSqrt( float x );
+TENSHI_FUNC float TENSHI_CALL teAbs( float x );
+TENSHI_FUNC float TENSHI_CALL teExp( float x );
+TENSHI_FUNC float TENSHI_CALL teFloor( float x );
+TENSHI_FUNC float TENSHI_CALL teCeil( float x );
+TENSHI_FUNC float TENSHI_CALL teRound( float x );
+TENSHI_FUNC float TENSHI_CALL teFrac( float x );
+TENSHI_FUNC float teSign( float x );
+TENSHI_FUNC float TENSHI_CALL teMinF( float a, float b );
+TENSHI_FUNC TenshiInt32_t TENSHI_CALL teMinI( TenshiInt32_t a, TenshiInt32_t b );
+TENSHI_FUNC float TENSHI_CALL teMaxF( float a, float b );
+TENSHI_FUNC TenshiInt32_t TENSHI_CALL teMaxI( TenshiInt32_t a, TenshiInt32_t b );
+TENSHI_FUNC float TENSHI_CALL teClamp( float x, float l, float h );
+TENSHI_FUNC float TENSHI_CALL teSaturate( float x );
+TENSHI_FUNC float TENSHI_CALL teSaturateSigned( float x );
+TENSHI_FUNC float TENSHI_CALL teLerp( float x, float y, float t );
+TENSHI_FUNC float TENSHI_CALL teCerp( float x, float y, float z, float w, float t );
+TENSHI_FUNC float TENSHI_CALL teSlerp( float a, float b, float t );
+TENSHI_FUNC float TENSHI_CALL teWrap360( float angle );
+TENSHI_FUNC float TENSHI_CALL teWrap180( float angle );
+TENSHI_FUNC float TENSHI_CALL teAngleDelta( float a, float b );
+TENSHI_FUNC float TENSHI_CALL teCurveValue( float a, float da, float sp );
+TENSHI_FUNC float TENSHI_CALL teWrapValue( float da );
+TENSHI_FUNC float TENSHI_CALL teNewXValue( float x, float a, float b );
+TENSHI_FUNC float TENSHI_CALL teNewYValue( float y, float a, float b );
+TENSHI_FUNC float TENSHI_CALL teNewZValue( float z, float a, float b );
+TENSHI_FUNC float TENSHI_CALL teCurveAngle( float a, float da, float sp );
+TENSHI_FUNC float TENSHI_CALL teDot2D( float x1, float y1, float x2, float y2 );
+TENSHI_FUNC float TENSHI_CALL teDot3D( float x1, float y1, float z1, float x2, float y2, float z2 );
+TENSHI_FUNC float TENSHI_CALL teLengthSq2D( float x, float y );
+TENSHI_FUNC float TENSHI_CALL teLengthSq3D( float x, float y, float z );
+TENSHI_FUNC float TENSHI_CALL teLength2D( float x, float y );
+TENSHI_FUNC float TENSHI_CALL teLength3D( float x, float y, float z );
+TENSHI_FUNC float TENSHI_CALL teDistance2D( float x1, float y1, float x2, float y2 );
+TENSHI_FUNC float TENSHI_CALL teDistance3D( float x1, float y1, float z1, float x2, float y2, float z2 );
+TENSHI_FUNC float TENSHI_CALL tePercentF( float numerator, float denominator );
+TENSHI_FUNC TenshiInt32_t TENSHI_CALL tePercentI( TenshiInt32_t numerator, TenshiInt32_t denominator );
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teArgb( TenshiUInt32_t r, TenshiUInt32_t g, TenshiUInt32_t b, TenshiUInt32_t a );
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teRgb( TenshiUInt32_t r, TenshiUInt32_t g, TenshiUInt32_t b );
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teRgbA( TenshiUInt32_t argb );
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teRgbR( TenshiUInt32_t argb );
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teRgbG( TenshiUInt32_t argb );
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teRgbB( TenshiUInt32_t argb );
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teArgbF( float r, float g, float b, float a );
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teRgbF( float r, float g, float b );
+TENSHI_FUNC float TENSHI_CALL teRgbAF( TenshiUInt32_t argb );
+TENSHI_FUNC float TENSHI_CALL teRgbRF( TenshiUInt32_t argb );
+TENSHI_FUNC float TENSHI_CALL teRgbGF( TenshiUInt32_t argb );
+TENSHI_FUNC float TENSHI_CALL teRgbBF( TenshiUInt32_t argb );
+
+/*
+ *	RANDOM NUMBER
+ */
+
+typedef struct TenshiPCGState_s {
+	TenshiUInt64_t state; /* can be any value */
+	TenshiUInt64_t inc;   /* must always be odd */
+} TenshiPCGState_t;
+
+TENSHI_FUNC void TENSHI_CALL tePCGSeed( TenshiPCGState_t *r, TenshiUInt64_t state, TenshiUInt64_t seq );
+TENSHI_FUNC void TENSHI_CALL tePCGRandomize( TenshiPCGState_t *r, TenshiUInt32_t seedval );
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL tePCGRnd( TenshiPCGState_t *r );
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL tePCGBoundedRnd( TenshiPCGState_t *r, TenshiUInt32_t bound );
+TENSHI_FUNC TenshiInt32_t TENSHI_CALL tePCGRangedRnd( TenshiPCGState_t *r, TenshiInt32_t lowBound, TenshiInt32_t highBound );
+
+TENSHI_FUNC void *TENSHI_CALL teRNGAlloc_f( void *pParm );
+TENSHI_FUNC void TENSHI_CALL teRNGDealloc_f( void *p );
+
+TENSHI_FUNC TenshiIndex_t TENSHI_CALL teAllocRNG( void );
+TENSHI_FUNC void TENSHI_CALL teMakeRNG( TenshiIndex_t RNGNumber );
+TENSHI_FUNC TenshiIndex_t TENSHI_CALL teDeleteRNG( TenshiIndex_t RNGNumber );
+TENSHI_FUNC TenshiBoolean_t TENSHI_CALL teRNGExist( TenshiIndex_t RNGNumber );
+
+TENSHI_FUNC void TENSHI_CALL teRandomizeRNG( TenshiIndex_t RNGNumber, TenshiUInt32_t seedval );
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teRNGGenerate( TenshiIndex_t RNGNumber );
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teRNGBoundedGenerate( TenshiIndex_t RNGNumber, TenshiUInt32_t bound );
+TENSHI_FUNC TenshiInt32_t TENSHI_CALL teRNGRangedGenerate( TenshiIndex_t RNGNumber, TenshiInt32_t lowBound, TenshiInt32_t highBound );
+
+TENSHI_FUNC void TENSHI_CALL teRandomize( TenshiUInt32_t seedval );
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teRnd( void );
+TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teRndBounded( TenshiUInt32_t bound );
+TENSHI_FUNC TenshiInt32_t TENSHI_CALL teRndRanged( TenshiInt32_t lowBound, TenshiInt32_t highBound );
 
 #endif /*TENSHI_STATIC_LINK_ENABLED*/
 
