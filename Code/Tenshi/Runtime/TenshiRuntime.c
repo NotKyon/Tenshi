@@ -3835,7 +3835,7 @@ TENSHI_FUNC float TENSHI_CALL teFrac( float x )
 {
 	return x - teFloor( x );
 }
-TENSHI_FUNC float teSign( float x )
+TENSHI_FUNC float TENSHI_CALL teSign( float x )
 {
 	return x < -1e-8f ? -1.0f : ( x > 1e-8f ? 1.0f : 0.0f );
 }

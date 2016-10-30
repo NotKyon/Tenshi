@@ -1063,7 +1063,7 @@ TENSHI_FUNC float TENSHI_CALL teFloor( float x );
 TENSHI_FUNC float TENSHI_CALL teCeil( float x );
 TENSHI_FUNC float TENSHI_CALL teRound( float x );
 TENSHI_FUNC float TENSHI_CALL teFrac( float x );
-TENSHI_FUNC float teSign( float x );
+TENSHI_FUNC float TENSHI_CALL teSign( float x );
 TENSHI_FUNC float TENSHI_CALL teMinF( float a, float b );
 TENSHI_FUNC TenshiInt32_t TENSHI_CALL teMinI( TenshiInt32_t a, TenshiInt32_t b );
 TENSHI_FUNC float TENSHI_CALL teMaxF( float a, float b );
