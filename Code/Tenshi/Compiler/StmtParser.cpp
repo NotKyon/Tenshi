@@ -2420,7 +2420,17 @@ namespace Tenshi { namespace Compiler {
 
 	bool CExitFunctionStmt::Parse()
 	{
-		AX_ASSERT( Token().IsKeyword( kKeyword_ExitFunction ) || Token().IsKeyword( kKeyword_EndFunction ) );
+		AX_ASSERT( Token().IsKeyword( kKeyword_ExitFunction ) || Token().IsKeyword( kKeyword_EndFunction ) || Token().IsPunctuation( "=>" ) );
+
+		if( Token().IsPunctuation( "=>" ) ) {
+			m_pExpr = Parser().ParseExpression();
+			if( !m_pExpr) {
+				Token().Error( "Expected expression following `=>`" );
+				return false;
+			}
+
+			return true;
+		}
 
 		if( Lexer().LexLine() ) {
 			Lexer().Unlex();

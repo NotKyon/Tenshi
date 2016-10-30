@@ -139,6 +139,7 @@ else
 endif
 
 "Random number between 1 and 100: " + rnd( 1, 100 )
+"The sum of 2 and 2 is: " + getSum( 2, 2 )
 
 open to read 1, "this really doesn't exist..."
 
@@ -151,3 +152,5 @@ function getfiletypename$()
 	if n = 0 then exitfunction "[Reg]"
 	if n = 1 then exitfunction "[Dir]"
 endfunction "[???]"
+
+function getSum( x, y ) => x + y

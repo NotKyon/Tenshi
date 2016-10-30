@@ -87,6 +87,7 @@ namespace Tenshi { namespace Compiler {
 			"&=",	// Assignment bitwise and (v &= r)
 			"|=",	// Assignment bitwise or (v |= r)
 			"~=",	// Assignment bitwise xor (v ~= r)
+			"=>",	// Function short-hand
 			"+",	// Add (l + r)
 			"-",	// Subtract (l - r); Negate (-r)
 			"*",	// Multiply (l * r); Pointer indirection (*r)

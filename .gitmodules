@@ -1,0 +1,3 @@
+[submodule "IDE"]
+	path = IDE
+	url = https://github.com/NotKyon/geany.git

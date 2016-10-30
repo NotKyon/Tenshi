@@ -63,6 +63,14 @@ namespace Tenshi { namespace Compiler {
 				m_Lexer.Unlex();
 			}
 		}
+		
+		// Short-hand?
+		// e.g., function getSum( x, y ) => x + y
+		if( m_Lexer.Check( ETokenType::Punctuation, "=>" ) ) {
+			const SToken &Tok = m_Lexer.Token();
+			auto &Stmt = m_Stmts.NewStmt< CExitFunctionStmt >( Tok, m_Parser );
+			return Stmt.Parse();
+		}
 
 		for(;;) {
 			const SToken &CheckTok = m_Lexer.Lex();
