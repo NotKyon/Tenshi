@@ -4380,7 +4380,7 @@ TENSHI_FUNC float TENSHI_CALL teStep( float a, float x )
 }
 TENSHI_FUNC float TENSHI_CALL teMix( float a, float b, float t )
 {
-	return teLerp( a, b, teClamp( t ) );
+	return teLerp( a, b, teSaturate( t ) );
 }
 TENSHI_FUNC float TENSHI_CALL teOver( float x, float y )
 {
