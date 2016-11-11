@@ -1,10 +1,11 @@
 # Tenshi (Basic Compiler)
-Implements a modified version of the Dark Basic language, while altering some of
-the more obscure features.
+This is a modified version of the
+[Dark Basic](https://github.com/LeeBamberTGC/Dark-Basic-Pro) language. Features
+have been added, some syntax has been changed, but the spirit behind it is the
+same.
 
-Most of the code here is old and uses frameworks that are known to contain bugs.
-This project is no longer a priority, though I may still work on it from time to
-time.
+This is a clean implementation; no code from the original repository has been
+used.
 
 
 ## What does the language look like?
@@ -67,25 +68,21 @@ internally by Tenshi. See `Code/Libs/`.
 - Allocation: Memory management system, used throughout.
 - Async: Parallel tasking library. Implements an efficient task scheduler for
          games.
-- Parser: Generic lexing/parsing system. This is still being ported over from
-          the prior version.
+- Parser: Generic lexing/parsing system.
 - System: File system functionality, UUID generation, and high-resolution
           timing.
-
-etc.
 
 
 ## Building
 
 How to build:
 
-- Grab Visual Studio 2015. (Other versions might work, but are untested.)
-- Run Setup.bat in the root directory.
-- Build LLVM (See ThirdParty/LLVM/ReadMe.txt)
-- Open Tenshi.sln and select "Build Solution."
+- Install the 64-bit version of [msys2](http://msys2.github.io/).
+- In msys2, run `pacman -S cmake` then `pacman -S mingw-w64-x86_64-llvm`.
+- Use CMake to generate a makefile or ninja build script, then issue
+  `cmake --build`.
 
-That's it. (Probably.)
+That should be it!
 
-Building with GCC or Clang presently is unlikely to work, however an
-installation of msys will be needed for some parts of the build steps. Look at
-some of the build batch files to figure this out.
+It should be possible to build everything with Visual Studio as well, however
+that is not tested.
