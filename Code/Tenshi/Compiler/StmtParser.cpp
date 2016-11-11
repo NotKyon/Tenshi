@@ -250,7 +250,7 @@ namespace Tenshi { namespace Compiler {
 
 	bool CReturnStmt::Parse()
 	{
-		AX_ASSERT( Token().IsKeyword( kKeyword_Return ) );
+		AX_ASSERT( Token().IsKeyword( kKeyword_GoBack ) );
 		return true;
 	}
 
@@ -2420,7 +2420,7 @@ namespace Tenshi { namespace Compiler {
 
 	bool CExitFunctionStmt::Parse()
 	{
-		AX_ASSERT( Token().IsKeyword( kKeyword_ExitFunction ) || Token().IsKeyword( kKeyword_EndFunction ) || Token().IsPunctuation( "=>" ) );
+		AX_ASSERT( Token().IsKeyword( kKeyword_Return ) || Token().IsKeyword( kKeyword_EndFunction ) || Token().IsPunctuation( "=>" ) );
 
 		if( Token().IsPunctuation( "=>" ) ) {
 			m_pExpr = Parser().ParseExpression();

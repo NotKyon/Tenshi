@@ -16,7 +16,7 @@ namespace Tenshi { namespace Compiler {
 		kKeyword_EndType,
 
 		kKeyword_Function,
-		kKeyword_ExitFunction,
+		kKeyword_Return,
 		kKeyword_EndFunction,
 
 		kKeyword_Select,
@@ -50,7 +50,7 @@ namespace Tenshi { namespace Compiler {
 
 		kKeyword_Goto,
 		kKeyword_Gosub,
-		kKeyword_Return,
+		kKeyword_GoBack,
 
 		kKeyword_Local,
 		kKeyword_Global,

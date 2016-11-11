@@ -142,9 +142,9 @@ namespace Tenshi { namespace Compiler {
 			Ax::Parser::SKeyword( "TYPE",				kKeyword_Type ),
 			Ax::Parser::SKeyword( "ENDTYPE",			kKeyword_EndType ),
 
-			Ax::Parser::SKeyword( "FUNCTION",			kKeyword_Function ),
-			Ax::Parser::SKeyword( "EXITFUNCTION",		kKeyword_ExitFunction ),
-			Ax::Parser::SKeyword( "ENDFUNCTION",		kKeyword_EndFunction ),
+			Ax::Parser::SKeyword( "FN",					kKeyword_Function ),
+			Ax::Parser::SKeyword( "RETURN",				kKeyword_Return ),
+			Ax::Parser::SKeyword( "ENDFN",				kKeyword_EndFunction ),
 
 			Ax::Parser::SKeyword( "SELECT",				kKeyword_Select ),
 			Ax::Parser::SKeyword( "CASE",				kKeyword_Case ),
@@ -177,7 +177,7 @@ namespace Tenshi { namespace Compiler {
 
 			Ax::Parser::SKeyword( "GOTO",				kKeyword_Goto ),
 			Ax::Parser::SKeyword( "GOSUB",				kKeyword_Gosub ),
-			Ax::Parser::SKeyword( "RETURN",				kKeyword_Return ),
+			Ax::Parser::SKeyword( "GOBACK",				kKeyword_GoBack ),
 
 			Ax::Parser::SKeyword( "LOCAL",				kKeyword_Local ),
 			Ax::Parser::SKeyword( "GLOBAL",				kKeyword_Global ),
@@ -207,8 +207,8 @@ namespace Tenshi { namespace Compiler {
 			Ax::Parser::SKeyword( "ATOMIC COMPARE SET",	kKeyword_AtomicCompareSet ),
 			Ax::Parser::SKeyword( "ATOMIC FENCE",		kKeyword_AtomicFence ),
 
-			Ax::Parser::SKeyword( "JOB FUNCTION",		kKeyword_JobFunction ),
-			Ax::Parser::SKeyword( "THREAD FUNCTION",	kKeyword_ThreadFunction ),
+			Ax::Parser::SKeyword( "JOB FN",				kKeyword_JobFunction ),
+			Ax::Parser::SKeyword( "THREAD FN",			kKeyword_ThreadFunction ),
 			Ax::Parser::SKeyword( "PARALLEL FOR",		kKeyword_ParallelFor ),
 			Ax::Parser::SKeyword( "PARALLEL FOREACH",	kKeyword_ParallelForEach ),
 

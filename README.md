@@ -33,11 +33,11 @@ repeat
         "  " + getFileTypeName$() + " <" + get filename$() + "> - " + get file date$() + " " + get file time$()
 until not find next()
 
-function getfiletypename$()
+fn getfiletypename$()
         local n = get file type()
-        if n = 0 then exitfunction "[Reg]"
-        if n = 1 then exitfunction "[Dir]"
-endfunction "[???]"
+        if n = 0 then return "[Reg]"
+        if n = 1 then return "[Dir]"
+endfn "[???]"
 ```
 
 Well, that's a bit further expanded from the previous code listing. Important

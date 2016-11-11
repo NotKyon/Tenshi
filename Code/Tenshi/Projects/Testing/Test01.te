@@ -147,10 +147,10 @@ type exampletype
 	x, y#, z$
 endtype
 
-function getfiletypename$()
+fn getfiletypename$()
 	local n = get file type()
-	if n = 0 then exitfunction "[Reg]"
-	if n = 1 then exitfunction "[Dir]"
-endfunction "[???]"
+	if n = 0 then return "[Reg]"
+	if n = 1 then return "[Dir]"
+endfn "[???]"
 
-function getSum( x, y ) => x + y
+fn getSum( x, y ) => x + y

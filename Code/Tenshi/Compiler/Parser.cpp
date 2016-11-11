@@ -250,7 +250,7 @@ namespace Tenshi { namespace Compiler {
 				case kKeyword_Gosub:
 					return ParseGotoGosub( tok, DstSeq );
 				
-				case kKeyword_Return:
+				case kKeyword_GoBack:
 					return ParseReturn( tok, DstSeq );
 
 				case kKeyword_Do:
@@ -316,7 +316,7 @@ namespace Tenshi { namespace Compiler {
 
 					return ParseFunction( tok, DstSeq );
 
-				case kKeyword_ExitFunction:
+				case kKeyword_Return:
 					if( !DstSeq.InFunction() ) {
 						m_Lexer.Error( "EXITFUNCTION can only be used inside of a FUNCTION/ENDFUNCTION block" );
 						return false;
