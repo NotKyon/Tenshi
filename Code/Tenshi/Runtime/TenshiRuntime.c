@@ -1769,6 +1769,269 @@ TENSHI_FUNC TenshiBoolean_t TENSHI_CALL teStr_Contains( const char *s, const cha
 	return strstr( s, search ) != ( const char * )0;
 }
 
+static TenshiUInt32_t teStepUTF8Decode( const TenshiUInt8_t **ppUTF8Src, const TenshiUInt8_t *pUTF8SrcEnd )
+{
+	TenshiUInt32_t uCodepoint;
+	const TenshiUInt8_t *p;
+
+	p = *ppUTF8Src;
+
+	if( p >= pUTF8SrcEnd ) {
+		return 0;
+	}
+
+	if( ( p[0] & 0xF0 ) == 0xF0 ) {
+		if( p + 4 > pUTF8SrcEnd ) {
+			*ppUTF8Src = pUTF8SrcEnd;
+			return 0xFFFD;
+		}
+
+		uCodepoint  = ( ( TenshiUInt32_t )( p[0] & 0x07 ) ) << 18;
+		uCodepoint |= ( ( TenshiUInt32_t )( p[1] & 0x3F ) ) << 12;
+		uCodepoint |= ( ( TenshiUInt32_t )( p[2] & 0x3F ) ) <<  6;
+		uCodepoint |= ( ( TenshiUInt32_t )( p[3] & 0x3F ) ) <<  0;
+
+		*ppUTF8Src += 4;
+		return uCodepoint;
+	}
+
+	if( ( p[0] & 0xE0 ) == 0xE0 ) {
+		if( p + 3 > pUTF8SrcEnd ) {
+			*ppUTF8Src = pUTF8SrcEnd;
+			return 0xFFFD;
+		}
+
+		uCodepoint  = ( ( TenshiUInt32_t )( p[0] & 0x0F ) ) << 12;
+		uCodepoint |= ( ( TenshiUInt32_t )( p[1] & 0x3F ) ) <<  6;
+		uCodepoint |= ( ( TenshiUInt32_t )( p[2] & 0x3F ) ) <<  0;
+
+		*ppUTF8Src += 3;
+		return uCodepoint;
+	}
+
+	if( ( p[0] & 0xC0 ) == 0xC0 ) {
+		if( p + 2 > pUTF8SrcEnd ) {
+			*ppUTF8Src = pUTF8SrcEnd;
+			return 0xFFFD;
+		}
+
+		uCodepoint  = ( ( TenshiUInt32_t )( p[0] & 0x1F ) ) <<  6;
+		uCodepoint |= ( ( TenshiUInt32_t )( p[1] & 0x3F ) ) <<  0;
+
+		*ppUTF8Src += 2;
+		return uCodepoint;
+	}
+
+	uCodepoint = ( TenshiUInt32_t )( p[0] & 0x7F );
+	*ppUTF8Src += 1;
+
+	return uCodepoint;
+}
+static const TenshiUInt8_t *teCharEnd( const TenshiUInt8_t *s )
+{
+	const TenshiUInt8_t *p = s;
+	const TenshiUInt8_t *const q = p + 5;
+	while( p < q ) {
+		if( *p == '\0' ) {
+			break;
+		}
+
+		++p;
+	}
+	return p;
+}
+static TenshiUInt32_t tePeekChar( const char *s )
+{
+	const TenshiUInt8_t *p;
+	const TenshiUInt8_t *e;
+	TenshiUInt32_t ch;
+
+	if( !s || !*s ) {
+		return 0;
+	}
+
+	p = ( const TenshiUInt8_t * )s;
+	e = teCharEnd( s );
+
+	ch = teStepUTF8Decode( &p, e );
+
+	return ch;
+}
+
+TENSHI_FUNC TenshiIntPtr_t TENSHI_CALL teStr_FindFirstChar( const char *s, const char *c )
+{
+	return teStr_FindFirstCharAsc( s, tePeekChar( c ) );
+}
+TENSHI_FUNC TenshiIntPtr_t TENSHI_CALL teStr_FindFirstCharAsc( const char *s, TenshiUInt32_t utf32c )
+{
+	const TenshiUInt8_t *p, *q, *e;
+
+	if( utf32c < 0x80 ) {
+		const char *p;
+
+		p = strchr( s, ( char )( TenshiInt32_t )utf32c );
+		if( !p ) {
+			return -1;
+		}
+
+		return ( TenshiIntPtr_t )( p - s );
+	}
+
+	p = ( const TenshiUInt8_t * )s;
+	e = ( const TenshiUInt8_t * )( strchr( s, '\0' ) );
+
+	while( p < e ) {
+		TenshiUInt32_t c;
+
+		q = p;
+		c = teStepUTF8Decode( &p, e );
+		if( c == utf32c ) {
+			return ( TenshiIntPtr_t )( q - ( const TenshiUInt8_t * )s );
+		}
+	}
+
+	return -1;
+}
+TENSHI_FUNC TenshiIntPtr_t TENSHI_CALL teStr_FindNextChar( const char *s, TenshiIntPtr_t lastIndex, const char *c )
+{
+	return teStr_FindNextCharAsc( s, lastIndex, tePeekChar( c ) );
+}
+TENSHI_FUNC TenshiIntPtr_t TENSHI_CALL teStr_FindNextCharAsc( const char *s, TenshiIntPtr_t lastIndex, TenshiUInt32_t utf32c )
+{
+	const TenshiUInt8_t *p, *q, *e;
+	const char *base;
+
+	base = s;
+	s = s + ( lastIndex + 1 );
+
+	if( utf32c < 0x80 ) {
+		const char *p;
+
+		p = strchr( s, ( char )( TenshiInt32_t )utf32c );
+		if( !p ) {
+			return -1;
+		}
+
+		return ( TenshiIntPtr_t )( p - base );
+	}
+
+	p = ( const TenshiUInt8_t * )s;
+	e = ( const TenshiUInt8_t * )( strchr( s, '\0' ) );
+
+	while( p < e ) {
+		TenshiUInt32_t c;
+
+		q = p;
+		c = teStepUTF8Decode( &p, e );
+		if( c == utf32c ) {
+			return ( TenshiIntPtr_t )( q - ( const TenshiUInt8_t * )base );
+		}
+	}
+
+	return -1;
+}
+TENSHI_FUNC TenshiIntPtr_t TENSHI_CALL teStr_FindLastChar( const char *s, const char *c )
+{
+	return teStr_FindLastCharAsc( s, tePeekChar( c ) );
+}
+TENSHI_FUNC TenshiIntPtr_t TENSHI_CALL teStr_FindLastCharAsc( const char *s, TenshiUInt32_t utf32c )
+{
+	const TenshiUInt8_t *p, *q, *e, *lastgood;
+
+	if( utf32c < 0x80 ) {
+		const char *p;
+
+		p = strrchr( s, ( char )( TenshiInt32_t )utf32c );
+		if( !p ) {
+			return -1;
+		}
+
+		return ( TenshiIntPtr_t )( p - s );
+	}
+
+	p = ( const TenshiUInt8_t * )s;
+	e = ( const TenshiUInt8_t * )( strchr( s, '\0' ) );
+
+	lastgood = ( const TenshiUInt8_t * )NULL;
+
+	while( p < e ) {
+		TenshiUInt32_t c;
+
+		q = p;
+		c = teStepUTF8Decode( &p, e );
+		if( c == utf32c ) {
+			lastgood = q;
+		}
+	}
+
+	if( lastgood != ( const TenshiUInt8_t * )NULL ) {
+		return ( TenshiIntPtr_t )( lastgood - ( const TenshiUInt8_t * )s );
+	}
+
+	return -1;
+}
+TENSHI_FUNC TenshiIntPtr_t TENSHI_CALL teStr_FindSubstring( const char *s, const char *search )
+{
+	const char *x;
+
+	x = strstr( s, search );
+	if( !x ) {
+		return -1;
+	}
+
+	return ( TenshiIntPtr_t )( x - s );
+}
+
+static char g_tokenBuffer[ 512 ] = { '\0' };
+static char *g_tokenText = ( char * )0;
+
+TENSHI_FUNC char *TENSHI_CALL teStr_FirstToken( const char *source, const char *delim )
+{
+	size_t len;
+
+	teStr_ClearTokens();
+	if( !source || !*source ) {
+		return ( char * )0;
+	}
+	if( !delim || !*delim ) {
+		delim = " ";
+	}
+
+	len = strlen( source );
+	if( len + 1 < sizeof( g_tokenBuffer ) ) {
+		g_tokenText = &g_tokenBuffer[ 0 ];
+	} else {
+		g_tokenText = ( char * )teAlloc( len + 1, TENSHI_MEMTAG_STRING );
+		if( !g_tokenText ) {
+			return ( char * )0;
+		}
+	}
+
+	memcpy( ( void * )g_tokenText, ( const void * )source, len + 1 );
+	return strtok( g_tokenText, delim );
+}
+TENSHI_FUNC char *TENSHI_CALL teStr_NextToken( const char *delim )
+{
+	if( !g_tokenText ) {
+		return ( char * )0;
+	}
+
+	if( !delim || !*delim ) {
+		delim = " ";
+	}
+
+	return strtok( NULL, delim );
+}
+TENSHI_FUNC void TENSHI_CALL teStr_ClearTokens( void )
+{
+	if( g_tokenText != ( char * )0 && g_tokenText != &g_tokenBuffer[ 0 ] ) {
+		teDealloc( ( void * )g_tokenText );
+	}
+
+	g_tokenText = ( char * )0;
+	g_tokenBuffer[ 0 ] = '\0';
+}
+
 
 /*
 ===============================================================================
@@ -4094,6 +4357,92 @@ TENSHI_FUNC float TENSHI_CALL teRgbGF( TenshiUInt32_t argb )
 TENSHI_FUNC float TENSHI_CALL teRgbBF( TenshiUInt32_t argb )
 {
 	return teChannelToFloat( teRgbB( argb ) );
+}
+
+TENSHI_FUNC float TENSHI_CALL teSmoothStep( float a, float b, float x )
+{
+	float y;
+
+	if( x < a ) {
+		return 0.0f;
+	}
+	if( x > b ) {
+		return 1.0f;
+	}
+
+	y = ( x - a )/( b - a );
+
+	return y*y*( 3.0f - 2.0f*y );
+}
+TENSHI_FUNC float TENSHI_CALL teStep( float a, float x )
+{
+	return x < a ? 0.0f : 1.0f;
+}
+TENSHI_FUNC float TENSHI_CALL teMix( float a, float b, float t )
+{
+	return teLerp( a, b, teClamp( t ) );
+}
+TENSHI_FUNC float TENSHI_CALL teOver( float x, float y )
+{
+	return 1.0f - ( 1.0f - x )*( 1.0f - y );
+}
+TENSHI_FUNC float TENSHI_CALL teTriWave( float a, float x )
+{
+	x = teFrac( x/360.0f );
+	if( x < 0.0f ) {
+		x = 1.0f + x;
+	}
+
+	if( x < a ) {
+		x = x/a;
+	} else {
+		x = 1.0f - ( x - a )/( 1.0f - a );
+	}
+
+	return -1.0f + 2.0f*x;
+}
+TENSHI_FUNC float TENSHI_CALL teSawWave( float x, float a )
+{
+	float f;
+
+	f = teFrac( x );
+	f = f < a ? f/a : 1.0f - ( f - a )/( 1.0f - a );
+
+	return f;
+}
+TENSHI_FUNC float TENSHI_CALL teSquareWave( float a, float x )
+{
+	return teSin( x ) > a ? 1.0f : -1.0f;
+}
+TENSHI_FUNC float TENSHI_CALL teGrad( TenshiInt32_t n, float x )
+{
+	n = ( n << 13 ) ^ n;
+	n = n*( n*n*15731 + 789221 ) + 1376312589;
+
+	return ( n & 0x20000000 ) ? -x : x;
+}
+TENSHI_FUNC float TENSHI_CALL teNoise( float x )
+{
+	float i, f, w, a, b;
+
+	i = teFloor( x );
+	f = teFrac( x );
+	w = f*f*f*( f*( f*6.0f - 15.0f ) + 10.0f );
+	a = teGrad( ( TenshiInt32_t )i + 0, f + 0.0f );
+	b = teGrad( ( TenshiInt32_t )i + 1, f - 1.0f );
+
+	return teLerp( a, b, w );
+}
+TENSHI_FUNC float TENSHI_CALL teCellNoise( float x )
+{
+	int n;
+
+	n = teFloor( x );
+	n = ( n << 13 )^n;
+	n = n*( n*n*15731 + 789221 ) + 1376312589;
+	n = ( n >> 14 ) & 0xFFFF;
+
+	return ( ( float )n )/65535.0f;
 }
 
 

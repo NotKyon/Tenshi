@@ -836,6 +836,17 @@ TENSHI_FUNC TenshiBoolean_t TENSHI_CALL teStr_HasPrefix( const char *s, const ch
 TENSHI_FUNC TenshiBoolean_t TENSHI_CALL teStr_HasSuffix( const char *s, const char *suffix );
 TENSHI_FUNC TenshiBoolean_t TENSHI_CALL teStr_Contains( const char *s, const char *search );
 
+TENSHI_FUNC TenshiIntPtr_t TENSHI_CALL teStr_FindFirstChar( const char *s, const char *c );
+TENSHI_FUNC TenshiIntPtr_t TENSHI_CALL teStr_FindFirstCharAsc( const char *s, TenshiUInt32_t utf32c );
+TENSHI_FUNC TenshiIntPtr_t TENSHI_CALL teStr_FindNextChar( const char *s, TenshiIntPtr_t lastIndex, const char *c );
+TENSHI_FUNC TenshiIntPtr_t TENSHI_CALL teStr_FindNextCharAsc( const char *s, TenshiIntPtr_t lastIndex, TenshiUInt32_t utf32c );
+TENSHI_FUNC TenshiIntPtr_t TENSHI_CALL teStr_FindLastChar( const char *s, const char *c );
+TENSHI_FUNC TenshiIntPtr_t TENSHI_CALL teStr_FindLastCharAsc( const char *s, TenshiUInt32_t utf32c );
+TENSHI_FUNC TenshiIntPtr_t TENSHI_CALL teStr_FindSubstring( const char *s, const char *search );
+TENSHI_FUNC char *TENSHI_CALL teStr_FirstToken( const char *source, const char *delim );
+TENSHI_FUNC char *TENSHI_CALL teStr_NextToken( const char *delim );
+TENSHI_FUNC void TENSHI_CALL teStr_ClearTokens( void );
+
 
 /*
  *	TYPE FUNCTIONS
@@ -1093,6 +1104,7 @@ TENSHI_FUNC float TENSHI_CALL teDistance2D( float x1, float y1, float x2, float 
 TENSHI_FUNC float TENSHI_CALL teDistance3D( float x1, float y1, float z1, float x2, float y2, float z2 );
 TENSHI_FUNC float TENSHI_CALL tePercentF( float numerator, float denominator );
 TENSHI_FUNC TenshiInt32_t TENSHI_CALL tePercentI( TenshiInt32_t numerator, TenshiInt32_t denominator );
+
 TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teArgb( TenshiUInt32_t r, TenshiUInt32_t g, TenshiUInt32_t b, TenshiUInt32_t a );
 TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teRgb( TenshiUInt32_t r, TenshiUInt32_t g, TenshiUInt32_t b );
 TENSHI_FUNC TenshiUInt32_t TENSHI_CALL teRgbA( TenshiUInt32_t argb );
@@ -1105,6 +1117,17 @@ TENSHI_FUNC float TENSHI_CALL teRgbAF( TenshiUInt32_t argb );
 TENSHI_FUNC float TENSHI_CALL teRgbRF( TenshiUInt32_t argb );
 TENSHI_FUNC float TENSHI_CALL teRgbGF( TenshiUInt32_t argb );
 TENSHI_FUNC float TENSHI_CALL teRgbBF( TenshiUInt32_t argb );
+
+TENSHI_FUNC float TENSHI_CALL teSmoothStep( float a, float b, float x );
+TENSHI_FUNC float TENSHI_CALL teStep( float a, float x );
+TENSHI_FUNC float TENSHI_CALL teMix( float a, float b, float t );
+TENSHI_FUNC float TENSHI_CALL teOver( float x, float y );
+TENSHI_FUNC float TENSHI_CALL teTriWave( float a, float t );
+TENSHI_FUNC float TENSHI_CALL teSawWave( float a, float t );
+TENSHI_FUNC float TENSHI_CALL teSquareWave( float a, float t );
+TENSHI_FUNC float TENSHI_CALL teGrad( TenshiInt32_t n, float x );
+TENSHI_FUNC float TENSHI_CALL teNoise( float x );
+TENSHI_FUNC float TENSHI_CALL teCellNoise( float x );
 
 /*
  *	RANDOM NUMBER

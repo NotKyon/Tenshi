@@ -57,6 +57,8 @@ namespace Tenshi { namespace Compiler {
 			"STR$[%GW%teCastUInt16ToStr"							NL
 			"STR$[%GD%teCastUInt32ToStr"							NL
 			"STR$[%GQ%teCastUInt64ToStr"							NL
+			"STR$[%GF%teCastFloat32ToStr"							NL
+			"STR$[%GO%teCastFloat64ToStr"							NL
 			""														NL
 			"ASC[%LS%teStr_Asc"										NL
 			"CHR$[%GD%teStr_Chr"									NL
@@ -83,6 +85,16 @@ namespace Tenshi { namespace Compiler {
 			"HAS PREFIX$[%BSS%teStr_HasPrefix"						NL
 			"HAS SUFFIX$[%BSS%teStr_HasSuffix"						NL
 			"CONTAINS$[%BSS%teStr_Contains"							NL
+			"FIND FIRST CHAR$[%IPSS%teStr_FindFirstChar"			NL
+			"FIND FIRST CHAR$[%IPSD%teStr_FindFirstCharAsc"			NL
+			"FIND NEXT CHAR$[%IPSIPS%teStr_FindNextChar"			NL
+			"FIND NEXT CHAR$[%IPSIPD%teStr_FindNextCharAsc"			NL
+			"FIND LAST CHAR$[%IPSS%teStr_FindLastChar"				NL
+			"FIND LAST CHAR$[%IPSD%teStr_FindLastCharAsc"			NL
+			"FIND SUBSTRING$[%IPSS%teStr_FindSubstring"				NL
+			"FIRST TOKEN$[%SSS%teStr_FirstToken"					NL
+			"NEXT TOKEN$[%SSS%teStr_NextToken"						NL
+			"FREE TOKENS$%0%teStr_ClearTokens"						NL
 			""														NL
 			"MAKE MEMBLOCK[%LUP%teAllocMemblock"					NL
 			"MAKE MEMBLOCK%LUP%teMakeMemblock"						NL
@@ -407,6 +419,29 @@ namespace Tenshi { namespace Compiler {
 					} else {
 						cExpectedArgs = 2;
 					}
+				/*
+				} else if( Parts[0] == ".const" ) {
+					if( Parts.Num() == 3 ) {
+						const Ax::String &ConstName = Parts[1];
+						const Ax::String &ConstData = Parts[2];
+
+						const SSymbol *const pExistingSym = Mod.Definitions.FindSymbol( ConstName, ESearchArea::ThisScopeOnly );
+						SSymbol *const pSym = pExistingSym != nullptr ? const_cast< SSymbol * >( pExistingSym ) : Mod.Definitions.AddSymbol( CommandName );
+						if( !pSym ) {
+							g_ErrorLog( Filename, uLineNum ) += "Invalid constant name: \"" + ConstName + "\"";
+							continue;
+						}
+
+						pSym->pVar = new SMemberInfo();
+						AX_EXPECT_MEMORY( pSym->pVar );
+
+						pSym->pVar->Name = ConstName;
+						pSym->pVar->Type.BuiltinType = EBuiltinType::Int64;
+						pSym->pVar->Type.cBytes = 8;
+					} else {
+						cExpectedArgs = 3;
+					}
+				*/
 				} else {
 					g_ErrorLog( Filename, uLineNum ) += "Unknown directive \"" + Parts[0] + "\"";
 					continue;
