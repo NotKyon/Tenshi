@@ -140,8 +140,6 @@ namespace Tenshi { namespace Compiler {
 		kKeyword_Op_End__,
 
 		kKeyword_RT_End = kKeyword_Op_End__,
-		kKeyword_RT_Print,
-		kKeyword_RT_PrintC,
 		kKeyword_RT_Data,
 		kKeyword_RT_Read,
 		kKeyword_RT_Restore,

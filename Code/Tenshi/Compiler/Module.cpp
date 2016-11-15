@@ -48,6 +48,9 @@ namespace Tenshi { namespace Compiler {
 			"__STRINGREPEAT[%GSL%teStrRepeat"						NL
 			"__STRINGCATPATH[%GSS%teStrCatPath"						NL
 			""														NL
+			"PRINT%S%tePrintLine"									NL
+			"PRINTC%S%tePrintChunk"									NL
+			""														NL
 			"STR$[%GS%teStrDup"										NL
 			"STR$[%GC%teCastInt8ToStr"								NL
 			"STR$[%GN%teCastInt16ToStr"								NL

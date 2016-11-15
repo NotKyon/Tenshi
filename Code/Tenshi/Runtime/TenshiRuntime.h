@@ -168,6 +168,11 @@ enum
 	kTenshiTypeF_FullTrivial		= 0x0F
 };
 
+typedef enum TenshiPrintFlag_e
+{
+	kTenshiPrintF_Newline			= 0x01
+} TenshiPrintFlag_t;
+
 /* specifies the priority for a given report */
 typedef enum TenshiReportPriority_e
 {
@@ -355,6 +360,8 @@ typedef char *( TENSHI_CALL *TenshiFnStrDup_t )( const char *pszText );
 
 typedef void( TENSHI_CALL *TenshiFnAutoprint_t )( TenshiIntPtr_t iVersion, const char *pszText );
 typedef int( TENSHI_CALL *TenshiFnSafeSync_t )( void );
+
+typedef void( TENSHI_CALL *TenshiFnPrint_t )( const char *pszText, TenshiUInt32_t flags );
 
 typedef void( TENSHI_CALL *TenshiFnLogfv_t )( TenshiUInt16_t flags, const char *pszMod, const char *pszFile,
 	TenshiUInt32_t Line, const char *pszFunc, const char *pszExpr, const char *pszFormat, va_list args );
@@ -573,6 +580,7 @@ struct TenshiRuntimeGlob_s
 	TenshiFnAutoprint_t				pfnAutoprintCallback;
 	TenshiFnSafeSync_t				pfnSafeSyncCallback;
 	TenshiFnRuntimeErrorCallback_t	pfnRuntimeErrorCallback;
+	TenshiFnPrint_t					pfnPrintCallback;
 
 	TenshiFnLogfv_t					pfnLogfv;
 	TenshiFnRuntimeError_t			pfnRuntimeError;
@@ -752,6 +760,9 @@ TENSHI_FUNC void TENSHI_CALL teDealloc( void *pData );
 
 TENSHI_FUNC void TENSHI_CALL teAutoprint( const char *pszText );
 TENSHI_FUNC int TENSHI_CALL teSafeSync( void );
+
+TENSHI_FUNC void TENSHI_CALL tePrintChunk( const char *pszText );
+TENSHI_FUNC void TENSHI_CALL tePrintLine( const char *pszText );
 
 TENSHI_FUNC const char *TENSHI_CALL teGetReportPriorityStr( TenshiReportPriority_t x );
 TENSHI_FUNC const char *TENSHI_CALL teGetReportFacilityStr( TenshiReportFacility_t x );

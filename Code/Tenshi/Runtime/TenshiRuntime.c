@@ -99,6 +99,19 @@ static TenshiObjectPool_t *			g_RNGPool;
 ===============================================================================
 */
 
+static void TENSHI_CALL tePrintHandler_f( const char *pszText, TenshiUInt32_t flags )
+{
+	if( !pszText ) {
+		pszText = "";
+	}
+
+	if( flags & kTenshiPrintF_Newline ) {
+		printf( "%s\n", pszText );
+	} else {
+		printf( "%s", pszText );
+	}
+}
+
 TENSHI_FUNC const char *TENSHI_CALL teGetReportPriorityStr( TenshiReportPriority_t x )
 {
 	switch( x )
@@ -634,6 +647,7 @@ CTOR( teInitGlob )
 
 	g_RTGlob.pfnRuntimeErrorCallback = &DefaultRuntimeError_f;
 	g_RTGlob.pfnRuntimeError = &teRuntimeError;
+	g_RTGlob.pfnPrintCallback = &tePrintHandler_f;
 
 	g_RTGlob.pMemblockAPI = &g_MemblockAPI;
 	g_RTGlob.pLoggingAPI = &g_LoggingAPI;
@@ -738,6 +752,15 @@ TENSHI_FUNC int TENSHI_CALL teSafeSync( void )
 	}
 
 	return 1;
+}
+
+TENSHI_FUNC void TENSHI_CALL tePrintChunk( const char *pszText )
+{
+	g_RTGlob.pfnPrintCallback( pszText, 0 );
+}
+TENSHI_FUNC void TENSHI_CALL tePrintLine( const char *pszText )
+{
+	g_RTGlob.pfnPrintCallback( pszText, kTenshiPrintF_Newline );
 }
 
 #undef TENSHI_FACILITY

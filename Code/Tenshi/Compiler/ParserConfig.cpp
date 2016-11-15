@@ -258,8 +258,6 @@ namespace Tenshi { namespace Compiler {
 			Ax::Parser::SKeyword( "DOUBLE FLOAT",		kKeyword_Float64 ),
 
 			Ax::Parser::SKeyword( "END",				kKeyword_RT_End ),
-			Ax::Parser::SKeyword( "PRINT",				kKeyword_RT_Print ),
-			Ax::Parser::SKeyword( "PRINTC",				kKeyword_RT_PrintC ),
 			Ax::Parser::SKeyword( "DATA",				kKeyword_RT_Data ),
 			Ax::Parser::SKeyword( "READ",				kKeyword_RT_Read ),
 			Ax::Parser::SKeyword( "RESTORE",			kKeyword_RT_Restore ),

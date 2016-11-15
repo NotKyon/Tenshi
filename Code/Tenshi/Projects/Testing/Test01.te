@@ -120,12 +120,11 @@ next
 "bin: " + bin$( 0xFACEBEEF )
 "oct: " + oct$( 0xFACEBEEF )
 
-"" + left$( "hello, world", 5 )
-"" + chr$(34) + mid$( "hello, world", 5, 2 ) + chr$(34)
-"" + right$( "hello, world", 5 )
-"" + asc( chr$( 34 ) )
+print left$( "hello, world", 5 )
+print chr$(34) + mid$( "hello, world", 5, 2 ) + chr$(34)
+print right$( "hello, world", 5 )
+print asc( chr$( 34 ) )
 
-// FIXME: The following test fails
 if "a" = "a"
 	"a == a, OK"
 else
