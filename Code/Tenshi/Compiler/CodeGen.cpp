@@ -12,7 +12,7 @@ namespace Tenshi { namespace Compiler {
 	}
 
 	MCodeGen::MCodeGen()
-	: m_Context( llvm::getGlobalContext() )
+	: m_Context()
 	, m_pPassReg( nullptr )
 	, m_pModule( nullptr )
 	, m_IRBuilder( m_Context )

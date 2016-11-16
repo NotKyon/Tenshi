@@ -243,18 +243,18 @@ namespace Tenshi { namespace Compiler {
 	===========================================================================
 	*/
 
-	CReturnStmt::CReturnStmt( const SToken &Tok, CParser &Parser )
+	CGoBackStmt::CGoBackStmt( const SToken &Tok, CParser &Parser )
 	: CStatement( EStmtType::ReturnStmt, Tok, Parser )
 	{
 	}
 
-	bool CReturnStmt::Parse()
+	bool CGoBackStmt::Parse()
 	{
 		AX_ASSERT( Token().IsKeyword( kKeyword_GoBack ) );
 		return true;
 	}
 
-	Ax::String CReturnStmt::ToString() const
+	Ax::String CGoBackStmt::ToString() const
 	{
 		Ax::String Result;
 
@@ -263,7 +263,7 @@ namespace Tenshi { namespace Compiler {
 		return Result;
 	}
 
-	bool CReturnStmt::CodeGen()
+	bool CGoBackStmt::CodeGen()
 	{
 		// TODO
 		Token().Error( "[CodeGen] Returning from GOSUB is not supported yet" );
@@ -2410,7 +2410,7 @@ namespace Tenshi { namespace Compiler {
 	===========================================================================
 	*/
 	
-	CExitFunctionStmt::CExitFunctionStmt( const SToken &Tok, CParser &Parser )
+	CReturnStmt::CReturnStmt( const SToken &Tok, CParser &Parser )
 	: CStatement( EStmtType::ExitFunctionStmt, Tok, Parser )
 	, m_pExpr( nullptr )
 	, m_Semanted()
@@ -2418,7 +2418,7 @@ namespace Tenshi { namespace Compiler {
 		memset( &m_Semanted, 0, sizeof( m_Semanted ) );
 	}
 
-	bool CExitFunctionStmt::Parse()
+	bool CReturnStmt::Parse()
 	{
 		AX_ASSERT( Token().IsKeyword( kKeyword_Return ) || Token().IsKeyword( kKeyword_EndFunction ) || Token().IsPunctuation( "=>" ) );
 
@@ -2444,7 +2444,7 @@ namespace Tenshi { namespace Compiler {
 		return true;
 	}
 
-	Ax::String CExitFunctionStmt::ToString() const
+	Ax::String CReturnStmt::ToString() const
 	{
 		Ax::String Result;
 
@@ -2458,7 +2458,7 @@ namespace Tenshi { namespace Compiler {
 		return Result;
 	}
 
-	bool CExitFunctionStmt::Semant()
+	bool CReturnStmt::Semant()
 	{
 		const SSymbol *const pOwnerSym = g_Prog->CurrentScope().GetOwner();
 		AX_ASSERT_NOT_NULL( pOwnerSym );
@@ -2490,7 +2490,7 @@ namespace Tenshi { namespace Compiler {
 
 		return true;
 	}
-	bool CExitFunctionStmt::CodeGen()
+	bool CReturnStmt::CodeGen()
 	{
 		AX_ASSERT( m_Semanted.CastOp != ECast::Invalid );
 		AX_ASSERT_NOT_NULL( m_Semanted.pReturnType );

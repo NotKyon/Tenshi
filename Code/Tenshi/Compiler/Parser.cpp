@@ -404,7 +404,7 @@ namespace Tenshi { namespace Compiler {
 	}
 	bool CParser::ParseReturn( const SToken &Tok, CStatementSequence &DstSeq )
 	{
-		return DstSeq.NewStmt< CReturnStmt >( Tok, *this ).Parse();
+		return DstSeq.NewStmt< CGoBackStmt >( Tok, *this ).Parse();
 	}
 	bool CParser::ParseDoLoop( const SToken &Tok, CStatementSequence &DstSeq )
 	{
@@ -436,7 +436,7 @@ namespace Tenshi { namespace Compiler {
 	}
 	bool CParser::ParseExitFunction( const SToken &Tok, CStatementSequence &DstSeq )
 	{
-		return DstSeq.NewStmt< CExitFunctionStmt >( Tok, *this ).Parse();
+		return DstSeq.NewStmt< CReturnStmt >( Tok, *this ).Parse();
 	}
 
 	bool CParser::ParseExitRepeat( const SToken &Tok, CStatementSequence &DstSeq )

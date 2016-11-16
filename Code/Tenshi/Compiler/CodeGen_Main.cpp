@@ -96,7 +96,7 @@ namespace Tenshi { namespace Compiler {
 			llvm::initializeCodeGen( *m_pPassReg );
 			llvm::initializeLoopStrengthReducePass( *m_pPassReg );
 			llvm::initializeLowerIntrinsicsPass( *m_pPassReg );
-			llvm::initializeUnreachableBlockElimPass( *m_pPassReg );
+			//llvm::initializeUnreachableBlockElimPass( *m_pPassReg );
 		}
 
 		const std::string TripleName = llvm::Triple::normalize( "x86_64-pc-win32" );
@@ -122,7 +122,7 @@ namespace Tenshi { namespace Compiler {
 		Opts.MCOptions.AsmVerbose = true;
 		Opts.MCOptions.ShowMCEncoding = true;
 
-		m_pTargetMachine = m_pTarget->createTargetMachine( TripleName, "x86-64", "", Opts );
+		m_pTargetMachine = m_pTarget->createTargetMachine( TripleName, "x86-64", "", Opts, llvm::Optional<llvm::Reloc::Model>(), llvm::CodeModel::Default, llvm::CodeGenOpt::Default );
 		AX_EXPECT_MEMORY( m_pTargetMachine );
 
 		m_pModule = new llvm::Module( "", m_Context );
@@ -151,7 +151,7 @@ namespace Tenshi { namespace Compiler {
 		//m_pFPM->add( llvm::createBasicAliasAnalysisPass() );
 		m_pFPM->add( llvm::createInstructionCombiningPass() );
 		m_pFPM->add( llvm::createReassociatePass() );
-		m_pFPM->add( llvm::createGVNPass() );
+		//m_pFPM->add( llvm::createGVNPass() );
 		m_pFPM->add( llvm::createCFGSimplificationPass() );
 		m_pFPM->doInitialization(); //don't worry about the return value here -- it just says whether it changed...
 

@@ -210,7 +210,7 @@ namespace Tenshi { namespace Compiler {
 		void EmitModuleInfo();
 
 	private:
-		llvm::LLVMContext &			m_Context;
+		llvm::LLVMContext			m_Context;
 		llvm::PassRegistry *		m_pPassReg;
 		llvm::Module *				m_pModule;
 		llvm::IRBuilder<>			m_IRBuilder;

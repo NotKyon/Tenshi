@@ -23,7 +23,7 @@ namespace Tenshi { namespace Compiler {
 	
 	llvm::Type *MCodeGen::GetBuiltinType( EBuiltinType T ) const
 	{
-		llvm::LLVMContext &Ctx = m_Context;
+		llvm::LLVMContext &Ctx = const_cast< llvm::LLVMContext & >( m_Context );
 
 		switch( T )
 		{

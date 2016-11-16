@@ -162,11 +162,11 @@ namespace Tenshi { namespace Compiler {
 	//	# <returnstmt> ::= "RETURN"
 	//	#                ;
 	//
-	class CReturnStmt: public CStatement
+	class CGoBackStmt: public CStatement
 	{
 	public:
-		CReturnStmt( const SToken &Tok, CParser &Parser );
-		virtual ~CReturnStmt() {}
+		CGoBackStmt( const SToken &Tok, CParser &Parser );
+		virtual ~CGoBackStmt() {}
 
 		bool Parse();
 
@@ -175,7 +175,7 @@ namespace Tenshi { namespace Compiler {
 		virtual bool CodeGen() AX_OVERRIDE;
 
 	private:
-		AX_DELETE_COPYFUNCS(CReturnStmt);
+		AX_DELETE_COPYFUNCS(CGoBackStmt);
 	};
 	//
 	//	Loop-Flow Statement
@@ -609,35 +609,35 @@ namespace Tenshi { namespace Compiler {
 		AX_DELETE_COPYFUNCS(CVarAssignStmt);
 	};
 	//
-	//	Exit-Function Statement
-	//	=======================
+	//	Return Statement
+	//	================
 	//	Represents the action of returning from a function (potentially with a
 	//	value).
 	//
-	//	If EXITFUNCTION is invoked without a parameter in a function that
+	//	If RETURN is invoked without a parameter in a function that
 	//	returns a value then a default constructed value is returned in
 	//	non-strict mode. In strict mode, however, this is an error.
 	//
-	//	If EXITFUNCTION is invoked with a parameter in a fnction that does not
+	//	If RETURN is invoked with a parameter in a fnction that does not
 	//	return a value then the type of the parameter must be void. Any other
 	//	type is an error. (The expression that results in void will still be
 	//	evaluated.)
 	//
-	//	The only valid place to call EXITFUNCTION is within a function. Calling
+	//	The only valid place to call RETURN is within a function. Calling
 	//	it within the global scope is an error.
 	//
-	//	ENDFUNCTION has the same semantics as EXITFUNCTION, as outlined above,
-	//	but with different surrounding syntax rules and implications. (That is
-	//	because ENDFUNCTION is used to finalize the function's definition.)
+	//	ENDFN has the same semantics as RETURN, as outlined above, but with
+	//	different surrounding syntax rules and implications. (That is because
+	//	ENDFN is used to finalize the function's definition.)
 	//
-	//	# <exitfnstmt> ::= "EXITFUNCTION" <expr>?
+	//	# <exitfnstmt> ::= "RETURN" <expr>?
 	//	#                ;
 	//
-	class CExitFunctionStmt: public CStatement
+	class CReturnStmt: public CStatement
 	{
 	public:
-		CExitFunctionStmt( const SToken &Tok, CParser &Parser );
-		virtual ~CExitFunctionStmt() {}
+		CReturnStmt( const SToken &Tok, CParser &Parser );
+		virtual ~CReturnStmt() {}
 
 		bool Parse();
 
@@ -654,7 +654,7 @@ namespace Tenshi { namespace Compiler {
 			const STypeRef *		pReturnType;
 		}							m_Semanted;
 
-		AX_DELETE_COPYFUNCS(CExitFunctionStmt);
+		AX_DELETE_COPYFUNCS(CReturnStmt);
 	};
 
 }}

@@ -15,10 +15,10 @@ add_definitions(${LLVM_DEFINITIONS})
 # Find the libraries that correspond to the LLVM components
 # that we wish to use
 #llvm_map_components_to_libnames(llvm_libs support core irreader native nativecodegen object option passes target asmprinter arm x86)
-llvm_map_components_to_libnames(llvm_libs support core cppbackend cppbackendcodegen armcodegen native)
+llvm_map_components_to_libnames(llvm_libs support core armcodegen native)
 
 # The following is probably what we want on more full LLVM systems
-# llvm_map_components_to_libnames(llvm_libs support xcorecodegen core bpfcodegen hexagoncodegen mipscodegen msp430codegen nvptxcodegen powerpccodegen sparccodegen systemzcodegen cppbackend cppbackendcodegen armcodegen amdgpucodegen aarch64codegen native asmprinter systemz)
+# llvm_map_components_to_libnames(llvm_libs support xcorecodegen core bpfcodegen hexagoncodegen mipscodegen msp430codegen nvptxcodegen powerpccodegen sparccodegen systemzcodegen armcodegen amdgpucodegen aarch64codegen native asmprinter systemz)
 
 # ============================================================================ #
 

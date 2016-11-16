@@ -68,7 +68,7 @@ namespace Tenshi { namespace Compiler {
 		// e.g., function getSum( x, y ) => x + y
 		if( m_Lexer.Check( ETokenType::Punctuation, "=>" ) ) {
 			const SToken &Tok = m_Lexer.Token();
-			auto &Stmt = m_Stmts.NewStmt< CExitFunctionStmt >( Tok, m_Parser );
+			auto &Stmt = m_Stmts.NewStmt< CReturnStmt >( Tok, m_Parser );
 			return Stmt.Parse();
 		}
 
@@ -80,7 +80,7 @@ namespace Tenshi { namespace Compiler {
 			}
 
 			if( CheckTok.IsKeyword( kKeyword_EndFunction ) ) {
-				auto &Stmt = m_Stmts.NewStmt< CExitFunctionStmt >( CheckTok, m_Parser );
+				auto &Stmt = m_Stmts.NewStmt< CReturnStmt >( CheckTok, m_Parser );
 				if( !Stmt.Parse() ) {
 					return false;
 				}
