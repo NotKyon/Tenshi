@@ -140,6 +140,22 @@ endif
 "Random number between 1 and 100: " + rnd( 1, 100 )
 "The sum of 2 and 2 is: " + getSum( 2, 2 )
 
+local xx = 0
+
+print "Before loop..."
+while xx < 10
+	print "xx = " + xx
+	if xx = 3
+		xx = 5
+		continue
+		// FIXME: Adding code after this point breaks the basic block
+	endif
+	if xx = 7 then break
+	xx = xx + 1
+endwhile
+print "After loop"
+print "(xx = " + xx + ")"
+
 open to read 1, "this really doesn't exist..."
 
 type exampletype

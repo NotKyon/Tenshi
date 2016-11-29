@@ -275,14 +275,14 @@ namespace Tenshi { namespace Compiler {
 					}
 
 					return ParseExitRepeat( tok, DstSeq );
-				case kKeyword_ExitLoop:
+				case kKeyword_Break:
 					if( !DstSeq.InLoop() ) {
 						m_Lexer.Error( "EXIT LOOP can only be used in loops" );
 						return false;
 					}
 
 					return ParseExitRepeat( tok, DstSeq );
-				case kKeyword_RepeatLoop:
+				case kKeyword_Continue:
 					if( !DstSeq.InLoop() ) {
 						m_Lexer.Error( "REPEAT LOOP can only be used in loops" );
 						return false;

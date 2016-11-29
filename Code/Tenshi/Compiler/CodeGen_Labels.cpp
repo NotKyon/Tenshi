@@ -93,4 +93,36 @@ namespace Tenshi { namespace Compiler {
 		return *pBlock;
 	}
 
+	// Enter a loop
+	bool MCodeGen::EnterLoop( llvm::BasicBlock *pBreakLoop, llvm::BasicBlock *pContinueLoop )
+	{
+		SLoopPoints points;
+
+		points.pBreakLoop = pBreakLoop;
+		points.pContinueLoop = pContinueLoop;
+
+		return m_LoopPoints.Append( points );
+	}
+	// Leave a loop
+	void MCodeGen::LeaveLoop()
+	{
+		AX_ASSERT_MSG( m_LoopPoints.IsEmpty() == false, "Not in a loop!" );
+
+		m_LoopPoints.RemoveLast();
+	}
+	// Break from a loop
+	void MCodeGen::BreakLoop()
+	{
+		AX_ASSERT_MSG( m_LoopPoints.IsEmpty() == false, "Not in a loop!" );
+
+		m_IRBuilder.CreateBr( m_LoopPoints.Last().pBreakLoop );
+	}
+	// Continue a loop
+	void MCodeGen::ContinueLoop()
+	{
+		AX_ASSERT_MSG( m_LoopPoints.IsEmpty() == false, "Not in a loop!" );
+
+		m_IRBuilder.CreateBr( m_LoopPoints.Last().pContinueLoop );
+	}
+
 }}

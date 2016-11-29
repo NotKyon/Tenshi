@@ -89,6 +89,12 @@ namespace Tenshi { namespace Compiler {
 		void EmitCleanup( llvm::Value *pIgnoreVal = nullptr );
 	};
 
+	struct SLoopPoints
+	{
+		llvm::BasicBlock *			pBreakLoop;
+		llvm::BasicBlock *			pContinueLoop;
+	};
+
 	class MCodeGen
 	{
 	public:
@@ -196,6 +202,15 @@ namespace Tenshi { namespace Compiler {
 		// Remove a clean-up call
 		void RemoveCleanCall( llvm::Value *pArg );
 
+		// Enter a loop
+		bool EnterLoop( llvm::BasicBlock *pBreakLoop, llvm::BasicBlock *pContinueLoop );
+		// Leave a loop
+		void LeaveLoop();
+		// Break from a loop
+		void BreakLoop();
+		// Continue a loop
+		void ContinueLoop();
+
 		unsigned GetStringId();
 		unsigned GetTypeId();
 		llvm::Type *GetRTTIType();
@@ -235,6 +250,7 @@ namespace Tenshi { namespace Compiler {
 		llvm::FunctionType *		m_pObjCopyFTy;
 		llvm::FunctionType *		m_pObjMoveFTy;
 		Ax::TArray< STypeInfo * >	m_UserTypes;
+		Ax::TArray< SLoopPoints >	m_LoopPoints;
 
 		MCodeGen();
 		~MCodeGen();

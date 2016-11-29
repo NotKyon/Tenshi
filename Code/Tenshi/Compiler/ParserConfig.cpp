@@ -172,8 +172,8 @@ namespace Tenshi { namespace Compiler {
 			Ax::Parser::SKeyword( "IN",					kKeyword_In ),
 			Ax::Parser::SKeyword( "STEP",				kKeyword_Step ),
 			Ax::Parser::SKeyword( "NEXT",				kKeyword_Next ),
-			Ax::Parser::SKeyword( "EXIT LOOP",			kKeyword_ExitLoop ),
-			Ax::Parser::SKeyword( "REPEAT LOOP",        kKeyword_RepeatLoop ),
+			Ax::Parser::SKeyword( "BREAK",				kKeyword_Break ),
+			Ax::Parser::SKeyword( "CONTINUE",			kKeyword_Continue ),
 
 			Ax::Parser::SKeyword( "GOTO",				kKeyword_Goto ),
 			Ax::Parser::SKeyword( "GOSUB",				kKeyword_Gosub ),

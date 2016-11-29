@@ -35,6 +35,7 @@ namespace Tenshi { namespace Compiler {
 	, m_pObjFiniFTy( nullptr )
 	, m_pObjCopyFTy( nullptr )
 	, m_pObjMoveFTy( nullptr )
+	, m_LoopPoints()
 	{
 	}
 	MCodeGen::~MCodeGen()

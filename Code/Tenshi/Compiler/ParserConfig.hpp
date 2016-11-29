@@ -45,8 +45,8 @@ namespace Tenshi { namespace Compiler {
 		kKeyword_In,
 		kKeyword_Step,
 		kKeyword_Next,
-		kKeyword_ExitLoop,
-		kKeyword_RepeatLoop,
+		kKeyword_Break,
+		kKeyword_Continue,
 
 		kKeyword_Goto,
 		kKeyword_Gosub,

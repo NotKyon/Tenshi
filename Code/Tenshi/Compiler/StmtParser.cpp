@@ -302,13 +302,13 @@ namespace Tenshi { namespace Compiler {
 
 		const SToken &Tok = Token();
 
-		if( Tok.IsKeyword( kKeyword_RepeatLoop ) ) {
+		if( Tok.IsKeyword( kKeyword_Continue ) ) {
 			m_Type = ELoopFlow::Continue;
 		} else {
 			m_Type = ELoopFlow::Break;
 		}
 
-		AX_ASSERT( Tok.IsKeyword( kKeyword_Exit ) || Tok.IsKeyword( kKeyword_ExitLoop ) || Tok.IsKeyword( kKeyword_RepeatLoop ) );
+		AX_ASSERT( Tok.IsKeyword( kKeyword_Exit ) || Tok.IsKeyword( kKeyword_Break ) || Tok.IsKeyword( kKeyword_Continue ) );
 		return true;
 	}
 
@@ -334,8 +334,20 @@ namespace Tenshi { namespace Compiler {
 
 	bool CLoopFlowStmt::CodeGen()
 	{
+		switch( m_Type )
+		{
+		case ELoopFlow::Break:
+			CG->BreakLoop();
+			return true;
+
+		case ELoopFlow::Continue:
+			CG->ContinueLoop();
+			return true;
+		}
+
 		// TODO
-		Token().Error( "[CodeGen] Loop flow statements are not supported yet" );
+		AX_ASSERT_MSG( false, "Unimplemented" );
+		Token().Error( "[CodeGen] Unknown loop flow statement" );
 		return false;
 	}
 
@@ -413,9 +425,13 @@ namespace Tenshi { namespace Compiler {
 			return false;
 		}
 
+		CG->EnterLoop( pLoopLeave, pLoopEnter );
+
 		if( !CBlockStatement::CodeGen() ) {
 			return false;
 		}
+
+		CG->LeaveLoop();
 
 		llvm::ArrayRef<llvm::Value*> args;
 		llvm::Value *const pCanContinue = CG->Builder().CreateCall( CG->InternalFuncs().pSafeSync, args, "cancontinue" );
@@ -521,6 +537,8 @@ namespace Tenshi { namespace Compiler {
 			return false;
 		}
 
+		CG->EnterLoop( pLoopLeave, pLoopEnter );
+
 		llvm::Value *const pCondVal = CG->EmitCondition( *m_pCondition );
 		if( !pCondVal ) {
 			return false;
@@ -536,6 +554,8 @@ namespace Tenshi { namespace Compiler {
 
 		CG->Builder().CreateBr( pLoopEnter );
 		CG->SetCurrentBlock( *pLoopLeave );
+
+		CG->LeaveLoop();
 
 		return true;
 	}
@@ -633,11 +653,17 @@ namespace Tenshi { namespace Compiler {
 		AX_ASSERT_NOT_NULL( m_pUntilToken );
 
 		llvm::BasicBlock *const pLoopEnter = &CG->EmitLabel( "repeat.body" );
+		llvm::BasicBlock *const pLoopStep  = llvm::BasicBlock::Create( CG->Context(), "repeat.step", &CG->CurrentFunction() );
 		llvm::BasicBlock *const pLoopLeave = llvm::BasicBlock::Create( CG->Context(), "repeat.end", &CG->CurrentFunction() );
+
+		CG->EnterLoop( pLoopLeave, pLoopStep );
 
 		if( !CBlockStatement::CodeGen() ) {
 			return false;
 		}
+
+		CG->Builder().CreateBr( pLoopStep );
+		CG->SetCurrentBlock( *pLoopStep );
 
 		llvm::Value *const pCondVal = CG->EmitCondition( *m_pCondition );
 		if( !pCondVal ) {
@@ -647,6 +673,7 @@ namespace Tenshi { namespace Compiler {
 		CG->Builder().CreateCondBr( pCondVal, pLoopLeave, pLoopEnter );
 
 		CG->SetCurrentBlock( *pLoopLeave );
+		CG->LeaveLoop();
 
 		return true;
 	}
@@ -998,6 +1025,8 @@ namespace Tenshi { namespace Compiler {
 
 		const bool bIsFP = pVarSym->Translated.pValue->getType()->isFloatingPointTy();
 
+		CG->EnterLoop( pLeaveLabel, pStepLabel );
+
 		for( unsigned int i = 0; i < 2; ++i ) {
 			AX_ASSERT( i < sizeof( pLabels )/sizeof( pLabels[0] ) );
 			AX_ASSERT_NOT_NULL( pLabels[ i ] );
@@ -1084,6 +1113,8 @@ namespace Tenshi { namespace Compiler {
 			pLeaveLabel->moveAfter( &CG->CurrentFunction().back() );
 		}
 		pStepLabel->moveBefore( pLeaveLabel );
+
+		CG->LeaveLoop();
 		return true;
 	}
 
