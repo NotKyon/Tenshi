@@ -384,10 +384,20 @@ namespace Tenshi { namespace Compiler {
 		virtual bool Semant() AX_OVERRIDE;
 		virtual bool CodeGen() AX_OVERRIDE;
 
+		inline const CExpression *Expression() const
+		{
+			return m_pSelectExpr;
+		}
+		inline const SValue &ExpressionValue() const
+		{
+			return m_GeneratedExpressionValue;
+		}
+
 	private:
 		const SToken *				m_pCaseDefaultToken;
 		const SToken *				m_pEndselectToken;
 		CExpression *				m_pSelectExpr;
+		SValue						m_GeneratedExpressionValue;
 
 		AX_DELETE_COPYFUNCS(CSelectStmt);
 	};
@@ -405,7 +415,7 @@ namespace Tenshi { namespace Compiler {
 	class CSelectCaseStmt: public CBlockStatement
 	{
 	public:
-		CSelectCaseStmt( const SToken &Tok, CParser &Parser );
+		CSelectCaseStmt( CSelectStmt &Stmt, const SToken &Tok, CParser &Parser );
 		virtual ~CSelectCaseStmt() {}
 
 		bool Parse();
@@ -416,6 +426,7 @@ namespace Tenshi { namespace Compiler {
 		virtual bool CodeGen() AX_OVERRIDE;
 
 	private:
+		CSelectStmt &				m_SelectStmt;
 		bool						m_bIsDefault;
 		CExpression *				m_pExpr;
 

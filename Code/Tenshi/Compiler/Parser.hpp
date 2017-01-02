@@ -19,6 +19,8 @@ namespace Tenshi { namespace Compiler {
 	class CNameExpr;
 	class CExpressionList;
 
+	class CSelectStmt;
+
 	class CParser
 	{
 	friend class CStatement;
@@ -74,7 +76,7 @@ namespace Tenshi { namespace Compiler {
 		bool ParseUserDefinedType( const SToken &Tok, CStatementSequence &DstSeq );
 		bool ParseFunction( const SToken &Tok, CStatementSequence &DstSeq );
 
-		bool ParseCase( const SToken &Tok, CStatementSequence &DstSeq );
+		bool ParseCase( CSelectStmt &Stmt, const SToken &Tok, CStatementSequence &DstSeq );
 
 		CExpression *ParseTerminal();
 		CExpression *ParseNameTerminal();

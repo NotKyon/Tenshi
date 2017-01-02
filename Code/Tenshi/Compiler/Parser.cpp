@@ -477,9 +477,9 @@ namespace Tenshi { namespace Compiler {
 		return pFunc->Parse();
 	}
 
-	bool CParser::ParseCase( const SToken &Tok, CStatementSequence &DstSeq )
+	bool CParser::ParseCase( CSelectStmt &Stmt, const SToken &Tok, CStatementSequence &DstSeq )
 	{
-		return DstSeq.NewStmt< CSelectCaseStmt >( Tok, *this ).Parse();
+		return DstSeq.NewStmt< CSelectCaseStmt >( Stmt, Tok, *this ).Parse();
 	}
 
 	CExpression *CParser::ParseTerminal()

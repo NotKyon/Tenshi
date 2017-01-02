@@ -1152,7 +1152,7 @@ namespace Tenshi { namespace Compiler {
 			}
 
 			if( CheckTok.IsKeyword( kKeyword_Case ) ) {
-				if( !Parser().ParseCase( CheckTok, m_Stmts ) ) {
+				if( !Parser().ParseCase( *this, CheckTok, m_Stmts ) ) {
 					return false;
 				}
 
@@ -1165,7 +1165,7 @@ namespace Tenshi { namespace Compiler {
 					return false;
 				}
 
-				if( !Parser().ParseCase( CheckTok, m_Stmts ) ) {
+				if( !Parser().ParseCase( *this, CheckTok, m_Stmts ) ) {
 					return false;
 				}
 
@@ -1225,20 +1225,26 @@ namespace Tenshi { namespace Compiler {
 	}
 	bool CSelectStmt::CodeGen()
 	{
-		// TODO
-
 		AX_ASSERT_NOT_NULL( m_pSelectExpr );
 		AX_ASSERT_NOT_NULL( m_pEndselectToken );
 
-		if( !m_pSelectExpr->CodeGen() ) {
+		m_GeneratedExpressionValue = m_pSelectExpr->CodeGen();
+		if( !m_GeneratedExpressionValue ) {
 			return false;
 		}
+
+		llvm::BasicBlock *const pLeaveLabel = llvm::BasicBlock::Create( CG->Context(), "select.end", &CG->CurrentFunction() );
 
 		if( !CBlockStatement::CodeGen() ) {
 			return false;
 		}
 
-		return false;
+		CG->SetCurrentBlock( *pLeaveLabel );
+		if( pLeaveLabel != &CG->CurrentFunction().back() ) {
+			pLeaveLabel->moveAfter( &CG->CurrentFunction().back() );
+		}
+
+		return true;
 	}
 
 
@@ -1250,8 +1256,9 @@ namespace Tenshi { namespace Compiler {
 	===========================================================================
 	*/
 
-	CSelectCaseStmt::CSelectCaseStmt( const SToken &Tok, CParser &Parser )
+	CSelectCaseStmt::CSelectCaseStmt( CSelectStmt &Stmt, const SToken &Tok, CParser &Parser )
 	: CBlockStatement( EStmtSeqType::CaseBlock, EStmtType::CaseStmt, Tok, Parser )
+	, m_SelectStmt( Stmt )
 	, m_bIsDefault( false )
 	, m_pExpr( nullptr )
 	{
@@ -1349,9 +1356,16 @@ namespace Tenshi { namespace Compiler {
 
 		AX_ASSERT_NOT_NULL( m_pExpr );
 
-		if( !m_pExpr->CodeGen() ) {
+		const SValue &TopExprVal = m_SelectStmt.ExpressionValue();
+
+		SValue CaseExprVal = m_pExpr->CodeGen();
+		if( !CaseExprVal ) {
 			return false;
 		}
+
+		// if topexprval == caseexprvall then block statements, else
+		// try next case
+		((void)TopExprVal);
 
 		if( !CBlockStatement::CodeGen() ) {
 			return false;

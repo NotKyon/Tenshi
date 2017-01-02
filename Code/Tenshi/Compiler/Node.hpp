@@ -436,6 +436,14 @@ namespace Tenshi { namespace Compiler {
 			
 			return static_cast< tStmtType & >( AddStmt( static_cast< CStatement & >( *pStmt ) ) );
 		}
+		template< typename tStmtType, typename tOtherType >
+		inline tStmtType &NewStmt( tOtherType &OtherType, const SToken &Tok, CParser &Parser )
+		{
+			tStmtType *const pStmt = new tStmtType( OtherType, Tok, Parser );
+			AX_EXPECT_MEMORY( pStmt );
+			
+			return static_cast< tStmtType & >( AddStmt( static_cast< CStatement & >( *pStmt ) ) );
+		}
 
 		Ax::String ToString() const;
 
