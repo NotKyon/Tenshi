@@ -338,10 +338,10 @@
 /// Set to 1 if the vector-call calling convention is supported by the compiler,
 /// or 0 if not.
 #ifndef AX_HAS_VECTORCALL
-# if ( AX_COMPILER & AX_COMPILER_MSC ) && ( defined( _M_IX86 ) ||\
+# if ( ( AX_COMPILER & AX_COMPILER_MSC ) && ( defined( _M_IX86 ) ||\
 defined( _M_X64 ) ) && ( !defined( _M_IX86_FP ) || _M_IX86_FP > 1 ) && \
 ( ( _MSC_FULL_VER >= 170065501 && _MSC_VER < 1800 ) || \
-_MSC_FULL_VER >= 180020418 )
+_MSC_FULL_VER >= 180020418 ) ) && defined( _WIN32 )
 #  define AX_HAS_VECTORCALL			1
 # else
 #  define AX_HAS_VECTORCALL			0
@@ -353,8 +353,10 @@ _MSC_FULL_VER >= 180020418 )
 #ifndef AX_VECTORCALL
 # if AX_HAS_VECTORCALL
 #  define AX_VECTORCALL				__vectorcall
-# else
+# elif defined(_WIN32)
 #  define AX_VECTORCALL				__fastcall
+# else
+#  define AX_VECTORCALL             /* none */
 # endif
 #endif
 /// @def AX_VCALL

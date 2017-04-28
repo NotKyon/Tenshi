@@ -58,6 +58,7 @@ private:
 	Ax::String						m_FindName;
 	bool							m_bIsFirst;
 	bool							m_bIsEnd;
+#elif defined(__APPLE__)
 #else
 # error TODO: Cross platform directory enumeration
 #endif

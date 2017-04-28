@@ -64,12 +64,14 @@ bool CDirectory::Open( const StrRef &InPath, EOpenDir Mode, ErrorCode &EC )
 }
 void CDirectory::Close()
 {
+#ifdef _WIN32
 	if( m_hFind == INVALID_HANDLE_VALUE ) {
 		return;
 	}
 
 	( void )FindClose( m_hFind );
 	m_hFind = INVALID_HANDLE_VALUE;
+#endif
 }
 
 bool CDirectory::Read( ErrorCode &EC )
@@ -160,6 +162,8 @@ const char *CDirectory::EntryName() const
 	AX_ASSERT( m_hFind != INVALID_HANDLE_VALUE );
 
 	return m_FindName;
+#elif defined(__APPLE__)
+	return nullptr;
 #endif
 }
 Ax::uint64 CDirectory::EntrySize() const
@@ -172,6 +176,8 @@ Ax::uint64 CDirectory::EntrySize() const
 	AX_ASSERT( m_hFind != INVALID_HANDLE_VALUE );
 
 	return Make64( m_FindData.nFileSizeHigh, m_FindData.nFileSizeLow );
+#elif defined(__APPLE__)
+	return 0;
 #endif
 }
 EFileType CDirectory::EntryType() const
@@ -196,6 +202,8 @@ EFileType CDirectory::EntryType() const
 	}
 
 	return kFT_Special;
+#elif defined(__APPLE__)
+	return kFT_Invalid;
 #endif
 }
 Ax::uint64 CDirectory::EntryCreationTime() const
@@ -208,6 +216,8 @@ Ax::uint64 CDirectory::EntryCreationTime() const
 	AX_ASSERT( m_hFind != INVALID_HANDLE_VALUE );
 
 	return Make64( m_FindData.ftCreationTime );
+#elif defined(__APPLE__)
+	return 0;
 #endif
 }
 Ax::uint64 CDirectory::EntryAccessedTime() const
@@ -220,6 +230,8 @@ Ax::uint64 CDirectory::EntryAccessedTime() const
 	AX_ASSERT( m_hFind != INVALID_HANDLE_VALUE );
 
 	return Make64( m_FindData.ftLastAccessTime );
+#elif defined(__APPLE__)
+	return 0;
 #endif
 }
 Ax::uint64 CDirectory::EntryModifiedTime() const
@@ -232,6 +244,8 @@ Ax::uint64 CDirectory::EntryModifiedTime() const
 	AX_ASSERT( m_hFind != INVALID_HANDLE_VALUE );
 
 	return Make64( m_FindData.ftLastWriteTime );
+#elif defined(__APPLE__)
+	return 0;
 #endif
 }
 

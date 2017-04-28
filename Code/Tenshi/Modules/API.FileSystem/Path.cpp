@@ -4,6 +4,9 @@
 #ifdef _WIN32
 # include <shellapi.h>
 # include <ShlObj.h>
+#else
+# include <pwd.h>
+# include <unistd.h>
 #endif
 
 TE_FUNC const char *TE_CALL FS_AppDir()
@@ -31,7 +34,13 @@ TE_FUNC const char *TE_CALL FS_HomeDir()
 
 	return HomeDir;
 #else
-# error TODO: Please implement this function.
+	if( !bDidInit ) {
+		struct passwd *const pw = getpwuid( getuid() );
+		bDidInit |= pw != nullptr && HomeDir.Assign( pw->pw_dir );
+		bDidInit |= bDidInit || HomeDir.Assign( getenv( "HOME" ) );
+	}
+
+	return HomeDir;
 #endif
 }
 TE_FUNC const char *TE_CALL FS_WinDir()
@@ -149,7 +158,7 @@ TE_FUNC const char *TE_CALL FS_TempDir()
 #ifdef _WIN32
 		bDidInit |= TempDir.Assign( FS_AppDataDir() ) ? TempDir.AppendPath( "Temp" ) : false;
 #else
-# error TODO: Please implement this function.
+		bDidInit |= TempDir.Assign( "/tmp" );
 #endif
 	}
 

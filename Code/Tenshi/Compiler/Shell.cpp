@@ -17,9 +17,11 @@ namespace Tenshi { namespace Compiler {
 	{
 		AX_EXPECT_MEMORY( m_CommandMap.Init( TENSHI_SHELLCOMMAND_ALLOWED, Ax::ECase::Insensitive ) );
 
+#ifdef _WIN32
 		if( GetConsoleOutputCP() != CP_UTF8 ) {
 			SetConsoleOutputCP( CP_UTF8 );
 		}
+#endif
 	}
 	MShell::~MShell()
 	{
@@ -420,7 +422,9 @@ namespace Tenshi { namespace Compiler {
 #else
 		LogCommand( Args, ">" );
 
-# error This has not been implemented for your platform.
+		AX_ASSERT_MSG( false, "MShell::Run() Unimplemented" );
+
+		//# error This has not been implemented for your platform.
 #endif
 	}
 

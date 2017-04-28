@@ -6,6 +6,7 @@
 # include "../System/Timer.hpp"
 # include "../Core/String.hpp"
 #endif
+#include "../Async/Atomic.hpp"
 
 #define AX_CRT_DEBUG_ENABLED 0
 
@@ -343,9 +344,9 @@ void *Ax::Alloc( size_t n, int tag )
 # endif
 
 	Async::AtomicInc( &tagStats.cAllocs );
-	Async::AtomicAdd( &tagStats.CurMemUsage, realSize );
+	AX_ATOMIC_FETCH_ADD_FULLUPTR( &tagStats.CurMemUsage, realSize );
 	if( tagStats.CurMemUsage > tagStats.MaxMemUsage ) {
-		Async::AtomicSet( &tagStats.MaxMemUsage, tagStats.CurMemUsage );
+		AX_ATOMIC_EXCHANGE_FULLUPTR( &tagStats.MaxMemUsage, tagStats.CurMemUsage );
 	}
 
 # if AX_MEMTAG_PROFILING_ENABLED
@@ -406,7 +407,7 @@ void *Ax::Dealloc( void *p )
 # endif
 
 	Async::AtomicInc( &tagStats.cDeallocs );
-	Async::AtomicSub( &tagStats.CurMemUsage, realSize );
+	AX_ATOMIC_FETCH_SUB_FULLUPTR( &tagStats.CurMemUsage, realSize );
 
 # if AX_MEMTAG_PROFILING_ENABLED
 	AtomicAdd( &tagStats.TotalDeallocTime, totalTime );

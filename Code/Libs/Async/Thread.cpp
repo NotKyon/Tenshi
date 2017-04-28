@@ -2,12 +2,18 @@
 #include "../Core/Logger.hpp"
 #include "../System/TimeConversion.hpp"
 
+#if AX_THREAD_MODEL == AX_THREAD_MODEL_PTHREAD
+# include <sys/types.h>
+# include <unistd.h>
+#endif
+
 Ax::Async::CThread::CThread()
 #if AX_THREAD_MODEL == AX_THREAD_MODEL_WINDOWS
 : m_hThread( NULL )
 , m_uThreadId( 0 )
 #elif AX_THREAD_MODEL == AX_THREAD_MODEL_PTHREAD
-: m_Thread()
+: m_Thread( (pthread_t)0 )
+, m_ThreadId( 0 )
 #else
 # error AX_THREAD_MODEL( Ax::Async::CThread::CThread ): Unhandled thread model
 #endif
@@ -124,7 +130,7 @@ Ax::Async::CThread::EPriority Ax::Async::CThread::SetPriority( EPriority prio )
 # endif
 	}
 #elif AX_THREAD_MODEL == AX_THREAD_MODEL_PTHREAD
-# error AX_THREAD_MODEL( Ax::Async::CThread::SetPriority ): PThread not handled
+	((void)prio);
 #else
 # error AX_THREAD_MODEL( Ax::Async::CThread::SetPriority ): Unhandled thread model
 #endif
@@ -175,7 +181,7 @@ Ax::Async::CThread::EPriority Ax::Async::CThread::GetPriority() const
 
 	return EPriority::Normal;
 #elif AX_THREAD_MODEL == AX_THREAD_MODEL_PTHREAD
-# error AX_THREAD_MODEL( Ax::Async::CThread::GetPriority ): PThread not handled
+	return EPriority::Normal;
 #else
 # error AX_THREAD_MODEL( Ax::Async::CThread::GetPriority ): Unhandled thread model
 #endif
@@ -214,7 +220,29 @@ bool Ax::Async::CThread::Start()
 
 	return true;
 #elif AX_THREAD_MODEL == AX_THREAD_MODEL_PTHREAD
-# error AX_THREAD_MODEL( Ax::Async::CThread::Start ): PThread not handled
+	if( m_Thread != ( pthread_t )0 ) {
+		return true;
+	}
+
+	m_bTerminate = false;
+	m_iExitValue = EXIT_SUCCESS;
+	m_ThreadId = 0;
+
+	if( pthread_create( &m_Thread, ( const pthread_attr_t * )0, &Main_f, ( void * )this ) != 0 ) {
+# if AX_DEBUG_ENABLED
+		if( !m_Name.IsEmpty() ) {
+			AX_ERROR_LOG += ( "Failed to create thread \"" + m_Name + "\"" );
+		} else {
+# endif
+			AX_ERROR_LOG += "Failed to create thread";
+# if AX_DEBUG_ENABLED
+		}
+# endif
+
+		return false;
+	}
+
+	return true;
 #else
 # error AX_THREAD_MODEL( Ax::Async::CThread::Start ): Thread model not handled
 #endif
@@ -224,8 +252,12 @@ Ax::threadResult_t AX_THREAD_CALL Ax::Async::CThread::Main_f( void *parm )
 	CThread *const p = ( CThread * )parm;
 	AX_ASSERT_NOT_NULL( p );
 
+#if AX_THREAD_MODEL == AX_THREAD_MODEL_PTHREAD
+	p->m_ThreadId = getpid();
+#endif
+
 	p->m_iExitValue = p->OnRun();
-	return ( threadResult_t )p->m_iExitValue;
+	return threadResult_t( size_t( p->m_iExitValue ) );
 }
 
 void Ax::Async::CThread::SignalStop()
@@ -237,7 +269,11 @@ void Ax::Async::CThread::Stop()
 	static const int maxThreadWaitTimeMS = 500;
 
 #if AX_THREAD_MODEL == AX_THREAD_MODEL_PTHREAD
-# error AX_THREAD_MODEL( Ax::Async::CThread::Stop ): PThread not handled
+	((void)maxThreadWaitTimeMS);
+
+	if( !m_Thread ) {
+		return;
+	}
 #endif
 
 #if AX_THREAD_MODEL == AX_THREAD_MODEL_WINDOWS
@@ -264,6 +300,10 @@ void Ax::Async::CThread::Stop()
 		CloseHandle( m_hThread );
 		m_hThread = NULL;
 	}
+#elif AX_THREAD_MODEL == AX_THREAD_MODEL_PTHREAD
+	( void )pthread_cancel( m_Thread );
+	( void )pthread_join( m_Thread, ( void ** )0 );
+	m_Thread = ( pthread_t )0;
 #endif
 }
 bool Ax::Async::CThread::IsQuitting() const
@@ -275,7 +315,17 @@ bool Ax::Async::CThread::IsRunning() const
 #if AX_THREAD_MODEL == AX_THREAD_MODEL_WINDOWS
 	return m_hThread != NULL && WaitForSingleObject( m_hThread, 0 ) != WAIT_OBJECT_0;
 #elif AX_THREAD_MODEL == AX_THREAD_MODEL_PTHREAD
-# error AX_THREAD_MODEL( Ax::Async::CThread::IsRunning ): PThreads not handled
+	int status;
+
+	if( !m_ThreadId || waitpid( m_ThreadId, &status, WNOHANG | WUNTRACED ) == -1 ) {
+		return 0;
+	}
+
+	if( WIFEXITED( status ) || WIFSIGNALED( status ) ) {
+		return 0;
+	}
+
+	return 1;
 #else
 # error AX_THREAD_MODEL( Ax::Async::CThread::IsRunning ): Thread model not handled
 #endif
@@ -325,7 +375,11 @@ Ax::Async::SThreadTimes &Ax::Async::CThread::GetTimes( SThreadTimes &OutTimes ) 
 
 	return OutTimes;
 #elif AX_THREAD_MODEL == AX_THREAD_MODEL_PTHREAD
-# error AX_THREAD_MODEL( Ax::Async::CThread::GetTimes ): PThreads not handled
+	OutTimes.EnterTime = 0;
+	OutTimes.LeaveTime = 0;
+	OutTimes.KernelTime = 0;
+	OutTimes.UserTime = 0;
+	return OutTimes;
 #else
 # error AX_THREAD_MODEL( Ax::Async::CThread::GetTimes ): Thread model not handled
 #endif

@@ -6,16 +6,23 @@
 #include "HighPerformanceClock.hpp"
 #include "../Core/Assert.hpp"
 
+#ifndef _WIN32
+# define AXTIME_IMPLEMENTATION
+# include "ax_time.h"
+#endif
+
+#include <ctime>
+
 namespace
 {
 
 	using namespace Ax;
 	
+#ifdef _WIN32
 	inline uint64 ConvertResolution( uint64 t, uint64 f, uint64 r )
 	{
 		return t*r/f;
 	}
-#ifdef _WIN32
 	inline uint64 QueryFrequency()
 	{
 		LARGE_INTEGER f;
@@ -38,7 +45,7 @@ double Ax::System::Seconds()
 
 	return double( uCurrMicrosecs - uBaseMicrosecs )/1000000.0;
 #else
-# error TODO: Ax::System::Seconds() for this platform
+	return axtm_seconds();
 #endif
 }
 Ax::uint64 Ax::System::Microseconds()
@@ -54,7 +61,7 @@ Ax::uint64 Ax::System::Microseconds()
 
 	return ConvertResolution( t, f, 1000000 );
 #else
-# error TODO: Ax::System::Microseconds() for this platform
+	return axtm_microseconds();
 #endif
 }
 void Ax::System::Nanoseconds( int &seconds, int &nanoseconds )
@@ -68,7 +75,10 @@ void Ax::System::Nanoseconds( int &seconds, int &nanoseconds )
 	seconds = ( int )ConvertResolution( t, f, 1 );
 	nanoseconds = ( int )ConvertResolution( t%f, f, 1000000000 );
 #else
-# error TODO: Ax::System::Nanoseconds() for this platform
+	int s = 0, n = 0;
+	axtm_nanoseconds( &s, &n );
+	seconds = s;
+	nanoseconds = n;
 #endif
 }
 
@@ -81,6 +91,6 @@ Ax::uint32 Ax::System::Milliseconds_LowLatency()
 	AX_STATIC_SUPPRESS( 28159 )
 	return GetTickCount() - base;
 #else
-# error TODO: Ax::System::Milliseconds_LowLatency() for this platform
+	return Ax::uint32( clock() );
 #endif
 }

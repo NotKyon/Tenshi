@@ -75,66 +75,110 @@ TE_FUNC Ax::uint64 TE_CALL FS_GetFileUniqueID( const char *pszPath )
 
 TE_FUNC bool TE_CALL FS_FileExist( const char *pszPath )
 {
+#ifdef _WIN32
 	struct _stat64i32 s;
 	wchar_t wszPath[ PATH_MAX + 1 ];
 
 	return _wstat( Ax::ToWStr( wszPath, pszPath ), &s ) == 0 && ( s.st_mode & ( _S_IFREG | _S_IFIFO ) ) != 0;
+#else
+	struct stat s;
+	return stat( pszPath, &s ) == 0 && ( s.st_mode & ( S_IFREG | S_IFIFO ) ) != 0;
+#endif
 }
 TE_FUNC bool TE_CALL FS_PathExist( const char *pszPath )
 {
+#ifdef _WIN32
 	struct _stat64i32 s;
 	wchar_t wszPath[ PATH_MAX + 1 ];
 
 	return _wstat( Ax::ToWStr( wszPath, pszPath ), &s ) == 0;
+#else
+	struct stat s;
+	return stat( pszPath, &s ) == 0;
+#endif
 }
 
 TE_FUNC bool TE_CALL FS_IsRegularFile( const char *pszPath )
 {
+#ifdef _WIN32
 	struct _stat64i32 s;
 	wchar_t wszPath[ PATH_MAX + 1 ];
 
 	return _wstat( Ax::ToWStr( wszPath, pszPath ), &s ) == 0 && ( s.st_mode & _S_IFREG ) != 0;
+#else
+	struct stat s;
+	return stat( pszPath, &s ) == 0 && ( s.st_mode & S_IFREG ) != 0;
+#endif
 }
 TE_FUNC bool TE_CALL FS_IsDirectory( const char *pszPath )
 {
 	struct stat s;
 
+#ifdef _WIN32
 	return stat( pszPath, &s ) == 0 && ( s.st_mode & _S_IFDIR ) != 0;
+#else
+	return stat( pszPath, &s ) == 0 && ( s.st_mode & S_IFDIR ) != 0;
+#endif
 }
 TE_FUNC bool TE_CALL FS_IsDevice( const char *pszPath )
 {
+#ifdef _WIN32
 	struct _stat64i32 s;
 	wchar_t wszPath[ PATH_MAX + 1 ];
 
-	return _wstat( Ax::ToWStr( wszPath, pszPath ), &s ) == 0 && ( s.st_mode & _S_IFCHR ) != 0;
+	return _wstat( Ax::ToWStr( wszPath, pszPath ), &s ) == 0 && ( s.st_mode & ( _S_IFCHR | _S_IFBLK ) ) != 0;
+#else
+	struct stat s;
+	return stat( pszPath, &s ) == 0 && ( s.st_mode & ( S_IFCHR | S_IFBLK ) ) != 0;
+#endif
 }
 TE_FUNC bool TE_CALL FS_IsCharacterDevice( const char *pszPath )
 {
+#ifdef _WIN32
 	struct _stat64i32 s;
 	wchar_t wszPath[ PATH_MAX + 1 ];
 
 	return _wstat( Ax::ToWStr( wszPath, pszPath ), &s ) == 0 && ( s.st_mode & _S_IFCHR ) != 0;
+#else
+	struct stat s;
+	return stat( pszPath, &s ) == 0 && ( s.st_mode & S_IFCHR ) != 0;
+#endif
 }
 TE_FUNC bool TE_CALL FS_IsBlockDevice( const char *pszPath )
 {
+#ifdef _WIN32
 	/* TODO: block devices */
 	( void )pszPath;
 	UNIMPLEMENTED();
 	return false;
+#else
+	struct stat s;
+	return stat( pszPath, &s ) == 0 && ( s.st_mode & S_IFBLK ) != 0;
+#endif
 }
 TE_FUNC bool TE_CALL FS_IsPipe( const char *pszPath )
 {
+#ifdef _WIN32
 	struct _stat64i32 s;
 	wchar_t wszPath[ PATH_MAX + 1 ];
 
 	return _wstat( Ax::ToWStr( wszPath, pszPath ), &s ) == 0 && ( s.st_mode & _S_IFIFO ) != 0;
+#else
+	struct stat s;
+	return stat( pszPath, &s ) == 0 && ( s.st_mode & S_IFIFO ) != 0;
+#endif
 }
 TE_FUNC bool TE_CALL FS_IsSocket( const char *pszPath )
 {
+#ifdef _WIN32
 	/* TODO: sockets */
 	( void )pszPath;
 	UNIMPLEMENTED();
 	return false;
+#else
+	struct stat s;
+	return stat( pszPath, &s ) == 0 && ( s.st_mode & S_IFSOCK ) != 0;
+#endif
 }
 
 #if 0

@@ -112,6 +112,7 @@ namespace Ax { namespace Async {
 		DWORD						m_uThreadId;
 #elif AX_THREAD_MODEL == AX_THREAD_MODEL_PTHREAD
 		pthread_t					m_Thread;
+		int                         m_ThreadId;
 #else
 # error AX_THREAD_MODEL( CThread ): Unhandled thread model
 #endif

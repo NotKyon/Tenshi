@@ -9,6 +9,10 @@
 
 #include "Binutils.hpp"
 
+#ifndef _WIN32
+# include <unistd.h>
+#endif
+
 namespace Tenshi { namespace Compiler {
 
 	/*
@@ -313,7 +317,11 @@ namespace Tenshi { namespace Compiler {
 		char szPath[ PATH_MAX ];
 		bool bDidFSEnter = false;
 
+#ifdef _WIN32
 		GetCurrentDirectoryA( sizeof( szPath ), szPath );
+#else
+		getcwd( szPath, sizeof( szPath ) );
+#endif
 		AX_DEBUG_LOG += "Loading project \"" + Ax::String( pszFilename ) + "\" -- from directory=\"" + Ax::String( szPath ) + "\"";
 
 		if( Ax::GetAbsolutePath( szPath, pszFilename ) != nullptr ) {

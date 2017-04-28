@@ -14,6 +14,7 @@
 #define TENSHI_STATIC_LINK_ENABLED	1
 
 #include <math.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <stddef.h>
@@ -1485,7 +1486,6 @@ TENSHI_FUNC int TENSHI_CALL teStr_Asc( const char *s )
 }
 TENSHI_FUNC char *TENSHI_CALL teStr_Chr( TenshiUInt32_t utf32cp )
 {
-	TenshiUIntPtr_t n;
 	char *dst;
 	char buf[ 5 ];
 
@@ -1874,7 +1874,7 @@ static TenshiUInt32_t tePeekChar( const char *s )
 	}
 
 	p = ( const TenshiUInt8_t * )s;
-	e = teCharEnd( s );
+	e = teCharEnd( p );
 
 	ch = teStepUTF8Decode( &p, e );
 
@@ -4271,6 +4271,8 @@ TENSHI_FUNC float TENSHI_CALL teCurveAngle( float a, float da, float sp )
 
 	a = teWrap360( a );
 	da = teWrap360( da );
+
+	diff = a - da; /* FIXME: Adjust to original, proper code */
 
 	if( diff < -180.0f ) {
 		diff = a + 360.0f - da;

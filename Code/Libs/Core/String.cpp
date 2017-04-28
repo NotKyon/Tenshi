@@ -2056,7 +2056,7 @@ Ax::String Ax::String::ExtractDirectory() const
 		return String();
 	}
 
-	return String( *this, 0, i );
+	return String( *this, ( intptr )0, i );
 #endif
 }
 Ax::String Ax::String::ExtractBasename() const

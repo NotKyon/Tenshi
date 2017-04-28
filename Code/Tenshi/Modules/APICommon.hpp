@@ -3,10 +3,10 @@
 #ifdef _WIN32
 # define WIN32_LEAN_AND_MEAN 1
 # include <Windows.h>
+# include <winerror.h>
 # undef min
 # undef max
 #endif
-#include <winerror.h>
 
 #include <Core/Assert.hpp>
 #include <Core/Manager.hpp>

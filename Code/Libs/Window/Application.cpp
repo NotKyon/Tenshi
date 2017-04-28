@@ -56,6 +56,9 @@ namespace Ax { namespace Window {
 
 		Windows::ProcessMessage( Msg );
 		return true;
+#else
+		AX_ASSERT_MSG( false, "Unimplemented" );
+		return false;
 #endif
 	}
 	bool ProcessAllQueuedEvents()
@@ -70,6 +73,9 @@ namespace Ax { namespace Window {
 		}
 
 		return bDidProcess;
+#else
+		AX_ASSERT_MSG( false, "Unimplemented" );
+		return false;
 #endif
 	}
 

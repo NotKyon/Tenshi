@@ -97,6 +97,9 @@ namespace Ax { namespace Window {
 			return SDesktopInfo();
 		}
 		return Info;
+#else
+		AX_ASSERT_MSG( false, "Unimplemented" );
+		return SDesktopInfo();
 #endif
 	}
 

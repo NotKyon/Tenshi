@@ -46,6 +46,7 @@ namespace Parsing
 		return p - base;
 	}
 
+#if 0
 	static uintptr SkipNonwhite( const char *&p )
 	{
 		AX_ASSERT_NOT_NULL( p );
@@ -74,6 +75,7 @@ namespace Parsing
 
 		return p - base;
 	}
+#endif
 
 	static void CalculateLineInfo( Console::SConfigLineInfo &dst, const char *src, const char *ptr )
 	{
@@ -592,6 +594,39 @@ void Ax::Console::Configuration::RemoveAllValues( SConfigVar *var )
 	var->values.Clear();
 }
 
+#ifdef _WIN32
+# define MAXPATH 270
+typedef wchar_t CharTy;
+typedef DWORD   UIntTy;
+#else
+# define MAXPATH 512
+typedef char   CharTy;
+typedef size_t UIntTy;
+#endif
+static bool get_dir( CharTy *dst, UIntTy dstn ) {
+#ifdef _WIN32
+	return GetCurrentDirectoryW( dstn, dst ) != 0;
+#else
+	*dst = CharTy(0);
+	return false;
+#endif
+}
+static bool set_dir( const CharTy *src ) {
+#ifdef _WIN32
+	return SetCurrentDirectoryW( src ) != 0;
+#else
+	((void)src);
+	return false;
+#endif
+}
+static const CharTy *char_strrchr( const CharTy *s, CharTy x ) {
+#ifdef _WIN32
+	return wstrrchr( s, x );
+#else
+	return strrchr( s, x );
+#endif
+}
+
 void Ax::Console::Configuration::Process( SConfigVar *parent, EProcessMode mode, const char *name, const char *value,
 const char *filename, const char *buffer, const char *ptr )
 {
@@ -608,20 +643,20 @@ const char *filename, const char *buffer, const char *ptr )
 				return;
 			}
 
-			wchar_t curDir[ 270 ];
-			if( !GetCurrentDirectoryW( ( DWORD )ArraySize( curDir ), &curDir[ 0 ] ) ) {
-				curDir[ 0 ] = L'\0';
+			CharTy curDir[ MAXPATH ];
+			if( !get_dir( &curDir[0], UIntTy(ArraySize(curDir)) ) ) {
+				curDir[0] = CharTy(0);
 			}
 
-			char relDir[ 512 ];
-			const char *p = strrchr( filename, '/' );
-			const char *q = strrchr( filename, '\\' );
-			const char *slash = p < q ? q : p;
+			CharTy relDir[ 512 ];
+			const CharTy *p = char_strrchr( filename, CharTy('/') );
+			const CharTy *q = char_strrchr( filename, CharTy('\\') );
+			const CharTy *slash = p < q ? q : p;
 			if( slash != nullptr && ( size_t )( slash - filename ) < sizeof( relDir ) ) {
 				StrCpyN( relDir, filename, slash - filename );
 				relDir[ slash - filename ] = '\0';
 
-				SetCurrentDirectoryA( relDir );
+				set_dir( relDir );
 			}
 
 			++m_uIncludeDepth;
@@ -630,8 +665,8 @@ const char *filename, const char *buffer, const char *ptr )
 
 			// 'curDir[0]' is set to the null terminator upon failure
 			AX_STATIC_SUPPRESS( 6102 ) //'curDir' is initialized but not used
-			if( curDir[ 0 ] != L'\0' ) {
-				SetCurrentDirectoryW( curDir );
+			if( curDir[ 0 ] != UIntTy(0) ) {
+				set_dir( curDir );
 			}
 
 			if( !r ) {

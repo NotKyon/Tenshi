@@ -157,6 +157,7 @@ public:
 private:
 #ifdef _WIN32
 	HANDLE							m_hFile;
+#elif defined(__APPLE__)
 #else
 # error Please implement this
 #endif

@@ -517,7 +517,19 @@ Ax::uint64 Ax::System::GetUniqueFileId( const char *filename )
 		return 0;
 	}
 
-	return ( uint64 )SimpleHash( path );
+	uint64 hash = 0xFACEBEEF;
+	uint64 n = 0;
+
+	for( size_t i = 0; path[ i ] != '\0'; ++i ) {
+		uint64_t x = uint64_t( path[i] );
+
+		hash  -= n;
+		hash <<= 1;
+		hash  ^= x<<4 | x>>2 | x<<2;
+		hash   = hash<<4 | ( hash ^ hash>>4 );
+	}
+
+	return hash;
 #endif
 }
 

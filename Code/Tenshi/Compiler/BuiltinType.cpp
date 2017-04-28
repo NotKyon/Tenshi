@@ -427,6 +427,7 @@ namespace Tenshi { namespace Compiler {
 	{
 		switch( Type )
 		{
+		case EBuiltinType::Invalid:
 		case EBuiltinType::Any:
 		case EBuiltinType::UserDefined:
 		case EBuiltinType::Void:
@@ -758,8 +759,9 @@ namespace Tenshi { namespace Compiler {
 	{
 		switch( T )
 		{
-		case EBuiltinType::Boolean:
-			return EBuiltinType::Int8;
+		case EBuiltinType::Boolean:         return EBuiltinType::Int8;
+		default:
+			break;
 		}
 
 		return T;
@@ -778,6 +780,8 @@ namespace Tenshi { namespace Compiler {
 		case EBuiltinType::UNorm16:			return EBuiltinType::SNorm16;
 		case EBuiltinType::UNorm32:			return EBuiltinType::SNorm32;
 		case EBuiltinType::UNorm64:			return EBuiltinType::SNorm64;
+		default:
+			break;
 		}
 
 		return T;
@@ -796,6 +800,8 @@ namespace Tenshi { namespace Compiler {
 		case EBuiltinType::SNorm16:			return EBuiltinType::UNorm16;
 		case EBuiltinType::SNorm32:			return EBuiltinType::UNorm32;
 		case EBuiltinType::SNorm64:			return EBuiltinType::UNorm64;
+		default:
+			break;
 		}
 
 		return T;
@@ -847,6 +853,8 @@ namespace Tenshi { namespace Compiler {
 			case EBuiltinType::Float16:		return ECast::Float16ToStr;
 			case EBuiltinType::Float32:		return ECast::Float32ToStr;
 			case EBuiltinType::Float64:		return ECast::Float64ToStr;
+			default:
+				break;
 			}
 
 			if( Mode == ECastMode::Input && IsString( FromT ) ) {

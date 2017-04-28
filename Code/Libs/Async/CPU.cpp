@@ -3,6 +3,7 @@
 #include "Thread.hpp"
 #include "../Platform/Platform.hpp"
 #include "../Core/Manager.hpp"
+#include "../Core/Logger.hpp"
 #if defined( _MSC_VER )
 # include <intrin.h>
 #endif

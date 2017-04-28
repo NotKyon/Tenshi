@@ -41,7 +41,8 @@
 
 #include <llvm/ADT/Triple.h>
 #include <llvm/Analysis/Passes.h>
-#include <llvm/Bitcode/ReaderWriter.h>
+#include <llvm/Bitcode/BitcodeReader.h>
+#include <llvm/Bitcode/BitcodeWriter.h>
 #include <llvm/CodeGen/LinkAllAsmWriterComponents.h>
 #include <llvm/CodeGen/LinkAllCodegenComponents.h>
 //#include <llvm/ExecutionEngine/ExecutionEngine.h>

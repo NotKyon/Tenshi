@@ -145,7 +145,7 @@ namespace Ax
 		// allow for case insensitivity by adjusting the conversion-map to point
 		// to the same pEntries for different characters
 		if( casing == ECase::Insensitive ) {
-			if( m_Convmap[ 'a' ] != 0xFF ) {
+			if( m_Convmap[ uintptr('a') ] != 0xFF ) {
 				for( j = 'A'; j <= 'Z'; ++j ) {
 					if( m_Convmap[ j ] == 0xFF ) {
 						continue;
@@ -157,7 +157,7 @@ namespace Ax
 				for( j = 'A'; j <= 'Z'; ++j ) {
 					m_Convmap[ j ] = m_Convmap[ j - 'A' + 'a' ];
 				}
-			} else if( m_Convmap[ 'A' ] != 0xFF ) {
+			} else if( m_Convmap[ uintptr('A') ] != 0xFF ) {
 				for( j = 'a'; j <= 'z'; ++j ) {
 					if( m_Convmap[ j ] == 0xFF ) {
 						continue;

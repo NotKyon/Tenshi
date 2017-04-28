@@ -37,6 +37,23 @@
 	( uint64( __sync_fetch_and_xor( ( volatile uint64 * )( Dst ), ( uint64 )( Src ) ) ) )
 
 
+#define AX_ATOMIC_EXCHANGE_FULLUPTR( Dst, Src )\
+	( uintptr( __sync_lock_test_and_set( ( volatile uintptr * )( Dst ), ( uintptr )( Src ) ) ) )
+#define AX_ATOMIC_COMPARE_EXCHANGE_FULLUPTR( Dst, Src, Cmp )\
+	( uintptr( __sync_val_compare_and_swap( ( volatile uintptr * )( Dst ), ( uintptr )( Src ), ( uint64 )( Cmp ) ) ) )
+
+#define AX_ATOMIC_FETCH_ADD_FULLUPTR( Dst, Src )\
+	( uintptr( __sync_fetch_and_add( ( volatile uintptr * )( Dst ), ( uintptr )( Src ) ) ) )
+#define AX_ATOMIC_FETCH_SUB_FULLUPTR( Dst, Src )\
+	( uintptr( __sync_fetch_and_sub( ( volatile uintptr * )( Dst ), ( uintptr )( Src ) ) ) )
+#define AX_ATOMIC_FETCH_AND_FULLUPTR( Dst, Src )\
+	( uintptr( __sync_fetch_and_and( ( volatile uintptr * )( Dst ), ( uintptr )( Src ) ) ) )
+#define AX_ATOMIC_FETCH_OR_FULLUPTR( Dst, Src )\
+	( uintptr( __sync_fetch_and_or( ( volatile uintptr * )( Dst ), ( uintptr )( Src ) ) ) )
+#define AX_ATOMIC_FETCH_XOR_FULLUPTR( Dst, Src )\
+	( uintptr( __sync_fetch_and_xor( ( volatile uintptr * )( Dst ), ( uintptr )( Src ) ) ) )
+
+
 #define AX_ATOMIC_EXCHANGE_FULLPTR( Dst, Src )\
 	( ( void * )( __sync_lock_test_and_set( ( void *volatile * )( Dst ), ( void * )( Src ) ) ) )
 #define AX_ATOMIC_COMPARE_EXCHANGE_FULLPTR( Dst, Src, Cmp )\

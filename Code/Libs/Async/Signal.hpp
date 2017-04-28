@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Detail/Threading.hpp"
+#include "../Core/Assert.hpp"
 
 namespace Ax { namespace Async {
 
@@ -58,7 +59,7 @@ namespace Ax { namespace Async {
 										//	TODO: Implement this
 										//
 
-										AX_ASSERT_MSG( false, "Unimplemented" )
+										AX_ASSERT_MSG( false, "Unimplemented" );
 #else
 # error AX_THREAD_MODEL( CSignal::Reset ): Unhandled thread model
 #endif

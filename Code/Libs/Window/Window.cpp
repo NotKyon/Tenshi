@@ -805,6 +805,8 @@ namespace Ax { namespace Window {
 		}
 
 		return OSWindow( hWindow );
+#else
+		AX_ASSERT_MSG( false, "Unimplemented" );
 #endif
 	}
 	void Close( OSWindow Window )
@@ -913,6 +915,10 @@ namespace Ax { namespace Window {
 		StrCpy( pszOutTitleUTF8, cMaxOutBytes, IntWindow.TitleText );
 		return strlen( pszOutTitleUTF8 ) + 1;
 # endif
+#else
+		AX_ASSERT_MSG( false, "Unimplemented" );
+		StrCpy( pszOutTitleUTF8, cMaxOutBytes, "" );
+		return 0;
 #endif
 	}
 
@@ -969,6 +975,9 @@ namespace Ax { namespace Window {
 
 #if AX_OS(Windows)
 		return IsWindowVisible( HWND(Window) ) != FALSE;
+#else
+		AX_ASSERT_MSG( false, "Unimplemented" );
+		return false;
 #endif
 	}
 
@@ -986,6 +995,9 @@ namespace Ax { namespace Window {
 
 #if AX_OS(Windows)
 		return IsWindowEnabled( HWND(Window) ) != FALSE;
+#else
+		AX_ASSERT_MSG( false, "Unimplemented" );
+		return false;
 #endif
 	}
 

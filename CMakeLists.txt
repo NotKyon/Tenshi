@@ -1,10 +1,13 @@
 ﻿cmake_minimum_required(VERSION 3.4.1)
 project(Tenshi)
 
+# set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
+
 set_property(GLOBAL PROPERTY CXX_STANDARD 14)
 set(CMAKE_DEBUG_POSTFIX Dbg)
 
-find_package(LLVM REQUIRED CONFIG)
+find_package(LLVM 4.0 REQUIRED
+	all-targets analysis asmparser asmprinter bitreader bitwriter codegen core debuginfocodeview debuginfodwarf debuginfomsf debuginfopdb globalisel instcombine ipa ipo instrumentation irreader libdriver linker lto mc mcdisassembler mcparser objcarcopts object option profiledata scalaropts selectiondag support tablegen target transformutils vectorize ${EXTRA_LLVM_MODULES})
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
@@ -37,11 +40,16 @@ function(add_tenshi_api moduleName)
 	prepend(files "${AXMODS_DIR}/${moduleName}" ${ARGN})
 
 	add_library("${moduleName}" SHARED ${files})
-	set_target_properties("${moduleName}" PROPERTIES RUNTIME_OUTPUT_DIRECTORY "plugins-core")
-	set_target_properties("${moduleName}" PROPERTIES PREFIX "")
-	set_target_properties("${moduleName}" PROPERTIES DEBUG_SUFFIX "Dbg")
-	set_target_properties("${moduleName}" PROPERTIES CMAKE_SHARED_LIBRARY_PREFIX "")
-	set_target_properties("${moduleName}" PROPERTIES CMAKE_STATIC_LIBRARY_PREFIX "")
+	set_target_properties("${moduleName}" PROPERTIES
+		RUNTIME_OUTPUT_DIRECTORY    "plugins-core"
+		PREFIX                      ""
+		DEBUG_SUFFIX                "Dbg"
+		CMAKE_SHARED_LIBRARY_PREFIX ""
+		CMAKE_STATIC_LIBRARY_PREFIX ""
+		CXX_STANDARD                14
+		CXX_STANDARD_REQUIRED       ON
+		CXX_EXTENSIONS              ON
+	)
 
 	file(COPY "${AXMODS_DIR}/${moduleName}/${moduleName}.commands" DESTINATION "plugins-core")
 
@@ -213,6 +221,7 @@ add_library(AxSystem
 	${AXLIBS_SYSDIR}/Timer.hpp
 	${AXLIBS_SYSDIR}/UUID.cpp
 	${AXLIBS_SYSDIR}/UUID.hpp
+	${AXLIBS_SYSDIR}/ax_time.h
 )
 
 add_library(AxWindow
@@ -300,6 +309,13 @@ target_link_libraries(Tenshi
 	AxWindow
 	${llvm_libs}
 )
+foreach(target Tenshi ${ax_libs})
+	set_target_properties("${target}" PROPERTIES
+		CXX_STANDARD          14
+		CXX_STANDARD_REQUIRED ON
+		CXX_EXTENSIONS        ON
+	)
+endforeach()
 
 # Resulting library is used by the compiler at link time
 add_library(TenshiRuntime
@@ -307,7 +323,9 @@ add_library(TenshiRuntime
 	${TENSHI_RDIR}/TenshiRuntime.h
 )
 
-file(COPY "ThirdParty/GNU" DESTINATION ".")
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	file(COPY "ThirdParty/GNU" DESTINATION ".")
+endif()
 
 # Modules
 
