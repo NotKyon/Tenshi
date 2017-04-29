@@ -1070,7 +1070,6 @@ namespace Tenshi { namespace Compiler {
 
 		CG->SetCurrentBlock( *pStepLabel );
 
-		EBuiltinType StepBTy = EBuiltinType::Invalid; //delete this line
 		SValue PreStepVal;
 		if( m_pStepExpr != nullptr ) {
 			PreStepVal = m_pStepExpr->CodeGen();

@@ -77,9 +77,13 @@ namespace Tenshi { namespace Compiler {
 			AX_EXPECT_MEMORY( ModNames.Append() );
 			AX_EXPECT_MEMORY( ModInits.Append() );
 			AX_EXPECT_MEMORY( ModFinis.Append() );
-			
+
+#if 0
+			// FIXME: Unused. Seems like DataOffsets[] is used to reference the module name instead
+			// Remove this?
 			llvm::Constant *const pModNameConst =
 				llvm::ConstantDataArray::getString( m_Context, LLVMStr( pMod->Name ), true );
+#endif
 
 			llvm::Constant *const pZero = llvm::Constant::getNullValue( pUIntPtrTy );
 			llvm::Constant *const pOffs = llvm::ConstantInt::get( pUIntPtrTy, ( uint64_t )DataOffsets[ uOffsetIndex++ ], false );
@@ -133,7 +137,6 @@ namespace Tenshi { namespace Compiler {
 		llvm::ArrayType *const pModFinisTy = llvm::ArrayType::get( pModFiniFnTy->getPointerTo(), cModules );
 
 		llvm::Constant *const pModNamesInit = llvm::ConstantArray::get( pModNamesTy, LLVMArr( ModNames ) );
-		llvm::Type *const pModNamesInitTy = pModNamesInit->getType();
 
 		llvm::GlobalVariable *const pModNames =
 			new llvm::GlobalVariable
@@ -176,6 +179,11 @@ namespace Tenshi { namespace Compiler {
 				llvm::ConstantInt::get( pUIntPtrTy, ( uint64_t )cModules, false ),
 				"tenshi__numMods__"
 			);
+
+		((void)pModNames);
+		((void)pModInits);
+		((void)pModFinis);
+		((void)pNumMods);
 	}
 
 }}

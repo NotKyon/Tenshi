@@ -398,7 +398,6 @@ namespace Tenshi { namespace Compiler {
 #define TENSHI_RTTI_COUNT_SYM "tenshi__numTypes__"
 #define TENSHI_RTTI_ARRAY_SYM "tenshi__types__"
 
-		llvm::Type *const pUInt8PtrTy = llvm::Type::getInt8PtrTy( m_Context );
 		llvm::Type *const pUInt32Ty = llvm::Type::getInt32Ty( m_Context );
 		llvm::Type *const pUIntPtrTy = llvm::Type::getIntNTy( m_Context, g_Env->GetPointerBits() );
 
@@ -529,8 +528,6 @@ namespace Tenshi { namespace Compiler {
 					pStringBuffer,
 					pIndexes2
 				);
-
-			llvm::Constant *const pZero = llvm::Constant::getNullValue( pUIntPtrTy );
 
 			llvm::Constant *const pTyInit = UDT.bIsInitTrivial ? pNullInitFn : UDT.pLLVMInitFn;
 			llvm::Constant *const pTyFini = UDT.bIsFiniTrivial ? pNullFiniFn : UDT.pLLVMFiniFn;

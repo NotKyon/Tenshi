@@ -1903,7 +1903,6 @@ namespace Ax { namespace Parser {
 
 		uint64 uLiteral = 0;
 
-		SKeyword *pKeyword = nullptr;
 		if( m_pProcessor != nullptr ) {
 			p = m_pProcessor->SkipNumber( p, NumberType, Qualifier, Flags, uLiteral );
 		} else {

@@ -480,7 +480,7 @@ namespace Tenshi { namespace Compiler {
 		const int iResult = Runfv( pszFormat, args );
 		va_end( args );
 
-		return Run( Command );
+		return iResult;
 	}
 
 }}

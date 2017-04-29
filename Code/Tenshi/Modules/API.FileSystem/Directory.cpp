@@ -142,10 +142,12 @@ bool CDirectory::IsEnd() const
 {
 #ifdef _WIN32
 	return m_bIsEnd;
+#else
+	return true;
 #endif
 }
 
-static inline Ax::uint64 Make64( Ax::uint32 uHigh, Ax::uint32 uLow )
+inline Ax::uint64 Make64( Ax::uint32 uHigh, Ax::uint32 uLow )
 {
 	return ( Ax::uint64( uHigh )<<32 ) | Ax::uint64( uLow );
 }

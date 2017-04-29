@@ -170,7 +170,6 @@ namespace Tenshi { namespace Compiler {
 		
 		AX_EXPECT_MEMORY( Result.Append( "{\n" ) );
 
-		bool bIsFirst = true;
 		for( const CStatement *const &pStmt : m_Statements ) {
 			if( !pStmt ) {
 				AX_EXPECT_MEMORY( Result.Append( "\t(null-statement)\n" ) );
@@ -303,6 +302,9 @@ namespace Tenshi { namespace Compiler {
 		case EStmtType::WhileBlock:						return "WhileBlock";
 		case EStmtType::RepeatBlock:					return "RepeatBlock";
 		case EStmtType::ForNextBlock:					return "ForNextBlock";
+
+		case EStmtType::GotoStmt:                       return "GotoStmt";
+		case EStmtType::FallthroughStmt:                return "FallthroughStmt";
 		}
 
 		return "(unknown)";

@@ -113,6 +113,8 @@ bool CFile::Open( const char *pszPath, Ax::uint32 Mode, ErrorCode &EC )
 
 	EC.Value = 0;
 	return true;
+#else
+	return false;
 #endif
 }
 void CFile::Close()
@@ -141,6 +143,10 @@ Ax::uintptr CFile::Read( void *pDstBuf, Ax::uintptr cMaxDstBuf, ErrorCode &EC )
 
 	EC.Value = 0;
 	return ( Ax::uintptr )dwNumRead;
+#else
+	errno = ENOTSUP;
+	EC.SetErrno();
+	return 0;
 #endif
 }
 Ax::uintptr CFile::Write( const void *pSrcBuf, Ax::uintptr cSrcBytes, ErrorCode &EC )
@@ -163,6 +169,10 @@ Ax::uintptr CFile::Write( const void *pSrcBuf, Ax::uintptr cSrcBytes, ErrorCode 
 
 	EC.Value = 0;
 	return ( Ax::uintptr )dwNumWritten;
+#else
+	errno = ENOTSUP;
+	EC.SetErrno();
+	return 0;
 #endif
 }
 
@@ -176,6 +186,8 @@ Ax::uint64 CFile::GetSize()
 	}
 
 	return ( Ax::uint64 )Size.QuadPart;
+#else
+	return 0;
 #endif
 }
 Ax::uint64 CFile::GetPos()
@@ -189,6 +201,8 @@ Ax::uint64 CFile::GetPos()
 	}
 
 	return ( Ax::uint64 )CurPos.QuadPart;
+#else
+	return 0;
 #endif
 }
 bool CFile::SetPos( Ax::uint64 uByteOffset )
@@ -202,6 +216,8 @@ bool CFile::SetPos( Ax::uint64 uByteOffset )
 	}
 
 	return true;
+#else
+	return false;
 #endif
 }
 bool CFile::Skip( Ax::int64 cBytes )
@@ -215,6 +231,8 @@ bool CFile::Skip( Ax::int64 cBytes )
 	}
 
 	return true;
+#else
+	return false;
 #endif
 }
 bool CFile::SkipEnd( Ax::int64 cBytes )
@@ -228,6 +246,8 @@ bool CFile::SkipEnd( Ax::int64 cBytes )
 	}
 
 	return true;
+#else
+	return false;
 #endif
 }
 
@@ -235,6 +255,8 @@ bool CFile::Flush()
 {
 #ifdef _WIN32
 	return !!FlushFileBuffers( m_hFile );
+#else
+	return false;
 #endif
 }
 
@@ -242,6 +264,8 @@ bool CFile::IsEnd()
 {
 #ifdef _WIN32
 	return GetPos() >= GetSize();
+#else
+	return true;
 #endif
 }
 
