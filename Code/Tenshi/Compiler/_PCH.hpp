@@ -41,8 +41,19 @@
 
 #include <llvm/ADT/Triple.h>
 #include <llvm/Analysis/Passes.h>
-#include <llvm/Bitcode/BitcodeReader.h>
-#include <llvm/Bitcode/BitcodeWriter.h>
+#define HAS_LLVMBCRW 0
+#if defined(__has_include)
+# if __has_include(<llvm/Bitcode/ReaderWriter.h>)
+#  undef HAS_LLVMBCRW
+#  define HAS_LLVMBCRW 1
+# endif
+#endif
+#if HAS_LLVMBCRW
+# include <llvm/Bitcode/ReaderWriter.h>
+#else
+# include <llvm/Bitcode/BitcodeReader.h>
+# include <llvm/Bitcode/BitcodeWriter.h>
+#endif
 #include <llvm/CodeGen/LinkAllAsmWriterComponents.h>
 #include <llvm/CodeGen/LinkAllCodegenComponents.h>
 //#include <llvm/ExecutionEngine/ExecutionEngine.h>

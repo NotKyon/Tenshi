@@ -621,9 +621,18 @@ static bool set_dir( const CharTy *src ) {
 }
 static const CharTy *char_strrchr( const CharTy *s, CharTy x ) {
 #ifdef _WIN32
-	return wstrrchr( s, x );
+	return wcsrchr( s, x );
 #else
 	return strrchr( s, x );
+#endif
+}
+static void char_strcpyn( CharTy *dst, const CharTy *src, UIntTy dstn ) {
+#if defined( _WIN32 ) && defined( _MSC_VER )
+	wcsncpy_s( dst, dstn, src, dstn );
+#elif defined( _WIN32 )
+	wcsncpy( dst, src, dstn );
+#else
+	strncpy( dst, src, dstn );
 #endif
 }
 
@@ -648,16 +657,25 @@ const char *filename, const char *buffer, const char *ptr )
 				curDir[0] = CharTy(0);
 			}
 
+#ifdef _WIN32
+			wchar_t filenamebuf[ 512 ] = { L'\0' };
+			ToWStr( filenamebuf, filename );
+# define filename (&filenamebuf[0])
+#endif
+
 			CharTy relDir[ 512 ];
 			const CharTy *p = char_strrchr( filename, CharTy('/') );
 			const CharTy *q = char_strrchr( filename, CharTy('\\') );
 			const CharTy *slash = p < q ? q : p;
 			if( slash != nullptr && ( size_t )( slash - filename ) < sizeof( relDir ) ) {
-				StrCpyN( relDir, filename, slash - filename );
+				char_strcpyn( relDir, filename, slash - filename );
 				relDir[ slash - filename ] = '\0';
 
 				set_dir( relDir );
 			}
+#ifdef _WIN32
+# undef filename
+#endif
 
 			++m_uIncludeDepth;
 			const bool r = LoadFromFile( value );

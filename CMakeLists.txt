@@ -6,7 +6,7 @@ project(Tenshi)
 set_property(GLOBAL PROPERTY CXX_STANDARD 14)
 set(CMAKE_DEBUG_POSTFIX Dbg)
 
-find_package(LLVM 4.0 REQUIRED
+find_package(LLVM 3.9 REQUIRED
 	all-targets analysis asmparser asmprinter bitreader bitwriter codegen core debuginfocodeview debuginfodwarf debuginfomsf debuginfopdb globalisel instcombine ipa ipo instrumentation irreader libdriver linker lto mc mcdisassembler mcparser objcarcopts object option profiledata scalaropts selectiondag support tablegen target transformutils vectorize ${EXTRA_LLVM_MODULES})
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
@@ -233,6 +233,8 @@ add_library(AxWindow
 	${AXLIBS_WINDIR}/Window.cpp
 	${AXLIBS_WINDIR}/Window.hpp
 )
+
+target_link_libraries(AxSystem AxCore)
 
 set(TENSHI_DIR "Code/Tenshi")
 set(TENSHI_CDIR "${TENSHI_DIR}/Compiler")
