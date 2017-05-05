@@ -82,15 +82,93 @@ namespace Tenshi { namespace Compiler {
 	{
 		return GetPath( szDstAbsPath, tMaxBytes, pszRelPath );
 	}
-	
+
+#ifndef _WIN32
+	static const char *NextTok( const char *content, char search ) {
+		const char *const a = strchr( content, search );
+		if( a != nullptr ) {
+			return a;
+		}
+		return strchr( content, '\0' );
+	}
+	static bool Which( char *dst, size_t dstn, const char *execName ) {
+		AX_ASSERT_NOT_NULL( dst );
+
+		AX_ASSERT_NOT_NULL( execName );
+		const size_t n = strlen( execName );
+
+		AX_ASSERT( n > 0 );
+		AX_ASSERT( dstn > 1 + n );
+
+		const char *const path = getenv( "PATH" );
+		AX_EXPECT_NOT_NULL( path );
+
+		const char *s, *e;
+		for( s = path; ( e = NextTok( s, ':' ) ) != s; s = *e != '\0' ? e + 1 : e ) {
+			char subpath[ 2048 ];
+			if( s == e || n + 1 + (size_t)(ssize_t)( e - s ) >= sizeof( subpath ) ) {
+				continue;
+			}
+
+			size_t n = (size_t)(ssize_t)( e - s );
+			memcpy( &subpath[0], (const void *)s, n );
+			subpath[ n ] = '\0';
+			if( *( e - 1 ) != '/' ) {
+				subpath[ n++ ] = '/';
+				subpath[ n ] = '\0';
+			}
+			strcpy( &subpath[ n ], execName );
+
+			struct stat s;
+			if( stat( subpath, &s ) == 0 && S_ISREG(s.st_mode) ) {
+				strncpy( dst, subpath, dstn );
+				return true;
+			}
+		}
+
+		dst[ 0 ] = '\0';
+		return false;
+	}
+	template< size_t tDstN >
+	static bool Which( char( &dst )[ tDstN ], const char *execName ) {
+		return Which( dst, tDstN, execName );
+	}
+#endif
+
 	bool MBinutils::Init()
 	{
 		char szBuff[ PATH_MAX + 1 ];
 
+#ifdef _WIN32
 		if( !GetPath( szBuff, GNU_SYSROOT_DIR ) ) {
 			Ax::BasicErrorf( "Could not obtain path to GNU sysroot" );
 			return false;
 		}
+#else
+		bool bFoundGNUSysroot = false;
+		if( GetPath( szBuff, GNU_SYSROOT_DIR ) ) {
+			bFoundGNUSysroot = true;
+		}
+
+		if( !bFoundGNUSysroot ) {
+			if( !Which( szBuff, "ld" ) ) {
+				Ax::BasicErrorf( "Binutils does not appear to be installed" );
+				return false;
+			}
+
+			const size_t cBuff = strlen( szBuff );
+
+			static const char *const szBinLd = "/bin/ld";
+			static size_t cBinLd = strlen( szBinLd );
+
+			if( cBuff < cBinLd || strcmp( &szBuff[ cBuff - cBinLd ], szBinLd ) != 0 ) {
+				Ax::BasicErrorf( "Did not find appropriately installed binutils linker, ld" );
+				return false;
+			}
+
+			szBuff[ cBuff - cBinLd + 1 ] = '\0';
+		}
+#endif
 
 		AX_EXPECT_MEMORY( m_SysRoot.Assign( szBuff ) );
 		AX_DEBUG_LOG += "sysroot: " + m_SysRoot;
@@ -99,8 +177,8 @@ namespace Tenshi { namespace Compiler {
 		AX_EXPECT_MEMORY( m_LD.Assign( m_SysRoot ) );
 		AX_EXPECT_MEMORY( m_LD.AppendPath( "bin" AX_DIRSEP "ld" ) );
 
-		// Append '.exe' to all programs if we're in Windows
 #ifdef _WIN32
+		// Append '.exe' to all programs if we're in Windows
 		AX_EXPECT_MEMORY( m_LD.Append( ".exe" ) );
 #endif
 
@@ -160,11 +238,15 @@ namespace Tenshi { namespace Compiler {
 		}
 		AX_EXPECT_MEMORY( CommandLine.Append( InObjects ) );
 		AX_EXPECT_MEMORY( CommandLine.Append( m_Obj_TenshiRuntime ) );
+#ifdef _WIN32
 		AX_EXPECT_MEMORY( CommandLine.Append( "-lmingw32" ) );
 		AX_EXPECT_MEMORY( CommandLine.Append( "-lgcc" ) ); //only needed for stack checks
 		AX_EXPECT_MEMORY( CommandLine.Append( "-lmingwex" ) );
 		AX_EXPECT_MEMORY( CommandLine.Append( "-lmsvcrt" ) );
 		AX_EXPECT_MEMORY( CommandLine.Append( "-lkernel32" ) );
+#else
+		AX_EXPECT_MEMORY( CommandLine.Append( "-lgcc" ) );
+#endif
 
 		// Add modules
 		for( const SModule::IntrLink *pModLink = InMods.HeadLink(); pModLink != nullptr; pModLink = pModLink->NextLink() ) {
