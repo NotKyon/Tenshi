@@ -1,11 +1,8 @@
 # Tenshi (Basic Compiler)
-This is a modified version of the
-[Dark Basic](https://github.com/LeeBamberTGC/Dark-Basic-Pro) language. Features
-have been added, some syntax has been changed, but the spirit behind it is the
-same.
-
-This is a clean implementation; no code from the original repository has been
-used.
+Tenshi is a Basic-like language inspired by
+[Dark Basic](https://github.com/LeeBamberTGC/Dark-Basic-Pro). Features have been
+added, some syntax has been changed, but the spirit behind it is generally
+the same.
 
 
 ## What does the language look like?
@@ -56,31 +53,24 @@ remember very much. If this interests you, why not look through the code and
 through the various documentation directories?
 
 
-## AxTech Libraries (AxLibs)
-These contain various independent libraries for different tasks. They are used
-internally by Tenshi. See `Code/Libs/`.
-
-- Platform: Platform specific header-only definitions.
-- Core: Manages basic portable types (uint32, intptr, ...), the String class,
-        asserts, etc
-- Collections: Holds collection types (TList, TIntrusiveList, TArray,
-               TDictionary)
-- Allocation: Memory management system, used throughout.
-- Async: Parallel tasking library. Implements an efficient task scheduler for
-         games.
-- Parser: Generic lexing/parsing system.
-- System: File system functionality, UUID generation, and high-resolution
-          timing.
-
-
 ## Building
 
-How to build:
+How to build *on Windows*:
 
 - Install the 64-bit version of [msys2](http://msys2.github.io/).
 - In msys2, run `pacman -S cmake` then `pacman -S mingw-w64-x86_64-llvm`.
 - Use CMake to generate a makefile or ninja build script, then issue
   `cmake --build`.
+
+How to build *on macOS*:
+
+- Install [Mac Ports](https://www.macports.org/install.php).
+- In the Terminal, run `sudo port install cmake llvm-3.9 ninja`
+- Create a build directory, next to your clone of this repository and cd into
+  it. e.g., `mkdir build-Tenshi && cd build-Tenshi`
+- Use CMake to generate a ninja build script, but
+  **also specify the LLVM path**: `LLVM_DIR=/opt/local/libexec/llvm-3.9 cmake -DCMAKE_BUILD_TYPE=Debug -G Ninja ../Tenshi`
+- If all went well, then build by issuing the command `cmake --build`
 
 That should be it!
 
