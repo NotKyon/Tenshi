@@ -217,6 +217,27 @@ namespace Tenshi { namespace Compiler {
 		static const Ax::uintptr kExtraReserved = 16;
 		Ax::TArray< Ax::String > CommandLine;
 
+#ifdef __APPLE__
+		// Need to enforce macOS 10.5 minimum version for -rpath
+		do {
+			int versionMajor = 0, versionMinor = 0;
+
+			const char *const env = getenv( "MACOSX_DEPLOYMENT_TARGET" );
+			if( env != nullptr ) {
+				sscanf( env, "%d.%d", &versionMajor, &versionMinor );
+			}
+			if( versionMajor < 10 || ( versionMajor==10 && versionMinor < 5 ) ) {
+				static char target[128];
+
+				versionMajor = 10;
+				versionMinor = 5;
+				sprintf( target, "MACOSX_DEPLOYMENT_TARGET=%d.%d", versionMajor, versionMinor );
+
+				putenv( target );
+			}
+		} while( false );
+#endif
+
 		Ax::String OutDir;
 		AX_EXPECT_MEMORY( OutDir.Assign( Output.ExtractDirectory() ) );
 		if( OutDir.IsEmpty() ) {
@@ -228,6 +249,11 @@ namespace Tenshi { namespace Compiler {
 		AX_EXPECT_MEMORY( CommandLine.Append( m_LD ) );
 		AX_EXPECT_MEMORY( CommandLine.Append( "-o" ) );
 		AX_EXPECT_MEMORY( CommandLine.Append( Output ) );
+#ifdef __APPLE__
+		// Support loading libraries from right next to the executable
+		AX_EXPECT_MEMORY( CommandLine.Append( "-rpath" ) );
+		AX_EXPECT_MEMORY( CommandLine.Append( "@loader_path" ) );
+#endif
 		AX_EXPECT_MEMORY( CommandLine.Append( m_Obj_CRT2 ) );
 #ifdef _WIN32
 		AX_EXPECT_MEMORY( CommandLine.Append( m_Obj_CRTBegin ) );
