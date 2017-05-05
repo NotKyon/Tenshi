@@ -41,7 +41,8 @@ function(add_tenshi_api moduleName)
 
 	add_library("${moduleName}" SHARED ${files})
 	set_target_properties("${moduleName}" PROPERTIES
-		RUNTIME_OUTPUT_DIRECTORY    "plugins-core"
+		RUNTIME_OUTPUT_DIRECTORY    "${CMAKE_BINARY_DIR}/plugins-core"
+		LIBRARY_OUTPUT_DIRECTORY    "${CMAKE_BINARY_DIR}/plugins-core"
 		PREFIX                      ""
 		DEBUG_SUFFIX                "Dbg"
 		CMAKE_SHARED_LIBRARY_PREFIX ""
@@ -57,7 +58,6 @@ function(add_tenshi_api moduleName)
 	add_custom_command(TARGET "${moduleName}" POST_BUILD
 		DEPENDS "${cpsrc}"
 		COMMAND ${CMAKE_COMMAND} -E copy "${cpsrc}" "${cpdst}"
-		COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:${moduleName}>" "${CMAKE_BINARY_DIR}/plugins-core"
 	)
 
 	target_link_libraries("${moduleName}"
