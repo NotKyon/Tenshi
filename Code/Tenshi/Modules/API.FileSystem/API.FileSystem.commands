@@ -1,7 +1,7 @@
 .name			API.FileSystem
 
-.object			API.FileSystem.dll
-.object-dbg		API.FileSystemDbg.dll
+//.object			API.FileSystem.dll
+//.object-dbg		API.FileSystemDbg.dll
 
 .fn-init		FS_Init
 .fn-fini		FS_Fini

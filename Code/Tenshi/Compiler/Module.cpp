@@ -8,7 +8,7 @@
 namespace Tenshi { namespace Compiler {
 
 	using namespace Ax;
-	
+
 	MModules &MModules::GetInstance()
 	{
 		static MModules instance;
@@ -284,8 +284,8 @@ namespace Tenshi { namespace Compiler {
 					bIgnoring = g_Env->BuildInfo().Platform.OSName != "Windows";
 				} else if( Line == "?Linux" ) {
 					bIgnoring = g_Env->BuildInfo().Platform.OSName != "Linux";
-				} else if( Line == "?MacOSX" ) {
-					bIgnoring = g_Env->BuildInfo().Platform.OSName != "MacOSX";
+				} else if( Line == "?MacOSX" || Line == "?macOS" ) {
+					bIgnoring = g_Env->BuildInfo().Platform.OSName != "macOS";
 				} else if( Line == "?Debug" ) {
 					bIgnoring = g_Env->BuildInfo().Debugging == EDebugMode::NoSymbols;
 				} else if( Line == "?Release" ) {
@@ -511,7 +511,7 @@ namespace Tenshi { namespace Compiler {
 				Ax::String &SymbolName = Parts[ 2 ];
 
 				//g_DebugLog( Filename, uLineNum ) += CommandName + "::" + TypePattern + "::" + ReturnType + "::" + SymbolName;
-				
+
 				const SSymbol *const pExistingSym = Mod.Definitions.FindSymbol( CommandName, ESearchArea::ThisScopeOnly );
 				SSymbol *const pSym = pExistingSym != nullptr ? const_cast< SSymbol * >( pExistingSym ) : Mod.Definitions.AddSymbol( CommandName );
 				if( !pSym ) {
@@ -543,7 +543,7 @@ namespace Tenshi { namespace Compiler {
 				AX_EXPECT_MEMORY( OverloadIter != pSym->pFunc->Overloads.end() );
 
 				SFunctionOverload &Func = *OverloadIter;
-				
+
 				if( !ParseTypePattern( Func.Parameters, TypePattern, g_Env->BuildInfo().Platform ) ) {
 					g_ErrorLog( Filename, uLineNum ) += "Invalid type pattern: \"" + TypePattern + "\"";
 					continue;
@@ -574,20 +574,19 @@ namespace Tenshi { namespace Compiler {
 
 			}
 		}
-		
+
 		if( ObjectFilename.IsEmpty() ) {
 			const Ax::String &DLLExt = g_Env->BuildInfo().Platform.DLLExt;
 
 			Ax::String BaseFilename;
-			AX_EXPECT_MEMORY( BaseFilename.Assign( ObjectFilename.ExtractDirectory() ) );
-			AX_EXPECT_MEMORY( BaseFilename.AppendPath( ObjectFilename.ExtractBasename() ) );
+			AX_EXPECT_MEMORY( BaseFilename.Assign( Mod.Name ) );
 
 			AX_EXPECT_MEMORY( ObjectFilename.Assign( BaseFilename + DLLExt ) );
 			if( ObjectDbgFilename.IsEmpty() ) {
 				AX_EXPECT_MEMORY( ObjectDbgFilename.Assign( BaseFilename + "Dbg" + DLLExt ) );
 			}
 		} else if( ObjectDbgFilename.IsEmpty() ) {
-			AX_EXPECT_MEMORY( ObjectDbgFilename.Assign( Filename ) );
+			AX_EXPECT_MEMORY( ObjectDbgFilename.Assign( ObjectFilename ) );
 		}
 
 		if( ObjectFilename.CaseEndsWith( ".dll" ) || ObjectFilename.CaseEndsWith( ".dylib" ) || ObjectFilename.CaseEndsWith( ".so" ) ) {
