@@ -145,29 +145,24 @@ namespace Tenshi { namespace Compiler {
 			return false;
 		}
 #else
-		bool bFoundGNUSysroot = false;
-		if( GetPath( szBuff, GNU_SYSROOT_DIR ) ) {
-			bFoundGNUSysroot = true;
+		if( !Which( szBuff, "ld" ) ) {
+			Ax::BasicErrorf( "Binutils does not appear to be installed" );
+			return false;
 		}
 
-		if( !bFoundGNUSysroot ) {
-			if( !Which( szBuff, "ld" ) ) {
-				Ax::BasicErrorf( "Binutils does not appear to be installed" );
-				return false;
-			}
+		const size_t cBuff = strlen( szBuff );
 
-			const size_t cBuff = strlen( szBuff );
+		static const char *const szBinLd = "/bin/ld";
+		static size_t cBinLd = strlen( szBinLd );
 
-			static const char *const szBinLd = "/bin/ld";
-			static size_t cBinLd = strlen( szBinLd );
-
-			if( cBuff < cBinLd || strcmp( &szBuff[ cBuff - cBinLd ], szBinLd ) != 0 ) {
-				Ax::BasicErrorf( "Did not find appropriately installed binutils linker, ld" );
-				return false;
-			}
-
-			szBuff[ cBuff - cBinLd + 1 ] = '\0';
+		if( cBuff < cBinLd || strcmp( &szBuff[ cBuff - cBinLd ], szBinLd ) != 0 ) {
+			Ax::BasicErrorf( "Did not find appropriately installed binutils linker, ld" );
+			return false;
 		}
+
+		szBuff[ cBuff - cBinLd + 1 ] = '\0';
+
+		AX_DEBUG_LOG += szBuff;
 #endif
 
 		AX_EXPECT_MEMORY( m_SysRoot.Assign( szBuff ) );
@@ -190,7 +185,12 @@ namespace Tenshi { namespace Compiler {
 
 		// Find the objects that we need to link against
 		AX_EXPECT_MEMORY( m_Obj_CRT2.Assign( m_LibDir ) );
-		AX_EXPECT_MEMORY( m_Obj_CRT2.AppendPath( "crt2.o" ) );
+#ifdef _WIN32
+# define CRT2_O "crt2.o"
+#else
+# define CRT2_O "crt1.o"
+#endif
+		AX_EXPECT_MEMORY( m_Obj_CRT2.AppendPath( CRT2_O ) );
 
 		AX_EXPECT_MEMORY( m_Obj_CRTBegin.Assign( m_IntLibDir ) );
 		AX_EXPECT_MEMORY( m_Obj_CRTBegin.AppendPath( "crtbegin.o" ) );
@@ -229,7 +229,9 @@ namespace Tenshi { namespace Compiler {
 		AX_EXPECT_MEMORY( CommandLine.Append( "-o" ) );
 		AX_EXPECT_MEMORY( CommandLine.Append( Output ) );
 		AX_EXPECT_MEMORY( CommandLine.Append( m_Obj_CRT2 ) );
+#ifdef _WIN32
 		AX_EXPECT_MEMORY( CommandLine.Append( m_Obj_CRTBegin ) );
+#endif
 		AX_EXPECT_MEMORY( CommandLine.Append( "-L" ) );
 		AX_EXPECT_MEMORY( CommandLine.Append( m_LibDir ) );
 		if( m_IntLibDir != m_LibDir ) {
@@ -245,7 +247,8 @@ namespace Tenshi { namespace Compiler {
 		AX_EXPECT_MEMORY( CommandLine.Append( "-lmsvcrt" ) );
 		AX_EXPECT_MEMORY( CommandLine.Append( "-lkernel32" ) );
 #else
-		AX_EXPECT_MEMORY( CommandLine.Append( "-lgcc" ) );
+		AX_EXPECT_MEMORY( CommandLine.Append( "-lc" ) );
+		AX_EXPECT_MEMORY( CommandLine.Append( "-lm" ) );
 #endif
 
 		// Add modules
@@ -286,13 +289,19 @@ namespace Tenshi { namespace Compiler {
 					Ax::Warnf( ModDstFilename, "Failed to create copy" );
 				}
 #else
-				AX_DEBUG_LOG += "TODO: Copy [" + ModFilename + "] -> [" + ModDstFilename + "]";
+				Ax::String cpcmd;
+				cpcmd.Format( "cp \"%s\" \"%s\"", ModFilename.CString(), ModDstFilename.CString() );
+				if( system( cpcmd.CString() ) != EXIT_SUCCESS ) {
+					Ax::Warnf( ModDstFilename, "Failed to create copy" );
+				}
 #endif
 			}
 
 			AX_EXPECT_MEMORY( CommandLine.Append( ModFilename ) );
 		}
+#ifdef _WIN32
 		AX_EXPECT_MEMORY( CommandLine.Append( m_Obj_CRTEnd ) );
+#endif
 
 		return Shell->Run( CommandLine );
 	}
