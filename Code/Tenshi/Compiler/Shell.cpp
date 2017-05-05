@@ -171,7 +171,7 @@ namespace Tenshi { namespace Compiler {
 		}
 		AX_EXPECT_MEMORY( CommandLine.Reserve( cReserveBytes ) );
 		for( const Ax::String &Arg : Args ) {
-			if( CommandLine.IsEmpty() ) {
+			if( !CommandLine.IsEmpty() ) {
 				AX_EXPECT_MEMORY( CommandLine.Append( ' ' ) );
 			}
 
