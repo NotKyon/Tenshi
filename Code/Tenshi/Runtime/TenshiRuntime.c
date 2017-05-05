@@ -1,8 +1,8 @@
 #ifdef _WIN32
-# define TENSHI_FUNC				__declspec( dllexport )
+# define TENSHI_FUNC                __declspec( dllexport )
 # if defined( __GNUC__ )
 #  include <_mingw.h>
-#  undef MINGW_HAS_SECURE_API		/* No, you really don't. */
+#  undef MINGW_HAS_SECURE_API       /* No, you really don't. */
 # endif
 # undef WIN32_LEAN_AND_MEAN
 # define WIN32_LEAN_AND_MEAN
@@ -11,7 +11,7 @@
 # undef max
 #endif
 
-#define TENSHI_STATIC_LINK_ENABLED	1
+#define TENSHI_STATIC_LINK_ENABLED  1
 
 #include <math.h>
 #include <errno.h>
@@ -22,55 +22,55 @@
 #include <string.h>
 #include "TenshiRuntime.h"
 
-#define CURRENT_MEMTAG				g_RTGlob.iCurrentMemtag
+#define CURRENT_MEMTAG              g_RTGlob.iCurrentMemtag
 
 #ifdef _MSC_VER
-# define CURRENT_FUNCTION			__FUNCTION__
+# define CURRENT_FUNCTION           __FUNCTION__
 #else
-# define CURRENT_FUNCTION			__func__
+# define CURRENT_FUNCTION           __func__
 #endif
 
 #ifndef TRACE_ENABLED
 # ifdef _DEBUG
-#  define TRACE_ENABLED				1
+#  define TRACE_ENABLED             1
 # else
-#  define TRACE_ENABLED				0
+#  define TRACE_ENABLED             0
 # endif
 #endif
 
 #ifndef MEMTRACE_ENABLED
-# define MEMTRACE_ENABLED			0
+# define MEMTRACE_ENABLED           0
 #endif
 #ifndef STRTRACE_ENABLED
-# define STRTRACE_ENABLED			0
+# define STRTRACE_ENABLED           0
 #endif
 
 #ifndef SAFE_HANDLES_ENABLED
 # ifdef _DEBUG
-#  define SAFE_HANDLES_ENABLED		1
+#  define SAFE_HANDLES_ENABLED      1
 # else
-#  define SAFE_HANDLES_ENABLED		0
+#  define SAFE_HANDLES_ENABLED      0
 # endif
 #endif
 
 #if TRACE_ENABLED
-# define TRACE(...)					teLogf(\
+# define TRACE(...)                 teLogf(\
 										TELOG_DEBUG | TENSHI_FACILITY | TELOG_C_TRACE,\
 										TENSHI_MODNAME,\
 										__FILE__, __LINE__, CURRENT_FUNCTION,\
 										( const char * )0,\
 										__VA_ARGS__)
 #else
-# define TRACE(...)					((void)0)
+# define TRACE(...)                 ((void)0)
 #endif
 
 #undef TENSHI_MODNAME
 #undef TENSHI_FACILITY
-#define TENSHI_MODNAME				"$core"
-#define TENSHI_FACILITY				kTenshiLog_CoreRT
+#define TENSHI_MODNAME              "$core"
+#define TENSHI_FACILITY             kTenshiLog_CoreRT
 
-#define FREEPTR						((void*)0)
-#define RESERVEDPTR					((void*)1)
+#define FREEPTR                     ((void*)0)
+#define RESERVEDPTR                 ((void*)1)
 
 #ifdef _MSC_VER
 # pragma section( ".CRT$XCU", read )
@@ -85,11 +85,11 @@
 #endif
 
 
-static TenshiRuntimeGlob_t			g_RTGlob;
-static struct TenshiEngineTypes_s	g_EngineTypes;
-static struct TenshiMemblockAPI_s	g_MemblockAPI;
-static struct TenshiLoggingAPI_s	g_LoggingAPI;
-static TenshiObjectPool_t *			g_RNGPool;
+static TenshiRuntimeGlob_t          g_RTGlob;
+static struct TenshiEngineTypes_s   g_EngineTypes;
+static struct TenshiMemblockAPI_s   g_MemblockAPI;
+static struct TenshiLoggingAPI_s    g_LoggingAPI;
+static TenshiObjectPool_t *         g_RNGPool;
 
 
 /*
@@ -117,14 +117,14 @@ TENSHI_FUNC const char *TENSHI_CALL teGetReportPriorityStr( TenshiReportPriority
 {
 	switch( x )
 	{
-	case kTenshiLog_Debug:			return "debug";
-	case kTenshiLog_Info:			return "info";
-	case kTenshiLog_Notice:			return "notice";
-	case kTenshiLog_Warning:		return "warning";
-	case kTenshiLog_Error:			return "error";
-	case kTenshiLog_Critical:		return "critical";
-	case kTenshiLog_Alert:			return "alert";
-	case kTenshiLog_Panic:			return "panic";
+	case kTenshiLog_Debug:          return "debug";
+	case kTenshiLog_Info:           return "info";
+	case kTenshiLog_Notice:         return "notice";
+	case kTenshiLog_Warning:        return "warning";
+	case kTenshiLog_Error:          return "error";
+	case kTenshiLog_Critical:       return "critical";
+	case kTenshiLog_Alert:          return "alert";
+	case kTenshiLog_Panic:          return "panic";
 	}
 
 	return "(unknown-priority)";
@@ -133,37 +133,37 @@ TENSHI_FUNC const char *TENSHI_CALL teGetReportFacilityStr( TenshiReportFacility
 {
 	switch( x )
 	{
-	case kTenshiLog_UserCode:		return "app.usr";
-	case kTenshiLog_ThirdParty:		return "app.tpc";
+	case kTenshiLog_UserCode:       return "app.usr";
+	case kTenshiLog_ThirdParty:     return "app.tpc";
 
-	case kTenshiLog_CoreRT:			return "rt";
-	case kTenshiLog_CoreRT_Memory:	return "rt.mm";
-	case kTenshiLog_CoreRT_Object:	return "rt.obj";
-	case kTenshiLog_CoreRT_Type:	return "rt.ty";
-	case kTenshiLog_CoreRT_String:	return "rt.str";
-	case kTenshiLog_CoreRT_Array:	return "rt.arr";
-	case kTenshiLog_CoreRT_List:	return "rt.ls";
-	case kTenshiLog_CoreRT_BTree:	return "rt.bt";
+	case kTenshiLog_CoreRT:         return "rt";
+	case kTenshiLog_CoreRT_Memory:  return "rt.mm";
+	case kTenshiLog_CoreRT_Object:  return "rt.obj";
+	case kTenshiLog_CoreRT_Type:    return "rt.ty";
+	case kTenshiLog_CoreRT_String:  return "rt.str";
+	case kTenshiLog_CoreRT_Array:   return "rt.arr";
+	case kTenshiLog_CoreRT_List:    return "rt.ls";
+	case kTenshiLog_CoreRT_BTree:   return "rt.bt";
 
-	case kTenshiLog_MemblockAPI:	return "api.mm";
-	case kTenshiLog_CVarAPI:		return "api.cv";
-	case kTenshiLog_FileAPI:		return "api.fs";
-	case kTenshiLog_SystemAPI:		return "api.sys";
-	case kTenshiLog_MathAPI:		return "api.m";
-	case kTenshiLog_AsyncAPI:		return "api.tsk";
-	case kTenshiLog_NetworkAPI:		return "api.net";
-	case kTenshiLog_WindowingAPI:	return "api.wnd";
-	case kTenshiLog_InputAPI:		return "api.in";
-	case kTenshiLog_AudioAPI:		return "api.snd";
-	case kTenshiLog_RendererAPI:	return "api.r";
-	case kTenshiLog_ImageAPI:		return "api.img";
-	case kTenshiLog_Basic2DAPI:		return "api.b2";
-	case kTenshiLog_Basic3DAPI:		return "api.b3";
-	case kTenshiLog_TerrainAPI:		return "api.ter";
-	case kTenshiLog_ParticlesAPI:	return "api.fx";
-	case kTenshiLog_PhysicsAPI:		return "api.phy";
-	case kTenshiLog_BakerAPI:		return "api.bkr";
-	case kTenshiLog_VRAPI:			return "api.vr";
+	case kTenshiLog_MemblockAPI:    return "api.mm";
+	case kTenshiLog_CVarAPI:        return "api.cv";
+	case kTenshiLog_FileAPI:        return "api.fs";
+	case kTenshiLog_SystemAPI:      return "api.sys";
+	case kTenshiLog_MathAPI:        return "api.m";
+	case kTenshiLog_AsyncAPI:       return "api.tsk";
+	case kTenshiLog_NetworkAPI:     return "api.net";
+	case kTenshiLog_WindowingAPI:   return "api.wnd";
+	case kTenshiLog_InputAPI:       return "api.in";
+	case kTenshiLog_AudioAPI:       return "api.snd";
+	case kTenshiLog_RendererAPI:    return "api.r";
+	case kTenshiLog_ImageAPI:       return "api.img";
+	case kTenshiLog_Basic2DAPI:     return "api.b2";
+	case kTenshiLog_Basic3DAPI:     return "api.b3";
+	case kTenshiLog_TerrainAPI:     return "api.ter";
+	case kTenshiLog_ParticlesAPI:   return "api.fx";
+	case kTenshiLog_PhysicsAPI:     return "api.phy";
+	case kTenshiLog_BakerAPI:       return "api.bkr";
+	case kTenshiLog_VRAPI:          return "api.vr";
 	}
 
 	return "(unknown-facility)";
@@ -172,23 +172,23 @@ TENSHI_FUNC const char *TENSHI_CALL teGetReportCauseStr( TenshiReportCause_t x )
 {
 	switch( x )
 	{
-	case kTenshiLog_Intentional:			return "app.log";
-	case kTenshiLog_Init:					return "app.init";
-	case kTenshiLog_Fini:					return "app.fini";
+	case kTenshiLog_Intentional:            return "app.log";
+	case kTenshiLog_Init:                   return "app.init";
+	case kTenshiLog_Fini:                   return "app.fini";
 
-	case kTenshiLog_InternalFile:			return "io.int";
-	case kTenshiLog_ExternalFile:			return "io.ext";
+	case kTenshiLog_InternalFile:           return "io.int";
+	case kTenshiLog_ExternalFile:           return "io.ext";
 
-	case kTenshiLog_Trace:					return "dbg.trace";
-	case kTenshiLog_Development:			return "dbg.devel";
-	case kTenshiLog_Stats:					return "dbg.stats";
+	case kTenshiLog_Trace:                  return "dbg.trace";
+	case kTenshiLog_Development:            return "dbg.devel";
+	case kTenshiLog_Stats:                  return "dbg.stats";
 
-	case kTenshiLog_OutOfMemory:			return "env.no-memory";
-	case kTenshiLog_BufferOverflow:			return "sec.buf-of";
-	case kTenshiLog_BufferUnderflow:		return "sec.buf-uf";
-	case kTenshiLog_FailedCheck:			return "bad";
-	case kTenshiLog_FailedCheck_IsNull:		return "bad.is-null";
-	case kTenshiLog_FailedCheck_NotNull:	return "bad.not-null";
+	case kTenshiLog_OutOfMemory:            return "env.no-memory";
+	case kTenshiLog_BufferOverflow:         return "sec.buf-of";
+	case kTenshiLog_BufferUnderflow:        return "sec.buf-uf";
+	case kTenshiLog_FailedCheck:            return "bad";
+	case kTenshiLog_FailedCheck_IsNull:     return "bad.is-null";
+	case kTenshiLog_FailedCheck_NotNull:    return "bad.not-null";
 	}
 
 	return "(unknown-cause)";
@@ -529,11 +529,11 @@ TENSHI_FUNC void TENSHI_CALL teRuntimeError( TenshiReportFacility_t Facility, co
 typedef int( TENSHI_CALL *FnPluginInit_t )( TenshiRuntimeGlob_t * );
 typedef void( TENSHI_CALL *FnPluginFini_t )( void );
 
-extern const char *					tenshi__modNames__[];
-extern FnPluginInit_t				tenshi__modInits__[];
-extern FnPluginFini_t				tenshi__modFinis__[];
+extern const char *                 tenshi__modNames__[];
+extern FnPluginInit_t               tenshi__modInits__[];
+extern FnPluginFini_t               tenshi__modFinis__[];
 
-extern TenshiUIntPtr_t				tenshi__numMods__;
+extern TenshiUIntPtr_t              tenshi__numMods__;
 
 static const char *StrOrNull( const char *p )
 {
@@ -620,8 +620,8 @@ static void FiniModules( void )
 
 static const TenshiUIntPtr_t kNumAgesPerIndex = sizeof( TenshiUIntPtr_t )*8/4;
 
-extern TenshiUInt32_t				tenshi__numTypes__;
-extern TenshiType_t					tenshi__types__[];
+extern TenshiUInt32_t               tenshi__numTypes__;
+extern TenshiType_t                 tenshi__types__[];
 
 CTOR( teInitGlob )
 {
@@ -704,7 +704,7 @@ TENSHI_FUNC TenshiRuntimeGlob_t *TENSHI_CALL teGetGlob( void )
 }
 
 #undef TENSHI_FACILITY
-#define TENSHI_FACILITY				kTenshiLog_CoreRT_Memory
+#define TENSHI_FACILITY             kTenshiLog_CoreRT_Memory
 
 TENSHI_FUNC void *TENSHI_CALL teAlloc( TenshiUIntPtr_t cBytes, int Memtag )
 {
@@ -765,7 +765,7 @@ TENSHI_FUNC void TENSHI_CALL tePrintLine( const char *pszText )
 }
 
 #undef TENSHI_FACILITY
-#define TENSHI_FACILITY				kTenshiLog_CoreRT_Object
+#define TENSHI_FACILITY             kTenshiLog_CoreRT_Object
 
 TENSHI_FUNC TenshiObjectPool_t *TENSHI_CALL teAllocEnginePool( TenshiFnAllocObject_t pfnAlloc, TenshiFnDeallocObject_t pfnDealloc )
 {
@@ -1018,7 +1018,7 @@ TENSHI_FUNC void *TENSHI_CALL teUnwrapEngineObject( TenshiObjectPool_t *pPool, T
 */
 
 #undef TENSHI_FACILITY
-#define TENSHI_FACILITY				kTenshiLog_CoreRT_String
+#define TENSHI_FACILITY             kTenshiLog_CoreRT_String
 
 TENSHI_FUNC char *TENSHI_CALL teStrAlloc( char *p, TenshiUIntPtr_t n )
 {
@@ -2065,7 +2065,7 @@ TENSHI_FUNC void TENSHI_CALL teStr_ClearTokens( void )
 */
 
 #undef TENSHI_FACILITY
-#define TENSHI_FACILITY				kTenshiLog_CoreRT_Type
+#define TENSHI_FACILITY             kTenshiLog_CoreRT_Type
 
 TENSHI_FUNC TenshiBoolean_t TENSHI_CALL teIsTypeTrivial( const TenshiType_t *pType )
 {
@@ -2305,7 +2305,7 @@ TENSHI_FUNC TenshiType_t *TENSHI_CALL teFixType( TenshiType_t *p )
 */
 
 #undef TENSHI_FACILITY
-#define TENSHI_FACILITY				kTenshiLog_CoreRT_Array
+#define TENSHI_FACILITY             kTenshiLog_CoreRT_Array
 
 static const TenshiArray_t *ArrayFromConstData( const void *pData )
 {
@@ -2471,8 +2471,8 @@ TENSHI_FUNC void *TENSHI_CALL teArrayRedim( void *pOldArrayData, const TenshiUIn
 	TenshiUIntPtr_t cDataBytes;
 	TenshiUIntPtr_t cBytes;
 	TenshiUIntPtr_t i;
-	TenshiUIntPtr_t uOldBases		[ TENSHI_ARRAY_MAX_DIMENSIONS ];
-	TenshiUIntPtr_t uNewBases		[ TENSHI_ARRAY_MAX_DIMENSIONS ];
+	TenshiUIntPtr_t uOldBases       [ TENSHI_ARRAY_MAX_DIMENSIONS ];
+	TenshiUIntPtr_t uNewBases       [ TENSHI_ARRAY_MAX_DIMENSIONS ];
 	void *pOldBaseAddr;
 	void *pNewBaseAddr;
 	TenshiUIntPtr_t uOldBaseAddr;
@@ -2961,7 +2961,7 @@ TENSHI_FUNC TenshiUIntPtr_t TENSHI_CALL teArrayDimensionLen( const void *pArrayD
 */
 
 #undef TENSHI_FACILITY
-#define TENSHI_FACILITY				kTenshiLog_CoreRT_List
+#define TENSHI_FACILITY             kTenshiLog_CoreRT_List
 
 static void List_FixCachedIndex( TenshiList_t *pList, TenshiListItem_t *pItem )
 {
@@ -3455,7 +3455,7 @@ TENSHI_FUNC void *TENSHI_CALL teListAt( TenshiList_t *pList, TenshiUIntPtr_t uIn
 */
 
 #undef TENSHI_FACILITY
-#define TENSHI_FACILITY				kTenshiLog_CoreRT_BTree
+#define TENSHI_FACILITY             kTenshiLog_CoreRT_BTree
 
 TENSHI_FUNC TenshiBTree_t *TENSHI_CALL teNewBTree( TenshiType_t *pItemType )
 {
@@ -3813,7 +3813,7 @@ TENSHI_FUNC void *TENSHI_CALL teBTreeNext( void *pItem )
 */
 
 #undef TENSHI_FACILITY
-#define TENSHI_FACILITY				kTenshiLog_MemblockAPI
+#define TENSHI_FACILITY             kTenshiLog_MemblockAPI
 
 TENSHI_FUNC void *TENSHI_CALL teMemblockAlloc_f( void *pParm )
 {
@@ -4535,10 +4535,10 @@ TENSHI_FUNC TenshiInt32_t TENSHI_CALL tePCGRangedRnd( TenshiPCGState_t *r, Tensh
 }
 
 #undef TENSHI_FACILITY
-#define TENSHI_FACILITY				kTenshiLog_CoreRT
+#define TENSHI_FACILITY             kTenshiLog_CoreRT
 
-#define TENSHI_PCG_STATE_INIT		0x853c49e6748fea9bULL
-#define TENSHI_PCG_INC_INIT			0xda3e39cb94b95bdbULL
+#define TENSHI_PCG_STATE_INIT       0x853c49e6748fea9bULL
+#define TENSHI_PCG_INC_INIT         0xda3e39cb94b95bdbULL
 
 TENSHI_FUNC void *TENSHI_CALL teRNGAlloc_f( void *pParm )
 {
