@@ -21,9 +21,35 @@ namespace Tenshi { namespace Compiler {
 	{
 		AX_EXPECT_MEMORY( m_Dictionary.Init( TENSHI_PARSER_DICTIONARY_ALLOWED, SourceCasing ) );
 
-		AX_EXPECT_MEMORY( m_BuildInfo.Platform.OSName.Assign( "Windows" ) );
-		AX_EXPECT_MEMORY( m_BuildInfo.Platform.ExeExt.Assign( ".exe" ) );
-		AX_EXPECT_MEMORY( m_BuildInfo.Platform.DLLExt.Assign( ".dll" ) );
+#if defined(_WIN32)
+# define BUILDINFO_OSNAME "Windows"
+# define BUILDINFO_BINEXT ".exe"
+# define BUILDINFO_DLLEXT ".dll"
+#elif defined(__APPLE__)
+# define BUILDINFO_OSNAME "macOS"
+# define BUILDINFO_BINEXT ""
+# define BUILDINFO_DLLEXT ".dylib"
+#else
+# define BUILDINFO_BINEXT ""
+# define BUILDINFO_DLLEXT ".so"
+# if defined(__linux__)
+#  define BUILDINFO_OSNAME "Linux"
+# elif defined(__FreeBSD__)
+#  define BUILDINFO_OSNAME "FreeBSD"
+# elif defined(__NetBSD__)
+#  define BUILDINFO_OSNAME "NetBSD"
+# elif defined(__OpenBSD__)
+#  define BUILDINFO_OSNAME "OpenBSD"
+# elif defined(__DragonflyBSD__)
+#  define BUILDINFO_OSNAME "DragonflyBSD"
+# else
+#  define BUILDINFO_OSNAME "unknown_os"
+# endif
+#endif
+
+		AX_EXPECT_MEMORY( m_BuildInfo.Platform.OSName.Assign( BUILDINFO_OSNAME ) );
+		AX_EXPECT_MEMORY( m_BuildInfo.Platform.ExeExt.Assign( BUILDINFO_BINEXT ) );
+		AX_EXPECT_MEMORY( m_BuildInfo.Platform.DLLExt.Assign( BUILDINFO_DLLEXT ) );
 		m_BuildInfo.Platform.Subsystem = ESubsystem::Text;
 		m_BuildInfo.Platform.PointerSize = EPointerSize::kPointer64;
 		m_BuildInfo.Platform.Endianness = EEndianMode::Little;

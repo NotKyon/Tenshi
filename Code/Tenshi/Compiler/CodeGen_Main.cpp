@@ -99,7 +99,34 @@ namespace Tenshi { namespace Compiler {
 			//llvm::initializeUnreachableBlockElimPass( *m_pPassReg );
 		}
 
-		const std::string TripleName = llvm::Triple::normalize( "x86_64-pc-win32" );
+#define DEFAULT_WINDOWS_TRIPLE "x86_64-pc-win32"
+#define DEFAULT_MACOS_TRIPLE "x86_64-apple-darwin"
+#define DEFAULT_LINUX_TRIPLE "x86_64-unknown-linux"
+#define DEFAULT_FREEBSD_TRIPLE "x86_64-unknown-freebsd"
+#define DEFAULT_NETBSD_TRIPLE "x86_64-unknown-netbsd"
+#define DEFAULT_OPENBSD_TRIPLE "x86_64-unknown-openbsd"
+#define DEFAULT_DRAGONFLYBSD_TRIPLE "x86_64-unknown-dragonfly"
+
+		const std::string TripleName =
+			llvm::Triple::normalize(
+#if defined(_WIN32)
+				DEFAULT_WINDOWS_TRIPLE
+#elif defined(__APPLE__)
+				DEFAULT_MACOS_TRIPLE
+#elif defined(__linux__)
+				DEFAULT_LINUX_TRIPLE
+#elif defined(__FreeBSD__)
+				DEFAULT_FREEBSD_TRIPLE
+#elif defined(__NetBSD__)
+				DEFAULT_NETBSD_TRIPLE
+#elif defined(__OpenBSD__)
+				DEFAULT_OPENBSD_TRIPLE
+#elif defined(__DragonflyBSD__)
+				DEFAULT_DRAGONFLYBSD_TRIPLE
+#else
+				"x86_64-unknown-unknown"
+#endif
+			);
 		AX_DEBUG_LOG += TripleName.c_str();
 
 		llvm::Triple Triple( TripleName );
