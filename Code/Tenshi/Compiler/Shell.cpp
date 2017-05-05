@@ -1,6 +1,11 @@
 #include "_PCH.hpp"
 #include "Shell.hpp"
 
+#ifndef _WIN32
+# include <unistd.h>
+# include <sys/wait.h>
+#endif
+
 namespace Tenshi { namespace Compiler {
 
 	MShell &MShell::GetInstance()
@@ -26,7 +31,7 @@ namespace Tenshi { namespace Compiler {
 	MShell::~MShell()
 	{
 	}
-	
+
 	bool MShell::GetWindowsSafeCommandLine( Ax::String &InoutString, const Ax::TArray< Ax::String > &Args ) const
 	{
 		// Save some time by requesting most of our needed memory up-front
@@ -204,6 +209,26 @@ namespace Tenshi { namespace Compiler {
 			return pEntry->pData->Run( Args );
 		}
 
+		IOutputFilter *pFilter = nullptr;
+		for( Ax::uintptr j = m_Filters.Num(); j > 0; --j ) {
+			const Ax::uintptr i = j - 1;
+			IOutputFilter *const pCheck = m_Filters[ i ];
+			if( !pCheck || !pCheck->CanProcess( Args ) ) {
+				continue;
+			}
+
+			pFilter = pCheck;
+			break;
+		}
+
+		static const Ax::uintptr kMaxBytes = 4096;
+
+		Ax::String Text;
+		if( !Text.Reserve( kMaxBytes ) ) {
+			Ax::Errorf( Args[ 0 ], "Failed to allocate enough space for reading output" );
+			return ENOMEM;
+		}
+
 #ifdef _WIN32
 		Ax::String AppName;
 		Ax::String CommandArgs;
@@ -230,7 +255,7 @@ namespace Tenshi { namespace Compiler {
 			bWin &= ShuffleArgs.Append( Args[ 0 ] );
 			bWin &= ShuffleArgs.Num() == 3 && ShuffleArgs[ 1 ].Len() == 2;
 			bWin &= ShuffleArgs.Num() == 3 && ShuffleArgs[ 2 ].Len() == Args[ 0 ].Len();
-			
+
 			if( !bWin ) {
 				Ax::Errorf( Args[ 0 ], "Ran out of memory while reconfiguring command-line for Windows (cmd.exe)" );
 				return ENOMEM;
@@ -280,14 +305,6 @@ namespace Tenshi { namespace Compiler {
 			return ENOMEM;
 		}
 
-		static const Ax::uintptr kMaxBytes = 4096;
-
-		Ax::String Text;
-		if( !Text.Reserve( kMaxBytes ) ) {
-			Ax::Errorf( Args[ 0 ], "Failed to allocate enough space for reading output" );
-			return ENOMEM;
-		}
-
 		STARTUPINFOW StartInfo;
 
 		StartInfo.cb = sizeof( StartInfo );
@@ -313,18 +330,6 @@ namespace Tenshi { namespace Compiler {
 		HANDLE hErrRd = NULL, hErrWr = NULL;
 
 		AX_SCOPE_GUARD({CloseHandle(hOutRd);CloseHandle(hOutWr);CloseHandle(hErrRd);CloseHandle(hErrWr);});
-
-		IOutputFilter *pFilter = nullptr;
-		for( Ax::uintptr j = m_Filters.Num(); j > 0; --j ) {
-			const Ax::uintptr i = j - 1;
-			IOutputFilter *const pCheck = m_Filters[ i ];
-			if( !pCheck || !pCheck->CanProcess( Args ) ) {
-				continue;
-			}
-
-			pFilter = pCheck;
-			break;
-		}
 
 		if( pFilter != nullptr && !CreatePipe( &hOutRd, &hOutWr, nullptr, 0 ) ) {
 			pFilter = nullptr;
@@ -371,7 +376,7 @@ namespace Tenshi { namespace Compiler {
 				if( ReadFile( hOutRd, &Data[ 0 ], sizeof( Data ), &cReadBytes, nullptr ) ) {
 					AX_EXPECT( cReadBytes <= kMaxBytes );
 					Text.Assign( &Data[ 0 ], &Data[ cReadBytes ] );
-					
+
 					if( !bDidEnterOut ) {
 						bDidEnterOut = true;
 						pFilter->Enter( EStandardStream::Output );
@@ -391,13 +396,13 @@ namespace Tenshi { namespace Compiler {
 
 					pFilter->Write( EStandardStream::Error, Text );
 				}
-			
+
 				dwResult = WaitForSingleObject( ProcInfo.hProcess, 250 );
 				if( dwResult != WAIT_TIMEOUT ) {
 					break;
 				}
 			}
-			
+
 			if( bDidEnterOut ) {
 				pFilter->Leave( EStandardStream::Output );
 			}
@@ -405,7 +410,7 @@ namespace Tenshi { namespace Compiler {
 				pFilter->Leave( EStandardStream::Error );
 			}
 		}
-		
+
 		WaitForSingleObject( ProcInfo.hProcess, INFINITE );
 
 		DWORD dwExitCode = EXIT_FAILURE;
@@ -422,9 +427,134 @@ namespace Tenshi { namespace Compiler {
 #else
 		LogCommand( Args, ">" );
 
-		AX_ASSERT_MSG( false, "MShell::Run() Unimplemented" );
+		Ax::TArray< char * > execArgs;
+		if( !execArgs.Reserve( Args.Num() ) ) {
+			Ax::Errorf( Args[ 0 ], "Insufficient memory for argument vector (reserve)" );
+			return ENOMEM;
+		}
 
-		//# error This has not been implemented for your platform.
+		for( const auto &arg : Args ) {
+			char *const p = strdup( arg.CString() );
+			if( !p ) {
+				const int e = errno;
+				Ax::Errorf( Args[ 0 ], "Insufficient memory for argument" );
+				return e;
+			}
+
+			if( !execArgs.Append( p ) ) {
+				Ax::Errorf( Args[ 0 ], "Insufficient memory for argument vector" );
+				return ENOMEM;
+			}
+		}
+		if( !execArgs.Append( ( char * )nullptr ) ) {
+			Ax::Errorf( Args[ 0 ], "Insufficient memory for argument vector terminal" );
+			return ENOMEM;
+		}
+
+		int linkout[2];
+		if( pFilter != nullptr && pipe( linkout ) == -1 ) {
+			const int e = errno;
+			Ax::Errorf( Args[ 0 ], "Failed to create output link" );
+			return e;
+		}
+
+		int linkerr[2];
+		if( pFilter != nullptr && pipe( linkerr ) == -1 ) {
+			const int e = errno;
+			Ax::Errorf( Args[ 0 ], "Failed to create error link" );
+			return e;
+		}
+
+		pid_t proc;
+		if( ( proc = fork() ) == -1 ) {
+			const int e = errno;
+			Ax::Errorf( Args[ 0 ], "Failed to fork process" );
+			return e;
+		}
+
+		if( proc == 0 /* child process */ ) {
+			if( pFilter != nullptr ) {
+				dup2( linkout[ 1 ], STDOUT_FILENO );
+				dup2( linkerr[ 1 ], STDERR_FILENO );
+
+				close( linkout[ 0 ] );
+				close( linkout[ 1 ] );
+
+				close( linkerr[ 0 ] );
+				close( linkerr[ 1 ] );
+			}
+
+			execvp( Args[0].CString(), execArgs.Pointer() );
+			exit( errno );
+		}
+
+		int status = -1;
+
+		if( pFilter != nullptr ) {
+			close( linkout[ 1 ] );
+			close( linkerr[ 1 ] );
+
+			char buf[ 4096 ];
+			bool bDidEnterOut = false;
+			bool bDidEnterErr = false;
+
+			for(;;) {
+				bool bDidFail = false;
+				ssize_t numRead;
+
+				numRead = read( linkout[ 0 ], buf, sizeof( buf ) );
+				if( numRead > 0 ) {
+					Text.Assign( &buf[ 0 ], &buf[ numRead ] );
+
+					if( !bDidEnterOut ) {
+						bDidEnterOut = true;
+						pFilter->Enter( EStandardStream::Output );
+					}
+
+					pFilter->Write( EStandardStream::Output, Text );
+				} else if( numRead == -1 ) {
+					bDidFail = true;
+				}
+
+				numRead = read( linkerr[ 0 ], buf, sizeof( buf ) );
+				if( numRead > 0 ) {
+					Text.Assign( &buf[ 0 ], &buf[ numRead ] );
+
+					if( !bDidEnterErr ) {
+						bDidEnterErr = true;
+						pFilter->Enter( EStandardStream::Error );
+					}
+
+					pFilter->Write( EStandardStream::Error, Text );
+				} else if( numRead == -1 ) {
+					bDidFail = true;
+				}
+
+				if( bDidFail ) {
+					break;
+				}
+			}
+
+			close( linkerr[ 0 ] );
+			close( linkout[ 0 ] );
+		}
+
+		for(;;) {
+			if( waitpid( proc, &status, 0 ) == proc || errno == ECHILD ) {
+				break;
+			}
+			if( errno != EINTR ) {
+				// strange condition...
+				break;
+			}
+		}
+
+		for( char *&execArg : execArgs ) {
+			free( execArg );
+			execArg = nullptr;
+		}
+
+		return status;
 #endif
 	}
 
