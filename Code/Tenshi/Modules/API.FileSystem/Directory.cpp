@@ -95,7 +95,7 @@ bool CDirectory::Read( ErrorCode &EC )
 		if( EC ) {
 			return false;
 		}
-		
+
 		delete m_pSubdir;
 		m_pSubdir = nullptr;
 	}
@@ -134,9 +134,11 @@ bool CDirectory::Read( ErrorCode &EC )
 
 		return Read( EC );
 	}
-#endif
 
 	return true;
+#else
+	return false;
+#endif
 }
 bool CDirectory::IsEnd() const
 {
@@ -282,7 +284,7 @@ const char *CDirectory::SetDateStr( Ax::uint64 uFileTime )
 	FILETIME ft; ft.dwHighDateTime = Ax::uint32( uFileTime>>32 ); ft.dwLowDateTime = Ax::uint32( uFileTime );
 	FILETIME lft;
 	SYSTEMTIME st;
-	
+
 	if( !FileTimeToLocalFileTime( &ft, &lft ) || !FileTimeToSystemTime( &ft, &st ) ) {
 		return nullptr;
 	}
@@ -330,7 +332,7 @@ CDirectory *Directory( TenshiIndex_t uIndex )
 {
 	CDirectory *const pDir = g_Directories.Unwrap( uIndex );
 	TE_CHECK( TE_ERR_FS_DIRUNUSED, pDir != nullptr );
-	
+
 	return pDir;
 }
 TenshiIndex_t OpenDir( TenshiIndex_t DirNumber, const char *pszDirname, EOpenDir Mode, ErrorCode *pEC )
