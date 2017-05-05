@@ -51,7 +51,14 @@ function(add_tenshi_api moduleName)
 		CXX_EXTENSIONS              ON
 	)
 
-	file(COPY "${AXMODS_DIR}/${moduleName}/${moduleName}.commands" DESTINATION "plugins-core")
+	set(cpsrc "${CMAKE_SOURCE_DIR}/${AXMODS_DIR}/${moduleName}/${moduleName}.commands")
+	set(cpdst "${CMAKE_BINARY_DIR}/plugins-core/${moduleName}.commands")
+
+	add_custom_command(TARGET "${moduleName}" POST_BUILD
+		DEPENDS "${cpsrc}"
+		COMMAND ${CMAKE_COMMAND} -E copy "${cpsrc}" "${cpdst}"
+		COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:${moduleName}>" "${CMAKE_BINARY_DIR}/plugins-core"
+	)
 
 	target_link_libraries("${moduleName}"
 		${ax_libs}
